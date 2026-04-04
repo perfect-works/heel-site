@@ -19,7 +19,7 @@
     <div class="content" id="terminal">
         <div id="output"></div>
         <div class="input-row" id="input-row">
-            <span class="prompt-prefix">PS&nbsp;C:\Users\heel&gt;&nbsp;</span><input
+            <span class="prompt-prefix">PS&nbsp;C:\heel&gt;&nbsp;</span><input
                 type="text" id="cmd"
                 autocomplete="off" spellcheck="false">
         </div>
@@ -42,6 +42,52 @@
     var cmdHistory = [];
     var historyPos = -1;
     var animating  = false;
+    var currentDir = 'root'; /* 'root' | 'users' | member name */
+
+    function promptPath() {
+        if (currentDir === 'root')  return 'C:\\heel';
+        if (currentDir === 'users') return 'C:\\heel\\Users';
+        return 'C:\\heel\\Users\\' + currentDir;
+    }
+    function promptHTML() {
+        return 'PS&nbsp;' + promptPath() + '&gt;&nbsp;';
+    }
+    function updatePrompt() {
+        document.querySelector('#input-row .prompt-prefix').innerHTML = promptHTML();
+    }
+
+    function dirListing() {
+        var lines = [
+            { t: 'blank' },
+            { t: 'text', v: 'Directory of ' + promptPath(), dim: true },
+            { t: 'blank' },
+        ];
+        if (currentDir === 'root') {
+            lines.push({ t: 'text', v: ' [Users]' });
+        } else if (currentDir === 'users') {
+            lines.push({ t: 'text', v: ' [adharsh]' });
+            lines.push({ t: 'text', v: ' [tayla]'   });
+            lines.push({ t: 'text', v: ' [nick]'    });
+            lines.push({ t: 'text', v: ' [andres]'  });
+        } else {
+            lines.push({ t: 'text', v: '(empty)', dim: true });
+        }
+        lines.push({ t: 'blank' });
+        return lines;
+    }
+
+    function memberLines(name, instrument) {
+        return [
+            { t: 'blank' },
+            { t: 'text', v: name.toUpperCase(), center: true, spaced: true },
+            { t: 'blank' },
+            { t: 'nolink', label: 'instrument', value: instrument },
+            { t: 'blank' },
+            { t: 'text', v: "type 'cd ..' to go back to Users", dim: true },
+            { t: 'text', v: "type 'cd \\' to return to root",   dim: true },
+            { t: 'blank' },
+        ];
+    }
 
     /* ─── boot sequence ───────────────────────────────────── */
 
@@ -97,6 +143,8 @@
                 { t: 'hrow-sub',  flag: '--new-releases',   desc: 'new release info'                      },
                 { t: 'hrow-sub',  flag: '--upcoming-shows', desc: 'show dates'                            },
                 { t: 'hrow-sub',  flag: '--social',         desc: 'find us online',        last: true     },
+                { t: 'hrow', cmd: 'ls',                     desc: 'list directory'                        },
+                { t: 'hrow', cmd: 'cd &lt;dir&gt;',         desc: 'navigate'                              },
                 { t: 'hrow', cmd: 'clear',                  desc: 'clear terminal'                        },
                 { t: 'blank' },
             ];
@@ -147,6 +195,53 @@
                 { t: 'nolink', label: 'apr 18', value: 'houston \u2014 axelrad'       },
                 { t: 'blank' },
             ];
+        },
+
+        'ls': function () { return dirListing(); },
+        'dir': function () { return dirListing(); },
+
+        'cd': function () {
+            return [
+                { t: 'blank' },
+                { t: 'text', v: promptPath() },
+                { t: 'text', v: "type 'ls' to list directory contents", dim: true },
+                { t: 'blank' },
+            ];
+        },
+
+        'cd ..': function () {
+            if (currentDir === 'root') {
+                return [{ t: 'blank' }, { t: 'error', v: 'already at root.' }, { t: 'blank' }];
+            }
+            currentDir = currentDir === 'users' ? 'root' : 'users';
+            updatePrompt();
+            return dirListing();
+        },
+
+        'cd /':  function () { currentDir = 'root'; updatePrompt(); return dirListing(); },
+        'cd \\': function () { currentDir = 'root'; updatePrompt(); return dirListing(); },
+
+        'cd users': function () {
+            currentDir = 'users';
+            updatePrompt();
+            return dirListing();
+        },
+
+        'cd adharsh': function () {
+            currentDir = 'adharsh'; updatePrompt(); output.innerHTML = '';
+            return memberLines('adharsh', 'guitar / vocals');
+        },
+        'cd tayla': function () {
+            currentDir = 'tayla'; updatePrompt(); output.innerHTML = '';
+            return memberLines('tayla', 'guitar / vocals');
+        },
+        'cd nick': function () {
+            currentDir = 'nick'; updatePrompt(); output.innerHTML = '';
+            return memberLines('nick', 'bass');
+        },
+        'cd andres': function () {
+            currentDir = 'andres'; updatePrompt(); output.innerHTML = '';
+            return memberLines('andres', 'drums');
         },
 
         'clear': function () {
@@ -200,7 +295,7 @@
             case 'prompt':
                 el = document.createElement('div');
                 el.className = 'out-prompt';
-                el.innerHTML = '<span class="prompt-prefix">PS&nbsp;C:\\Users\\heel&gt;</span> ' + esc(line.v);
+                el.innerHTML = '<span class="prompt-prefix">' + promptHTML() + '</span> ' + esc(line.v);
                 return el;
 
             case 'error':
