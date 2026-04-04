@@ -237,11 +237,30 @@ body {
         padding: 12px 14px 16px;
         max-height: 85vh;
     }
-    .help-cmd {
-        min-width: 20ch;
+
+    /* scale all terminal text up to 16px */
+    .out-prompt,
+    .out-text,
+    .out-error,
+    .social-line,
+    .term-row,
+    .click-to-listen {
+        font-size: 1em;
+    }
+    .input-row {
+        font-size: 1em;
     }
     #cmd {
         font-size: 16px;
+    }
+
+    /* help menu: more breathing room between rows */
+    .help-row {
+        font-size: 1em;
+        margin-top: 1em;
+    }
+    .help-cmd {
+        min-width: 20ch;
     }
 }
 
