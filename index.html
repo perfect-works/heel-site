@@ -52,6 +52,14 @@
     var audioPaused        = false;
     var nowPlayingInterval = null;
 
+    /* ── member registry ── */
+    var MEMBERS = {
+        'adharsh': { instrument: 'guitar / vocals' },
+        'tayla':   { instrument: 'guitar / vocals' },
+        'nick':    { instrument: 'bass'             },
+        'andres':  { instrument: 'drums'            },
+    };
+
     /* ── merch registry ── */
     var MERCH = [
         { id: 'obey_tshirt',           href: 'https://square.link/u/Fdrsrntv' },
@@ -145,7 +153,7 @@
             lines.push({ t: 'dirlink', label: tc(1, false) + '[tayla]',   cmd: 'cd tayla'   });
             lines.push({ t: 'dirlink', label: tc(1, false) + '[nick]',    cmd: 'cd nick'    });
             lines.push({ t: 'dirlink', label: tc(1, false) + '[andres]',  cmd: 'cd andres'  });
-            lines.push({ t: 'dirlink', label: tc(1, true)  + '[../]',     cmd: 'cd ..'      });
+            lines.push({ t: 'dirlink', label: tc(1, true)  + '[← back]',     cmd: 'cd ..'      });
             lines.push({ t: 'blank' });
             lines.push({ t: 'text', v: "click a folder or type 'cd &lt;dir&gt;'", dim: true });
 
@@ -155,7 +163,7 @@
             lines.push({ t: 'dirlink', label: tc(1, false) + '[segmentation]', cmd: 'cd segmentation' });
             lines.push({ t: 'dirlink', label: tc(1, false) + '[unreleased]',    cmd: 'cd unreleased'   });
             lines.push({ t: 'dirlink', label: tc(1, false) + 'README.txt',     cmd: 'cat readme.txt'  });
-            lines.push({ t: 'dirlink', label: tc(1, true)  + '[../]',          cmd: 'cd ..'           });
+            lines.push({ t: 'dirlink', label: tc(1, true)  + '[← back]',          cmd: 'cd ..'           });
             lines.push({ t: 'blank' });
             lines.push({ t: 'text', v: "click README.txt or type 'cat readme.txt' for player info", dim: true });
 
@@ -169,7 +177,7 @@
                     cmd:   'play ' + tracks[i].id });
             }
             if (!tracks.length) lines.push({ t: 'text', v: tc(1, false) + '(empty)', dim: true });
-            lines.push({ t: 'dirlink', label: tc(1, true) + '[../]', cmd: 'cd ..' });
+            lines.push({ t: 'dirlink', label: tc(1, true) + '[← back]', cmd: 'cd ..' });
 
         } else if (currentDir === 'music/unreleased') {
             var demos = TRACKS.unreleased;
@@ -184,7 +192,7 @@
             } else {
                 lines.push({ t: 'text', v: tc(1, false) + '(empty)', dim: true });
             }
-            lines.push({ t: 'dirlink', label: tc(1, true) + '[../]', cmd: 'cd ..' });
+            lines.push({ t: 'dirlink', label: tc(1, true) + '[← back]', cmd: 'cd ..' });
 
         } else if (currentDir === 'merch') {
             lines.push({ t: 'text', v: '[ STORE ]', center: true, spaced: true });
@@ -195,29 +203,27 @@
             lines.push({ t: 'link', label: '<span class="tree-char">└── </span>cassette', href: 'https://square.link/u/XfokA7sz', value: '$11' });
             lines.push({ t: 'link', label: 'bumper_sticker',        href: 'https://square.link/u/3hpALQsN', value: '$5'  });
             lines.push({ t: 'blank' });
-            lines.push({ t: 'dirlink', label: '[../]', cmd: 'cd ..' });
+            lines.push({ t: 'dirlink', label: '[← back]', cmd: 'cd ..' });
             lines.push({ t: 'blank' });
             lines.push({ t: 'text', v: "click an item or type 'buy &lt;item&gt;' to purchase", dim: true });
 
-        } else {
+        } else if (MEMBERS[currentDir]) {
             /* member directory */
-            lines.push({ t: 'text', v: 'C:\\heel\\users\\' });
-            lines.push({ t: 'text', v: tc(0, true) + currentDir + '\\' });
-            lines.push({ t: 'dirlink', label: tc(1, true) + '[../]', cmd: 'cd ..' });
+            lines.push({ t: 'text', v: 'C:\\heel\\users\\' + currentDir + '\\' });
+            lines.push({ t: 'dirlink', label: tc(0, false) + 'instrument.txt', cmd: 'cat instrument.txt' });
+            lines.push({ t: 'dirlink', label: tc(0, true)  + '[← back]',       cmd: 'cd ..'             });
         }
 
         lines.push({ t: 'blank' });
         return lines;
     }
 
-    function memberLines(name, instrument) {
+    function memberLines(name) {
         return [
             { t: 'blank' },
-            { t: 'text', v: name.toUpperCase(), center: true, spaced: true },
-            { t: 'blank' },
-            { t: 'nolink', label: 'instrument', value: instrument },
-            { t: 'blank' },
-            { t: 'dirlink', label: '[../]', cmd: 'cd ..' },
+            { t: 'text', v: 'C:\\heel\\users\\' + name + '\\' },
+            { t: 'dirlink', label: tc(0, false) + 'instrument.txt', cmd: 'cat instrument.txt' },
+            { t: 'dirlink', label: tc(0, true)  + '[← back]',       cmd: 'cd ..'              },
             { t: 'blank' },
         ];
     }
@@ -357,26 +363,10 @@
             return dirListing();
         },
 
-        'cd adharsh': function () {
-            currentDir = 'adharsh'; updatePrompt();
-            cdClear();
-            return memberLines('adharsh', 'guitar / vocals');
-        },
-        'cd tayla': function () {
-            currentDir = 'tayla'; updatePrompt();
-            cdClear();
-            return memberLines('tayla', 'guitar / vocals');
-        },
-        'cd nick': function () {
-            currentDir = 'nick'; updatePrompt();
-            cdClear();
-            return memberLines('nick', 'bass');
-        },
-        'cd andres': function () {
-            currentDir = 'andres'; updatePrompt();
-            cdClear();
-            return memberLines('andres', 'drums');
-        },
+        'cd adharsh': function () { currentDir = 'adharsh'; updatePrompt(); cdClear(); return memberLines('adharsh'); },
+        'cd tayla':   function () { currentDir = 'tayla';   updatePrompt(); cdClear(); return memberLines('tayla');   },
+        'cd nick':    function () { currentDir = 'nick';    updatePrompt(); cdClear(); return memberLines('nick');    },
+        'cd andres':  function () { currentDir = 'andres';  updatePrompt(); cdClear(); return memberLines('andres'); },
 
         'cd merch': function () {
             currentDir = 'merch'; updatePrompt();
@@ -399,6 +389,17 @@
             cdClear();
             return dirListing();
         },
+
+        'cat instrument.txt': function () {
+            var member = MEMBERS[currentDir];
+            if (!member) return [{ t: 'blank' }, { t: 'error', v: 'no such file.' }, { t: 'blank' }];
+            return [
+                { t: 'blank' },
+                { t: 'nolink', label: 'instrument', value: member.instrument },
+                { t: 'blank' },
+            ];
+        },
+        'cat instrument': function () { return COMMANDS['cat instrument.txt'](); },
 
         'cat readme.txt': function () {
             return [
