@@ -63,12 +63,17 @@
             { t: 'blank' },
         ];
         if (currentDir === 'root') {
-            lines.push({ t: 'text', v: ' [Users]' });
+            lines.push({ t: 'dirlink', label: '[Users]',   cmd: 'cd users'   });
+            lines.push({ t: 'blank' });
+            lines.push({ t: 'text', v: "click a folder or type 'cd &lt;name&gt;'", dim: true });
         } else if (currentDir === 'users') {
-            lines.push({ t: 'text', v: ' [adharsh]' });
-            lines.push({ t: 'text', v: ' [tayla]'   });
-            lines.push({ t: 'text', v: ' [nick]'    });
-            lines.push({ t: 'text', v: ' [andres]'  });
+            lines.push({ t: 'dirlink', label: '[adharsh]', cmd: 'cd adharsh' });
+            lines.push({ t: 'dirlink', label: '[tayla]',   cmd: 'cd tayla'   });
+            lines.push({ t: 'dirlink', label: '[nick]',    cmd: 'cd nick'    });
+            lines.push({ t: 'dirlink', label: '[andres]',  cmd: 'cd andres'  });
+            lines.push({ t: 'dirlink', label: '[../]',     cmd: 'cd ..'      });
+            lines.push({ t: 'blank' });
+            lines.push({ t: 'text', v: "click a folder or type 'cd &lt;name&gt;'", dim: true });
         } else {
             lines.push({ t: 'text', v: '(empty)', dim: true });
         }
@@ -83,8 +88,7 @@
             { t: 'blank' },
             { t: 'nolink', label: 'instrument', value: instrument },
             { t: 'blank' },
-            { t: 'text', v: "type 'cd ..' to go back to Users", dim: true },
-            { t: 'text', v: "type 'cd \\' to return to root",   dim: true },
+            { t: 'dirlink', label: '[../]', cmd: 'cd ..' },
             { t: 'blank' },
         ];
     }
@@ -137,15 +141,15 @@
                 { t: 'blank' },
                 { t: 'text', v: 'USAGE:&nbsp;&nbsp;&#60;command&#62; [--flag]', dim: true },
                 { t: 'blank' },
-                { t: 'hrow', cmd: 'stream --heel',          desc: 'streaming links'                       },
-                { t: 'hrow', cmd: 'watch --all',            desc: 'videos &amp; visualizers'              },
-                { t: 'hrow-parent', cmd: 'fetch'                                                          },
-                { t: 'hrow-sub',  flag: '--new-releases',   desc: 'new release info'                      },
-                { t: 'hrow-sub',  flag: '--upcoming-shows', desc: 'show dates'                            },
-                { t: 'hrow-sub',  flag: '--social',         desc: 'find us online',        last: true     },
-                { t: 'hrow', cmd: 'ls',                     desc: 'list directory'                        },
-                { t: 'hrow', cmd: 'cd &lt;dir&gt;',         desc: 'navigate'                              },
-                { t: 'hrow', cmd: 'clear',                  desc: 'clear terminal'                        },
+                { t: 'hrow', cmd: 'stream --heel',          desc: 'streaming links',       exec: 'stream --heel'          },
+                { t: 'hrow', cmd: 'watch --all',            desc: 'videos &amp; visualizers', exec: 'watch --all'           },
+                { t: 'hrow-parent', cmd: 'fetch'                                                                             },
+                { t: 'hrow-sub',  flag: '--new-releases',   desc: 'new release info',      exec: 'fetch --new-releases',   last: false },
+                { t: 'hrow-sub',  flag: '--upcoming-shows', desc: 'show dates',            exec: 'fetch --upcoming-shows'              },
+                { t: 'hrow-sub',  flag: '--social',         desc: 'find us online',        exec: 'fetch --social',         last: true  },
+                { t: 'hrow', cmd: 'ls',                     desc: 'list directory',        exec: 'ls'                     },
+                { t: 'hrow', cmd: 'cd &lt;dir&gt;',         desc: 'navigate'                                               },
+                { t: 'hrow', cmd: 'clear',                  desc: 'clear terminal',        exec: 'clear'                  },
                 { t: 'blank' },
             ];
         },
@@ -213,17 +217,20 @@
             if (currentDir === 'root') {
                 return [{ t: 'blank' }, { t: 'error', v: 'already at root.' }, { t: 'blank' }];
             }
-            currentDir = currentDir === 'users' ? 'root' : 'users';
+            var goingToRoot = currentDir === 'users';
+            currentDir = goingToRoot ? 'root' : 'users';
             updatePrompt();
-            return dirListing();
+            output.innerHTML = '';
+            return goingToRoot ? [] : dirListing();
         },
 
-        'cd /':  function () { currentDir = 'root'; updatePrompt(); return dirListing(); },
-        'cd \\': function () { currentDir = 'root'; updatePrompt(); return dirListing(); },
+        'cd /':  function () { currentDir = 'root'; updatePrompt(); output.innerHTML = ''; return []; },
+        'cd \\': function () { currentDir = 'root'; updatePrompt(); output.innerHTML = ''; return []; },
 
         'cd users': function () {
             currentDir = 'users';
             updatePrompt();
+            output.innerHTML = '';
             return dirListing();
         },
 
@@ -271,9 +278,12 @@
 
             case 'hrow':
                 el = document.createElement('div');
-                el.className = 'help-row';
+                el.className = 'help-row' + (line.exec ? ' clickable' : '');
                 el.innerHTML = '<span class="help-cmd">' + line.cmd  + '</span>'
                              + '<span class="help-desc">' + line.desc + '</span>';
+                if (line.exec) el.addEventListener('click', (function (cmd) {
+                    return function () { execute(cmd); };
+                }(line.exec)));
                 return el;
 
             case 'hrow-parent':
@@ -284,12 +294,15 @@
 
             case 'hrow-sub':
                 el = document.createElement('div');
-                el.className = 'help-row';
+                el.className = 'help-row' + (line.exec ? ' clickable' : '');
                 el.innerHTML = '<span class="help-cmd">'
                              + '<span class="tree-char">' + (line.last ? '└── ' : '├── ') + '</span>'
                              + line.flag
                              + '</span>'
                              + '<span class="help-desc">' + line.desc + '</span>';
+                if (line.exec) el.addEventListener('click', (function (cmd) {
+                    return function () { execute(cmd); };
+                }(line.exec)));
                 return el;
 
             case 'prompt':
@@ -351,6 +364,15 @@
                     rowEl.textContent = '';
                     el.appendChild(rowEl);
                 }
+                return el;
+
+            case 'dirlink':
+                el = document.createElement('div');
+                el.className = 'dir-line';
+                el.innerHTML = line.label;
+                el.addEventListener('click', (function (cmd) {
+                    return function () { execute(cmd); };
+                }(line.cmd)));
                 return el;
 
             case 'detect':
@@ -658,6 +680,9 @@
                         animating = false;
                         inputRow.style.visibility = 'visible';
                         input.focus();
+                        if (window.innerWidth <= 500) {
+                            execute('help', true);
+                        }
                     }, 1500);
                 }, 80, 40);
             }, 80, 40);
