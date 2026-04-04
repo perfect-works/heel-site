@@ -284,6 +284,20 @@
             return memberLines('andres', 'drums');
         },
 
+        /* ── command aliases ── */
+        'stream heel':            function () { return COMMANDS['stream --heel'](); },
+        'stream -heel':           function () { return COMMANDS['stream --heel'](); },
+        'watch all':              function () { return COMMANDS['watch --all'](); },
+        'watch -all':             function () { return COMMANDS['watch --all'](); },
+        'fetch social':           function () { return COMMANDS['fetch --social'](); },
+        'fetch -social':          function () { return COMMANDS['fetch --social'](); },
+        'fetch new releases':     function () { return COMMANDS['fetch --new-releases'](); },
+        'fetch new-releases':     function () { return COMMANDS['fetch --new-releases'](); },
+        'fetch -new-releases':    function () { return COMMANDS['fetch --new-releases'](); },
+        'fetch upcoming shows':   function () { return COMMANDS['fetch --upcoming-shows'](); },
+        'fetch upcoming-shows':   function () { return COMMANDS['fetch --upcoming-shows'](); },
+        'fetch -upcoming-shows':  function () { return COMMANDS['fetch --upcoming-shows'](); },
+
         'clear': function () {
             output.innerHTML = '';
             return [];
