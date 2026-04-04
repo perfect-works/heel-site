@@ -43,6 +43,45 @@
     var historyPos = -1;
     var animating  = false;
 
+    /* ─── boot sequence ───────────────────────────────────── */
+
+    var BOOT_LINES_PRE = [
+        { t: 'text', v: 'HEEL BIOS v2.0 &nbsp;&nbsp;&nbsp;(C) HEEL CORPORATION 1998', dim: true },
+        { t: 'blank' },
+        { t: 'text', v: 'CPU: Intel(R) Pentium(R) II @ 300 MHz' },
+        { t: 'text', v: 'MEMORY TEST: 65536K ......... OK' },
+        { t: 'blank' },
+        { t: 'text', v: 'DETECTING STORAGE:' },
+        { t: 'detect', v: '&nbsp;&nbsp;C:\\ BITE.HDD', detectDelay: 1800, maxDots: 7 },
+        { t: 'blank' },
+        { t: 'text', v: 'LOADING DRIVERS:' },
+        { t: 'driver', label: 'DISTORTION.SYS', driverDelay: 1000, maxDots: 5 },
+        { t: 'driver', label: 'REVERB.DRV',     driverDelay: 800,  maxDots: 4 },
+        { t: 'driver', label: 'FEEDBACK.VXD',   driverDelay: 900,  maxDots: 4 },
+        { t: 'blank' },
+        { t: 'text', v: 'AUTOEXEC.BAT: heel.exe /loud /nodisclaimer' },
+        { t: 'blank' },
+        { t: 'progress', blocks: 20, duration: 3000 },
+    ];
+
+    var BOOT_LINES_POST = [
+        { t: 'blank' },
+        { t: 'text', v: 'Windows 9x [Version 4.10.1998]', dim: true },
+        { t: 'text', v: '(C) Copyright HEEL Corp 1998. All rights reserved.', dim: true },
+        { t: 'blank' },
+    ];
+
+    var WELCOME_LINES = [
+        { t: 'blank' },
+        { t: 'ascii-anim',
+          rows: [
+              '||     || ||===== ||===== ||     ',
+              '||=====|| ||===   ||===   ||     ',
+              '||     || ||===== ||===== ||====='
+          ],
+          charDelay: 45 },
+    ];
+
     /* ─── command definitions ──────────────────────────────── */
 
     var COMMANDS = {
@@ -198,32 +237,200 @@
                     + '<span class="click-to-listen">&gt; CLICK HERE TO LISTEN &lt;</span>'
                     + '</a>';
                 return el;
+
+            case 'ascii':
+                el = document.createElement('div');
+                el.className = 'out-text';
+                el.style.textAlign  = 'center';
+                el.style.whiteSpace = 'pre';
+                el.textContent = line.v;
+                return el;
+
+            case 'ascii-anim':
+                el = document.createElement('div');
+                for (var ri = 0; ri < line.rows.length; ri++) {
+                    var rowEl = document.createElement('div');
+                    rowEl.className = 'out-text';
+                    rowEl.style.textAlign  = 'center';
+                    rowEl.style.whiteSpace = 'pre';
+                    rowEl.textContent = '';
+                    el.appendChild(rowEl);
+                }
+                return el;
+
+            case 'detect':
+                el = document.createElement('div');
+                el.className = 'out-text';
+                el.innerHTML = line.v;
+                return el;
+
+            case 'driver':
+                el = document.createElement('div');
+                el.className = 'out-text';
+                el.innerHTML = '&nbsp;&nbsp;' + line.label;
+                return el;
+
+            case 'progress':
+                el = document.createElement('div');
+                el.className = 'out-text';
+                var emptyBar = '';
+                for (var i = 0; i < (line.blocks || 20); i++) emptyBar += '\u2591';
+                el.innerHTML = emptyBar + '  0%';
+                return el;
         }
         return null;
     }
 
     /* ─── animate lines into #output ──────────────────────── */
 
-    function printLines(lines, done) {
-        animating = true;
+    function printLines(lines, done, lineDelay, blankDelay) {
+        lineDelay  = lineDelay  || 65;
+        blankDelay = blankDelay || 25;
+        animating  = true;
         inputRow.style.visibility = 'hidden';
+
+        /* progress and ascii-anim fire done themselves */
+        var selfManagesDone = lines.some(function (l) {
+            return l.t === 'progress' || l.t === 'ascii-anim';
+        });
 
         var delay = 0;
         lines.forEach(function (line) {
-            setTimeout(function () {
-                var el = render(line);
-                if (el) { output.appendChild(el); scrollBottom(); }
-            }, delay);
-            delay += (line.t === 'blank') ? 25 : 65;
+
+            if (line.t === 'detect') {
+                setTimeout(function () {
+                    var el = render(line);
+                    if (!el) return;
+                    output.appendChild(el);
+                    scrollBottom();
+                    var dots = 0;
+                    var maxDots    = line.maxDots    || 6;
+                    var dotInterval = (line.detectDelay || 1200) / (maxDots + 1);
+                    var iv = setInterval(function () {
+                        dots++;
+                        if (dots < maxDots) {
+                            var s = '';
+                            for (var d = 0; d < dots; d++) s += '.';
+                            el.innerHTML = line.v + ' ' + s;
+                            scrollBottom();
+                        } else {
+                            var fs = '';
+                            for (var fd = 0; fd < maxDots; fd++) fs += '.';
+                            el.innerHTML = line.v + ' ' + fs + ' [FOUND]';
+                            scrollBottom();
+                            clearInterval(iv);
+                        }
+                    }, dotInterval);
+                }, delay);
+                delay += (line.detectDelay || 1200) + lineDelay;
+
+            } else if (line.t === 'driver') {
+                setTimeout(function () {
+                    var el = render(line);
+                    if (!el) return;
+                    output.appendChild(el);
+                    scrollBottom();
+                    var dots = 0;
+                    var maxDots     = line.maxDots     || 4;
+                    var dotInterval = (line.driverDelay || 700) / (maxDots + 1);
+                    var iv = setInterval(function () {
+                        dots++;
+                        if (dots < maxDots) {
+                            var s = '';
+                            for (var d = 0; d < dots; d++) s += '.';
+                            el.innerHTML = '&nbsp;&nbsp;' + line.label + ' ' + s;
+                            scrollBottom();
+                        } else {
+                            var fs = '';
+                            for (var fd = 0; fd < maxDots; fd++) fs += '.';
+                            el.innerHTML = '&nbsp;&nbsp;' + line.label + ' ' + fs + ' [ OK ]';
+                            scrollBottom();
+                            clearInterval(iv);
+                        }
+                    }, dotInterval);
+                }, delay);
+                delay += (line.driverDelay || 700) + lineDelay;
+
+            } else if (line.t === 'ascii-anim') {
+                setTimeout(function () {
+                    var el = render(line);
+                    if (!el) return;
+                    output.appendChild(el);
+                    scrollBottom();
+                    var rows     = line.rows;
+                    var maxChars = rows[0].length;
+                    var rowEls   = [];
+                    for (var ri = 0; ri < el.children.length; ri++) rowEls.push(el.children[ri]);
+                    var revealed = 0;
+                    var iv = setInterval(function () {
+                        revealed++;
+                        for (var ri = 0; ri < rowEls.length; ri++) {
+                            rowEls[ri].textContent = rows[ri].slice(0, revealed);
+                        }
+                        scrollBottom();
+                        if (revealed >= maxChars) {
+                            clearInterval(iv);
+                            animating = false;
+                            inputRow.style.visibility = 'visible';
+                            input.focus();
+                            scrollBottom();
+                            if (done) done();
+                        }
+                    }, line.charDelay || 45);
+                }, delay);
+                /* ascii-anim calls done itself — don't add to delay */
+
+            } else if (line.t === 'progress') {
+                var totalBlocks = line.blocks   || 20;
+                var msPerBlock  = (line.duration || 3000) / totalBlocks;
+                setTimeout(function () {
+                    var el = render(line);
+                    if (!el) return;
+                    output.appendChild(el);
+                    scrollBottom();
+                    var filled = 0;
+                    function fillNext() {
+                        if (filled >= totalBlocks) {
+                            animating = false;
+                            inputRow.style.visibility = 'visible';
+                            input.focus();
+                            scrollBottom();
+                            if (done) done();
+                            return;
+                        }
+                        filled++;
+                        var bar = '';
+                        for (var j = 0; j < totalBlocks; j++) bar += j < filled ? '\u2588' : '\u2591';
+                        el.innerHTML = bar + '  ' + Math.round(filled / totalBlocks * 100) + '%';
+                        scrollBottom();
+                        var stall = Math.random() < 0.2;
+                        var next  = stall
+                            ? msPerBlock * (3 + Math.random() * 4)
+                            : msPerBlock * (0.5 + Math.random() * 1.0);
+                        setTimeout(fillNext, next);
+                    }
+                    fillNext();
+                }, delay);
+                /* progress calls done itself — don't add to delay */
+
+            } else {
+                setTimeout(function () {
+                    var el = render(line);
+                    if (el) { output.appendChild(el); scrollBottom(); }
+                }, delay);
+                delay += line.t === 'blank' ? blankDelay : lineDelay;
+            }
         });
 
-        setTimeout(function () {
-            animating = false;
-            inputRow.style.visibility = 'visible';
-            input.focus();
-            scrollBottom();
-            if (done) done();
-        }, delay + 30);
+        if (!selfManagesDone) {
+            setTimeout(function () {
+                animating = false;
+                inputRow.style.visibility = 'visible';
+                input.focus();
+                scrollBottom();
+                if (done) done();
+            }, delay + 30);
+        }
     }
 
     /* ─── execute a command string ─────────────────────────── */
@@ -335,7 +542,32 @@
         void jumpscare.offsetWidth;
     });
 
-    /* ─── startup: blank terminal, user must type 'help' ───── */
+    /* ─── startup: boot → welcome → clear → prompt ────────── */
+    printLines(BOOT_LINES_PRE, function () {
+        animating = true;
+        inputRow.style.visibility = 'hidden';
+        printLines(BOOT_LINES_POST, function () {
+            animating = true;
+            inputRow.style.visibility = 'hidden';
+            printLines(WELCOME_LINES, function () {
+                animating = true;
+                inputRow.style.visibility = 'hidden';
+                printLines([
+                    { t: 'blank' },
+                    { t: 'text', v: '-- WELCOME --', center: true, dim: true },
+                ], function () {
+                    animating = true;
+                    inputRow.style.visibility = 'hidden';
+                    setTimeout(function () {
+                        output.innerHTML = '';
+                        animating = false;
+                        inputRow.style.visibility = 'visible';
+                        input.focus();
+                    }, 1500);
+                }, 80, 40);
+            }, 80, 40);
+        }, 110, 45);
+    }, 110, 45);
 
     /* ─── helpers ──────────────────────────────────────────── */
 
