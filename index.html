@@ -212,6 +212,8 @@
             lines.push({ t: 'text', v: 'C:\\heel\\users\\' + currentDir + '\\' });
             lines.push({ t: 'dirlink', label: tc(0, false) + 'instrument.txt', cmd: 'cat instrument.txt' });
             lines.push({ t: 'dirlink', label: tc(0, true)  + '[← back]',       cmd: 'cd ..'             });
+            lines.push({ t: 'blank' });
+            lines.push({ t: 'text', v: "click instrument.txt or type 'cat instrument.txt' to read", dim: true });
         }
 
         lines.push({ t: 'blank' });
