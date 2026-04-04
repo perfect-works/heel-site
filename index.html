@@ -129,10 +129,10 @@
             lines.push({ t: 'text', v: tc(0, true) + 'music\\' });
             lines.push({ t: 'dirlink', label: tc(1, false) + '[segmentation]', cmd: 'cd segmentation' });
             lines.push({ t: 'dirlink', label: tc(1, false) + '[unreleased]',    cmd: 'cd unreleased'   });
-            lines.push({ t: 'dirlink', label: tc(1, false) + 'README.txt',     cmd: 'cat readme'      });
+            lines.push({ t: 'dirlink', label: tc(1, false) + 'README.txt',     cmd: 'cat readme.txt'  });
             lines.push({ t: 'dirlink', label: tc(1, true)  + '[../]',          cmd: 'cd ..'           });
             lines.push({ t: 'blank' });
-            lines.push({ t: 'text', v: "click README.txt or type 'cat readme' for player info", dim: true });
+            lines.push({ t: 'text', v: "click README.txt or type 'cat readme.txt' for player info", dim: true });
 
         } else if (currentDir === 'music/segmentation') {
             var tracks = TRACKS.segmentation;
@@ -377,7 +377,7 @@
             return dirListing();
         },
 
-        'cat readme': function () {
+        'cat readme.txt': function () {
             return [
                 { t: 'blank' },
                 { t: 'text', v: 'MUSIC PLAYER', spaced: true },
@@ -392,7 +392,8 @@
                 { t: 'blank' },
             ];
         },
-        'readme': function () { return COMMANDS['cat readme'](); },
+        'cat readme': function () { return COMMANDS['cat readme.txt'](); },
+        'readme':     function () { return COMMANDS['cat readme.txt'](); },
 
         'pause': function () {
             if (!currentAudio || audioPaused) {
