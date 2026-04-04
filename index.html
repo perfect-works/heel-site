@@ -52,6 +52,14 @@
     var audioPaused        = false;
     var nowPlayingInterval = null;
 
+    /* ── merch registry ── */
+    var MERCH = [
+        { id: 'obey_tshirt',           href: 'https://square.link/u/Fdrsrntv' },
+        { id: 'segmentation_cd',       href: 'https://square.link/u/PI2TUnAo' },
+        { id: 'segmentation_cassette', href: 'https://square.link/u/XfokA7sz' },
+        { id: 'bumper_sticker',        href: 'https://square.link/u/3hpALQsN' },
+    ];
+
     /* ── track registry — fill in file paths once audio/ is populated ── */
     var TRACKS = {
         segmentation: [
@@ -790,6 +798,9 @@
         var fn = COMMANDS[lower];
         if (fn) {
             printLines(fn());
+        } else if (lower.indexOf('buy ') === 0 || (lower.indexOf('cat ') === 0 && lower !== 'cat readme.txt' && lower !== 'cat readme')) {
+            var itemId = lower.replace(/^(buy|cat)\s+/, '').trim();
+            printLines(openMerch(itemId));
         } else if (lower.indexOf('play ') === 0) {
             printLines(playTrack(lower.slice(5).trim()));
         } else if (lower === 'play') {
@@ -872,6 +883,11 @@
                     var allTracks = TRACKS.segmentation.concat(TRACKS.unreleased);
                     var tm = allTracks.filter(function (t) { return t.id.indexOf(tq) === 0; });
                     if (tm.length === 1) input.value = 'play ' + tm[0].id;
+                } else if (partial.indexOf('buy ') === 0 || partial.indexOf('cat ') === 0) {
+                    var prefix = partial.slice(0, 4);
+                    var mq = partial.slice(4);
+                    var mm = MERCH.filter(function (m) { return m.id.indexOf(mq) === 0; });
+                    if (mm.length === 1) input.value = prefix + mm[0].id;
                 } else {
                     var matches = Object.keys(COMMANDS).filter(function (k) {
                         return k.indexOf(partial) === 0;
@@ -999,6 +1015,18 @@
 
         refresh();
         nowPlayingInterval = setInterval(refresh, 500);
+    }
+
+    function openMerch(query) {
+        var found = null;
+        for (var i = 0; i < MERCH.length; i++) {
+            if (MERCH[i].id === query) { found = MERCH[i]; break; }
+        }
+        if (!found) {
+            return [{ t: 'blank' }, { t: 'error', v: '\'' + esc(query) + '\': item not found.' }, { t: 'blank' }];
+        }
+        window.open(found.href, '_blank');
+        return [{ t: 'blank' }, { t: 'text', v: 'opening checkout for ' + found.id + '...', dim: true }, { t: 'blank' }];
     }
 
     function playTrack(query) {
