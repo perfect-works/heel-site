@@ -80,11 +80,11 @@
 
     function promptPath() {
         if (currentDir === 'root')               return 'C:\\heel';
-        if (currentDir === 'users')              return 'C:\\heel\\Users';
+        if (currentDir === 'users')              return 'C:\\heel\\users';
         if (currentDir === 'music')              return 'C:\\heel\\music';
         if (currentDir === 'music/segmentation') return 'C:\\heel\\music\\segmentation';
         if (currentDir === 'music/unreleased')   return 'C:\\heel\\music\\unreleased';
-        return 'C:\\heel\\Users\\' + currentDir;
+        return 'C:\\heel\\users\\' + currentDir;
     }
     function promptHTML() {
         return 'PS&nbsp;' + promptPath() + '&gt;&nbsp;';
@@ -104,14 +104,14 @@
 
         if (currentDir === 'root') {
             lines.push({ t: 'text', v: 'C:\\heel\\' });
-            lines.push({ t: 'dirlink', label: tc(0, false) + '[Users]', cmd: 'cd users' });
+            lines.push({ t: 'dirlink', label: tc(0, false) + '[users]', cmd: 'cd users' });
             lines.push({ t: 'dirlink', label: tc(0, true)  + '[music]', cmd: 'cd music' });
             lines.push({ t: 'blank' });
             lines.push({ t: 'text', v: "click a folder or type 'cd &lt;dir&gt;'", dim: true });
 
         } else if (currentDir === 'users') {
             lines.push({ t: 'text', v: 'C:\\heel\\' });
-            lines.push({ t: 'text', v: tc(0, true) + 'Users\\' });
+            lines.push({ t: 'text', v: tc(0, true) + 'users\\' });
             lines.push({ t: 'dirlink', label: tc(1, false) + '[adharsh]', cmd: 'cd adharsh' });
             lines.push({ t: 'dirlink', label: tc(1, false) + '[tayla]',   cmd: 'cd tayla'   });
             lines.push({ t: 'dirlink', label: tc(1, false) + '[nick]',    cmd: 'cd nick'    });
@@ -127,6 +127,8 @@
             lines.push({ t: 'dirlink', label: tc(1, false) + '[unreleased]',    cmd: 'cd unreleased'   });
             lines.push({ t: 'dirlink', label: tc(1, false) + 'README.txt',     cmd: 'cat readme'      });
             lines.push({ t: 'dirlink', label: tc(1, true)  + '[../]',          cmd: 'cd ..'           });
+            lines.push({ t: 'blank' });
+            lines.push({ t: 'text', v: "click README.txt or type 'cat readme' for player info", dim: true });
 
         } else if (currentDir === 'music/segmentation') {
             var tracks = TRACKS.segmentation;
@@ -157,7 +159,7 @@
 
         } else {
             /* member directory */
-            lines.push({ t: 'text', v: 'C:\\heel\\Users\\' });
+            lines.push({ t: 'text', v: 'C:\\heel\\users\\' });
             lines.push({ t: 'text', v: tc(0, true) + currentDir + '\\' });
             lines.push({ t: 'dirlink', label: tc(1, true) + '[../]', cmd: 'cd ..' });
         }
