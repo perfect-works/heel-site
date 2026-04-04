@@ -353,7 +353,8 @@
             cdClear();
             return parent === 'root' ? [] : dirListing();
         },
-        'cd ../': function () { return COMMANDS['cd ..'](); },
+        'cd ../':  function () { return COMMANDS['cd ..'](); },
+        'cd back': function () { return COMMANDS['cd ..'](); },
 
         'cd /':  function () { currentDir = 'root'; updatePrompt(); cdClear(); return []; },
         'cd \\': function () { currentDir = 'root'; updatePrompt(); cdClear(); return []; },
@@ -787,7 +788,7 @@
         /* context-aware cd: validate against current directory */
         if (lower.indexOf('cd ') === 0) {
             var arg = lower.slice(3).trim();
-            if (arg !== '..' && arg !== '../' && arg !== '/' && arg !== '\\') {
+            if (arg !== '..' && arg !== '../' && arg !== '/' && arg !== '\\' && arg !== 'back') {
                 var children = DIR_CHILDREN[currentDir] || [];
                 if (children.indexOf(arg) === -1) {
                     output.appendChild(render({ t: 'error', v: '\'' + esc(arg) + '\': no such directory.' }));
