@@ -56,7 +56,7 @@
                 { t: 'hrow', cmd: 'watch --all',            desc: 'videos &amp; visualizers'              },
                 { t: 'hrow-parent', cmd: 'fetch'                                                          },
                 { t: 'hrow-sub',  flag: '--new-releases',   desc: 'new release info'                      },
-                { t: 'hrow-sub',  flag: '--upcoming-shows', desc: 'upcoming show dates'                   },
+                { t: 'hrow-sub',  flag: '--upcoming-shows', desc: 'show dates'                            },
                 { t: 'hrow-sub',  flag: '--social',         desc: 'find us online',        last: true     },
                 { t: 'hrow', cmd: 'clear',                  desc: 'clear terminal'                        },
                 { t: 'blank' },
@@ -150,7 +150,7 @@
 
             case 'hrow-sub':
                 el = document.createElement('div');
-                el.className = 'help-row';
+                el.className = 'help-row help-sub';
                 el.innerHTML = '<span class="help-cmd">'
                              + '<span class="tree-char">' + (line.last ? '└── ' : '├── ') + '</span>'
                              + line.flag
