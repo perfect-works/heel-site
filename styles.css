@@ -284,8 +284,8 @@ body {
     }
     .content {
         padding: 12px 14px 16px;
-        height: auto;
-        max-height: 85vh;
+        height: calc(100vh - 80px);
+        height: calc(100dvh - 80px);
     }
 
     /* scale all terminal text up to 16px */
