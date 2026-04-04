@@ -106,7 +106,7 @@
     /* ─── boot sequence ───────────────────────────────────── */
 
     var BOOT_LINES_PRE = [
-        { t: 'text', v: 'HEEL BIOS v2.0 &nbsp;&nbsp;&nbsp;(C) HEEL CORPORATION 1998', dim: true },
+        { t: 'text', v: 'WELT BIOS v1.0 &nbsp;&nbsp;&nbsp;(C) HEEL CORPORATION 1998', dim: true },
         { t: 'blank' },
         { t: 'text', v: 'CPU: Intel(R) Pentium(R) II @ 300 MHz' },
         { t: 'text', v: 'MEMORY TEST: 65536K ......... OK' },
@@ -730,6 +730,9 @@
                         input.focus();
                         if (window.innerWidth <= 500) {
                             execute('help');
+                        } else {
+                            var hint = render({ t: 'text', v: "type 'help' for a list of commands", dim: true });
+                            if (hint) output.appendChild(hint);
                         }
                     }, 1000);
                 }, 60, 30);
