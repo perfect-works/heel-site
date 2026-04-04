@@ -1,0 +1,250 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: #008080;
+    font-family: 'Courier New', Courier, monospace;
+    min-height: 100vh;
+    padding: 40px 16px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+/* Window chrome */
+.window {
+    width: 100%;
+    max-width: 640px;
+    background: #c0c0c0;
+    border-top: 2px solid #ffffff;
+    border-left: 2px solid #ffffff;
+    border-right: 2px solid #404040;
+    border-bottom: 2px solid #404040;
+}
+
+.title-bar {
+    background: linear-gradient(to right, #000080, #1084d0);
+    padding: 3px 6px 3px 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.title-bar-text {
+    color: #ffffff;
+    font-size: 0.8em;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+}
+
+.title-bar-controls {
+    display: flex;
+    gap: 2px;
+}
+
+.wbtn {
+    width: 16px;
+    height: 14px;
+    background: #c0c0c0;
+    border-top: 1px solid #ffffff;
+    border-left: 1px solid #ffffff;
+    border-right: 1px solid #808080;
+    border-bottom: 1px solid #808080;
+    font-size: 9px;
+    cursor: default;
+    color: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Courier New', monospace;
+    user-select: none;
+}
+
+/* Terminal content area */
+.content {
+    background: #000000;
+    color: #33ff33;
+    padding: 16px 20px 20px;
+    min-height: 420px;
+    max-height: 80vh;
+    overflow-y: auto;
+    margin: 3px;
+    border-top: 1px solid #404040;
+    border-left: 1px solid #404040;
+    border-right: 1px solid #dfdfdf;
+    border-bottom: 1px solid #dfdfdf;
+    cursor: text;
+}
+
+/* ── output line types ── */
+
+.out-prompt {
+    font-size: 0.82em;
+    margin-top: 6px;
+}
+
+.prompt-prefix {
+    font-weight: bold;
+}
+
+.out-text {
+    font-size: 0.85em;
+    padding-left: 2px;
+    line-height: 1.6;
+}
+
+.out-text.dim {
+    opacity: 0.45;
+    font-size: 0.78em;
+    letter-spacing: 0.5px;
+}
+
+.out-error {
+    font-size: 0.85em;
+    opacity: 0.5;
+    padding-left: 2px;
+}
+
+/* help table rows */
+.help-row {
+    display: flex;
+    align-items: baseline;
+    font-size: 0.85em;
+    padding-left: 2px;
+    margin-top: 3px;
+    gap: 6px;
+}
+
+.help-cmd {
+    color: #33ff33;
+    min-width: 26ch;
+    flex-shrink: 0;
+}
+
+.help-desc {
+    color: #33ff33;
+    opacity: 0.6;
+}
+
+.tree-char {
+    opacity: 0.4;
+}
+
+/* terminal rows — linked and plain */
+.social-line,
+.term-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.88em;
+    padding-left: 2px;
+    margin-top: 8px;
+}
+
+.social-line {
+    text-decoration: none;
+}
+
+.social-platform {
+    color: #33ff33;
+    white-space: nowrap;
+}
+
+.social-dots {
+    flex: 1;
+    border-bottom: 1px dotted #33ff33;
+    opacity: 0.35;
+    position: relative;
+    bottom: 2px;
+}
+
+.social-handle {
+    color: #33ff33;
+    font-weight: bold;
+    letter-spacing: 1px;
+    white-space: nowrap;
+}
+
+.social-line:hover .social-handle,
+.social-line:hover .social-platform {
+    color: #ffffff;
+}
+
+.term-row {
+    color: #33ff33;
+}
+
+/* album block */
+.album-cover-link {
+    display: block;
+    width: fit-content;
+    margin: 10px auto 4px;
+    text-align: center;
+    text-decoration: none;
+}
+
+.album-cover-link img {
+    width: 120px;
+    display: block;
+    border: 1px solid #33ff33;
+    margin: 0 auto;
+}
+
+.click-to-listen {
+    display: block;
+    margin-top: 8px;
+    font-size: 0.78em;
+    color: #33ff33;
+    letter-spacing: 1px;
+}
+
+.album-cover-link:hover .click-to-listen {
+    color: #ffffff;
+}
+
+/* ── input row ── */
+.input-row {
+    display: flex;
+    align-items: center;
+    margin-top: 6px;
+    font-size: 0.82em;
+}
+
+#cmd {
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #33ff33;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 1em;
+    flex: 1;
+    caret-color: #33ff33;
+    padding: 0;
+}
+
+/* ── mobile ── */
+@media (max-width: 500px) {
+    body {
+        padding: 16px 8px;
+    }
+    .content {
+        padding: 12px 14px 16px;
+        max-height: 85vh;
+    }
+    .help-cmd {
+        min-width: 20ch;
+    }
+}
+
+/* ── line appear animation ── */
+@keyframes termIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+#output > * {
+    animation: termIn 0.07s ease forwards;
+}

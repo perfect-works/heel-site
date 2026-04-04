@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HEEL</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="window">
+    <div class="title-bar">
+        <span class="title-bar-text">heel.exe</span>
+        <div class="title-bar-controls">
+            <span class="wbtn">_</span>
+            <span class="wbtn">&#9633;</span>
+            <span class="wbtn">&#215;</span>
+        </div>
+    </div>
+    <div class="content" id="terminal">
+        <div id="output"></div>
+        <div class="input-row" id="input-row">
+            <span class="prompt-prefix">PS&nbsp;C:\Users\heel&gt;&nbsp;</span><input
+                type="text" id="cmd"
+                autocomplete="off" spellcheck="false">
+        </div>
+    </div>
+</div>
+
+<script>
+(function () {
+
+    var output   = document.getElementById('output');
+    var input    = document.getElementById('cmd');
+    var inputRow = document.getElementById('input-row');
+    var terminal = document.getElementById('terminal');
+
+    var cmdHistory = [];
+    var historyPos = -1;
+    var animating  = false;
+
+    /* ─── command definitions ──────────────────────────────── */
+
+    var COMMANDS = {
+
+        'help': function () {
+            return [
+                { t: 'blank' },
+                { t: 'text', v: 'USAGE:&nbsp;&nbsp;&#60;command&#62; [--flag]', dim: true },
+                { t: 'blank' },
+                { t: 'hrow', cmd: 'stream --heel',          desc: 'streaming links'                       },
+                { t: 'hrow', cmd: 'watch --all',            desc: 'videos &amp; visualizers'              },
+                { t: 'hrow-parent', cmd: 'fetch'                                                          },
+                { t: 'hrow-sub',  flag: '--new-releases',   desc: 'new release info'                      },
+                { t: 'hrow-sub',  flag: '--upcoming-shows', desc: 'upcoming show dates'                   },
+                { t: 'hrow-sub',  flag: '--social',         desc: 'find us online',        last: true     },
+                { t: 'hrow', cmd: 'clear',                  desc: 'clear terminal'                        },
+                { t: 'blank' },
+            ];
+        },
+
+        'fetch --new-releases': function () {
+            return [
+                { t: 'blank' },
+                { t: 'text', v: 'SEGMENTATION \u2014 OUT NOW', center: true, spaced: true },
+                { t: 'album' },
+                { t: 'blank' },
+            ];
+        },
+
+        'stream --heel': function () {
+            return [
+                { t: 'blank' },
+                { t: 'link', label: 'spotify',     href: 'https://open.spotify.com/artist/6663RkcENJxc1KnuKZaRla', value: 'heel' },
+                { t: 'link', label: 'apple music', href: 'https://music.apple.com/us/artist/heel/1765219586',       value: 'heel' },
+                { t: 'link', label: 'bandcamp',    href: 'https://heelband.bandcamp.com/album/segmentation',        value: 'heel' },
+                { t: 'blank' },
+            ];
+        },
+
+        'watch --all': function () {
+            return [
+                { t: 'blank' },
+                { t: 'link', label: 'album release show', href: 'https://www.youtube.com/watch?v=0BCGjLoA6uc', value: 'live'       },
+                { t: 'link', label: 'honeycomb',          href: 'https://www.youtube.com/watch?v=JAfxkuAhK0c', value: 'visualizer' },
+                { t: 'link', label: 'through me',         href: 'https://youtu.be/v5sKosUJGIw',                 value: 'visualizer' },
+                { t: 'link', label: "you're so far away", href: 'https://www.youtube.com/watch?v=Jyj_q3xwDWA', value: 'visualizer' },
+                { t: 'blank' },
+            ];
+        },
+
+        'fetch --social': function () {
+            return [
+                { t: 'blank' },
+                { t: 'link', label: 'instagram', href: 'https://www.instagram.com/heel.mp3/', value: '@heel.mp3' },
+                { t: 'blank' },
+            ];
+        },
+
+        'fetch --upcoming-shows': function () {
+            return [
+                { t: 'blank' },
+                { t: 'nolink', label: 'apr 17', value: 'austin \u2014 pearl st co-op' },
+                { t: 'nolink', label: 'apr 18', value: 'houston \u2014 axelrad'       },
+                { t: 'blank' },
+            ];
+        },
+
+        'clear': function () {
+            output.innerHTML = '';
+            return [];
+        },
+    };
+
+    /* ─── render a line descriptor into a DOM element ─────── */
+
+    function render(line) {
+        var el;
+        switch (line.t) {
+
+            case 'blank':
+                el = document.createElement('div');
+                el.style.height = '0.5em';
+                return el;
+
+            case 'text':
+                el = document.createElement('div');
+                el.className = 'out-text' + (line.dim ? ' dim' : '');
+                if (line.center) el.style.textAlign  = 'center';
+                if (line.spaced) el.style.letterSpacing = '2px';
+                el.innerHTML = line.v;
+                return el;
+
+            case 'hrow':
+                el = document.createElement('div');
+                el.className = 'help-row';
+                el.innerHTML = '<span class="help-cmd">' + line.cmd  + '</span>'
+                             + '<span class="help-desc">' + line.desc + '</span>';
+                return el;
+
+            case 'hrow-parent':
+                el = document.createElement('div');
+                el.className = 'help-row help-parent';
+                el.innerHTML = '<span class="help-cmd">' + line.cmd + '</span>';
+                return el;
+
+            case 'hrow-sub':
+                el = document.createElement('div');
+                el.className = 'help-row';
+                el.innerHTML = '<span class="help-cmd">'
+                             + '<span class="tree-char">' + (line.last ? '└── ' : '├── ') + '</span>'
+                             + line.flag
+                             + '</span>'
+                             + '<span class="help-desc">' + line.desc + '</span>';
+                return el;
+
+            case 'prompt':
+                el = document.createElement('div');
+                el.className = 'out-prompt';
+                el.innerHTML = '<span class="prompt-prefix">PS&nbsp;C:\\Users\\heel&gt;</span> ' + esc(line.v);
+                return el;
+
+            case 'error':
+                el = document.createElement('div');
+                el.className = 'out-error';
+                el.innerHTML = line.v;
+                return el;
+
+            case 'link':
+                el = document.createElement('a');
+                el.className = 'social-line';
+                el.href      = line.href;
+                el.target    = '_blank';
+                el.rel       = 'noopener';
+                el.innerHTML = '<span class="social-platform">' + line.label + '</span>'
+                             + '<span class="social-dots"></span>'
+                             + '<span class="social-handle">'   + line.value + '</span>';
+                return el;
+
+            case 'nolink':
+                el = document.createElement('div');
+                el.className = 'term-row';
+                el.innerHTML = '<span class="social-platform">' + line.label + '</span>'
+                             + '<span class="social-dots"></span>'
+                             + '<span class="social-handle">'   + line.value + '</span>';
+                return el;
+
+            case 'album':
+                el = document.createElement('div');
+                el.innerHTML =
+                    '<a href="https://heelband.bandcamp.com/album/segmentation"'
+                    + ' class="album-cover-link" target="_blank" rel="noopener">'
+                    + '<img src="album_front_cover.png" alt="Heel \u2014 Segmentation">'
+                    + '<span class="click-to-listen">&gt; CLICK HERE TO LISTEN &lt;</span>'
+                    + '</a>';
+                return el;
+        }
+        return null;
+    }
+
+    /* ─── animate lines into #output ──────────────────────── */
+
+    function printLines(lines, done) {
+        animating = true;
+        inputRow.style.visibility = 'hidden';
+
+        var delay = 0;
+        lines.forEach(function (line) {
+            setTimeout(function () {
+                var el = render(line);
+                if (el) { output.appendChild(el); scrollBottom(); }
+            }, delay);
+            delay += (line.t === 'blank') ? 25 : 65;
+        });
+
+        setTimeout(function () {
+            animating = false;
+            inputRow.style.visibility = 'visible';
+            input.focus();
+            scrollBottom();
+            if (done) done();
+        }, delay + 30);
+    }
+
+    /* ─── execute a command string ─────────────────────────── */
+
+    function execute(raw, silent) {
+        var trimmed = raw.trim();
+        var lower   = trimmed.toLowerCase();
+
+        if (!silent) {
+            output.appendChild(render({ t: 'prompt', v: trimmed }));
+            scrollBottom();
+        }
+
+        if (!trimmed) return;
+
+        var fn = COMMANDS[lower];
+        if (fn) {
+            printLines(fn());
+        } else {
+            output.appendChild(render({
+                t: 'error',
+                v: '\'' + esc(lower) + '\' is not recognized. type \'help\' for available commands.'
+            }));
+            output.appendChild(render({ t: 'blank' }));
+            scrollBottom();
+        }
+    }
+
+    /* ─── keyboard handling ────────────────────────────────── */
+
+    input.addEventListener('keydown', function (e) {
+        if (animating && e.key !== 'Tab') { e.preventDefault(); return; }
+
+        switch (e.key) {
+
+            case 'Enter':
+                var val = input.value;
+                if (val.trim()) {
+                    cmdHistory.unshift(val);
+                    historyPos = -1;
+                }
+                input.value = '';
+                execute(val);
+                break;
+
+            case 'ArrowUp':
+                e.preventDefault();
+                if (historyPos < cmdHistory.length - 1) {
+                    historyPos++;
+                    input.value = cmdHistory[historyPos];
+                }
+                break;
+
+            case 'ArrowDown':
+                e.preventDefault();
+                if (historyPos > 0) {
+                    historyPos--;
+                    input.value = cmdHistory[historyPos];
+                } else {
+                    historyPos = -1;
+                    input.value = '';
+                }
+                break;
+
+            case 'Tab':
+                e.preventDefault();
+                var partial = input.value.toLowerCase().trim();
+                if (!partial) break;
+                var matches = Object.keys(COMMANDS).filter(function (k) {
+                    return k.indexOf(partial) === 0;
+                });
+                if (matches.length === 1) input.value = matches[0];
+                break;
+        }
+    });
+
+    /* click anywhere in the terminal to focus the input */
+    terminal.addEventListener('click', function () { input.focus(); });
+
+    /* ─── startup: blank terminal, user must type 'help' ───── */
+
+    /* ─── helpers ──────────────────────────────────────────── */
+
+    function esc(s) {
+        return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function scrollBottom() {
+        terminal.scrollTop = terminal.scrollHeight;
+    }
+
+}());
+</script>
+</body>
+</html>
