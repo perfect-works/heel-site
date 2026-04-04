@@ -13,7 +13,7 @@
         <div class="title-bar-controls">
             <span class="wbtn">_</span>
             <span class="wbtn">&#9633;</span>
-            <span class="wbtn">&#215;</span>
+            <span class="wbtn" id="close-btn">&#215;</span>
         </div>
     </div>
     <div class="content" id="terminal">
@@ -24,6 +24,11 @@
                 autocomplete="off" spellcheck="false">
         </div>
     </div>
+</div>
+
+<div id="flash-overlay"></div>
+<div id="jumpscare">
+    <img src="images/RussianSleepExperimentGuy.png" alt="">
 </div>
 
 <script>
@@ -189,7 +194,7 @@
                 el.innerHTML =
                     '<a href="https://heelband.bandcamp.com/album/segmentation"'
                     + ' class="album-cover-link" target="_blank" rel="noopener">'
-                    + '<img src="album_front_cover.png" alt="Heel \u2014 Segmentation">'
+                    + '<img src="images/album_front_cover.png" alt="Heel \u2014 Segmentation">'
                     + '<span class="click-to-listen">&gt; CLICK HERE TO LISTEN &lt;</span>'
                     + '</a>';
                 return el;
@@ -297,6 +302,38 @@
 
     /* click anywhere in the terminal to focus the input */
     terminal.addEventListener('click', function () { input.focus(); });
+
+    /* ─── jumpscare ────────────────────────────────────────── */
+    var jumpscare     = document.getElementById('jumpscare');
+    var flashOverlay  = document.getElementById('flash-overlay');
+
+    document.getElementById('close-btn').addEventListener('click', function (e) {
+        e.stopPropagation();
+
+        /* flash — single pulse, 350ms on then fade out over 400ms */
+        flashOverlay.style.display  = 'block';
+        flashOverlay.style.opacity  = '1';
+        flashOverlay.style.transition = 'none';
+
+        setTimeout(function () {
+            flashOverlay.style.transition = 'opacity 0.4s ease';
+            flashOverlay.style.opacity    = '0';
+            setTimeout(function () { flashOverlay.style.display = 'none'; }, 450);
+        }, 350);
+
+        /* image expands + sound fires at peak of flash */
+        setTimeout(function () {
+            var snd = new Audio('sounds/jumpscare.mp3');
+            snd.play().catch(function () {});
+            jumpscare.classList.add('active');
+        }, 250);
+    });
+
+    jumpscare.addEventListener('click', function () {
+        jumpscare.classList.remove('active');
+        /* reset animation so it can fire again */
+        void jumpscare.offsetWidth;
+    });
 
     /* ─── startup: blank terminal, user must type 'help' ───── */
 

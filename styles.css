@@ -219,7 +219,7 @@ body {
     outline: none;
     color: #33ff33;
     font-family: 'Courier New', Courier, monospace;
-    font-size: 1em;
+    font-size: 16px;
     flex: 1;
     caret-color: #33ff33;
     padding: 0;
@@ -237,6 +237,45 @@ body {
     .help-cmd {
         min-width: 20ch;
     }
+    #cmd {
+        font-size: 16px;
+    }
+}
+
+/* ── jumpscare ── */
+#flash-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: #ffffff;
+    z-index: 9998;
+    pointer-events: none;
+    opacity: 0;
+}
+
+#jumpscare {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    cursor: pointer;
+    background: #000;
+}
+
+#jumpscare img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+#jumpscare.active {
+    display: block;
+    animation: expandFromTopRight 0.5s cubic-bezier(0.2, 0, 0.4, 1) forwards;
+}
+
+@keyframes expandFromTopRight {
+    from { clip-path: inset(0 0 100% 100%); }
+    to   { clip-path: inset(0 0 0% 0%);     }
 }
 
 /* ── line appear animation ── */
