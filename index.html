@@ -943,12 +943,7 @@
         return dp[m][n];
     }
 
-    function cdClear() {
-        if (window.innerWidth > 500) return;
-        var promptEl = output.lastChild;
-        output.innerHTML = '';
-        if (promptEl) output.appendChild(promptEl);
-    }
+    function cdClear() { /* no-op: terminal keeps history on all devices */ }
 
     function fmtTime(s) {
         if (!s || isNaN(s)) return '0:00';
