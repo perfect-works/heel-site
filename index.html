@@ -18,6 +18,7 @@
     </div>
     <div class="content" id="terminal">
         <div id="output"></div>
+        <div id="nowplaying-row"><span class="nowplaying-text"></span></div>
         <div class="input-row" id="input-row">
             <span class="prompt-prefix">PS&nbsp;C:\heel&gt;&nbsp;</span><input
                 type="text" id="cmd"
@@ -39,14 +40,50 @@
     var inputRow = document.getElementById('input-row');
     var terminal = document.getElementById('terminal');
 
-    var cmdHistory = [];
-    var historyPos = -1;
-    var animating  = false;
-    var currentDir = 'root'; /* 'root' | 'users' | member name */
+    var cmdHistory  = [];
+    var historyPos  = -1;
+    var animating   = false;
+    var currentDir  = 'root';
+    var currentAudio = null;
+    var audioPaused  = false;
+
+    /* ── track registry — fill in file paths once audio/ is populated ── */
+    var TRACKS = {
+        segmentation: [
+            { id: 'segmentation',       label: '01 - segmentation',       file: 'sounds/music/segmentation/01_segmentation.mp3'     },
+            { id: 'stare',              label: '02 - stare',              file: 'sounds/music/segmentation/02_stare.mp3'            },
+            { id: 'august',             label: '03 - august',             file: 'sounds/music/segmentation/03_august.mp3'           },
+            { id: 'through me',         label: '04 - through me',         file: 'sounds/music/segmentation/04_through_me.mp3'       },
+            { id: 'daisy chain',        label: '05 - daisy chain',        file: 'sounds/music/segmentation/05_daisy_chain.mp3'      },
+            { id: 'some other memory',  label: '06 - some other memory',  file: 'sounds/music/segmentation/06_some_other_memory.mp3'},
+            { id: 'waste',              label: '07 - waste',              file: 'sounds/music/segmentation/07_waste.mp3'            },
+            { id: "you're so far away", label: "08 - you're so far away", file: 'sounds/music/segmentation/08_youre_so_far_away.mp3'},
+            { id: 'in my way',          label: '09 - in my way',          file: 'sounds/music/segmentation/09_in_my_way.mp3'        },
+            { id: 'honeycomb',          label: '10 - honeycomb',          file: 'sounds/music/segmentation/10_honeycomb.mp3'        },
+        ],
+        unreleased: [
+            { id: 'andres_song', label: 'andres_song', file: 'sounds/music/unreleased/andres_song.mp3' },
+        ],
+    };
+
+    /* ── parent directory map ── */
+    var DIR_PARENTS = {
+        'users':              'root',
+        'music':              'root',
+        'music/segmentation': 'music',
+        'music/unreleased':   'music',
+        'adharsh':            'users',
+        'tayla':              'users',
+        'nick':               'users',
+        'andres':             'users',
+    };
 
     function promptPath() {
-        if (currentDir === 'root')  return 'C:\\heel';
-        if (currentDir === 'users') return 'C:\\heel\\Users';
+        if (currentDir === 'root')               return 'C:\\heel';
+        if (currentDir === 'users')              return 'C:\\heel\\Users';
+        if (currentDir === 'music')              return 'C:\\heel\\music';
+        if (currentDir === 'music/segmentation') return 'C:\\heel\\music\\segmentation';
+        if (currentDir === 'music/unreleased')   return 'C:\\heel\\music\\unreleased';
         return 'C:\\heel\\Users\\' + currentDir;
     }
     function promptHTML() {
@@ -66,11 +103,12 @@
         var lines = [{ t: 'blank' }];
 
         if (currentDir === 'root') {
-            lines.push({ t: 'text', v: 'C:\\' });
-            lines.push({ t: 'text', v: tc(0, true) + 'heel\\' });
-            lines.push({ t: 'dirlink', label: tc(1, true) + '[Users]', cmd: 'cd users' });
+            lines.push({ t: 'text', v: 'C:\\heel\\' });
+            lines.push({ t: 'dirlink', label: tc(0, false) + '[Users]', cmd: 'cd users' });
+            lines.push({ t: 'dirlink', label: tc(0, true)  + '[music]', cmd: 'cd music' });
             lines.push({ t: 'blank' });
             lines.push({ t: 'text', v: "click a folder or type 'cd &lt;dir&gt;'", dim: true });
+
         } else if (currentDir === 'users') {
             lines.push({ t: 'text', v: 'C:\\heel\\' });
             lines.push({ t: 'text', v: tc(0, true) + 'Users\\' });
@@ -81,7 +119,44 @@
             lines.push({ t: 'dirlink', label: tc(1, true)  + '[../]',     cmd: 'cd ..'      });
             lines.push({ t: 'blank' });
             lines.push({ t: 'text', v: "click a folder or type 'cd &lt;dir&gt;'", dim: true });
+
+        } else if (currentDir === 'music') {
+            lines.push({ t: 'text', v: 'C:\\heel\\' });
+            lines.push({ t: 'text', v: tc(0, true) + 'music\\' });
+            lines.push({ t: 'dirlink', label: tc(1, false) + '[segmentation]', cmd: 'cd segmentation' });
+            lines.push({ t: 'dirlink', label: tc(1, false) + '[unreleased]',    cmd: 'cd unreleased'   });
+            lines.push({ t: 'dirlink', label: tc(1, false) + 'README.txt',     cmd: 'cat readme'      });
+            lines.push({ t: 'dirlink', label: tc(1, true)  + '[../]',          cmd: 'cd ..'           });
+
+        } else if (currentDir === 'music/segmentation') {
+            var tracks = TRACKS.segmentation;
+            lines.push({ t: 'text', v: 'C:\\heel\\music\\' });
+            lines.push({ t: 'text', v: tc(0, true) + 'segmentation\\' });
+            for (var i = 0; i < tracks.length; i++) {
+                lines.push({ t: 'dirlink',
+                    label: tc(1, false) + tracks[i].label + '.mp3',
+                    cmd:   'play ' + tracks[i].id });
+            }
+            if (!tracks.length) lines.push({ t: 'text', v: tc(1, false) + '(empty)', dim: true });
+            lines.push({ t: 'dirlink', label: tc(1, true) + '[../]', cmd: 'cd ..' });
+
+        } else if (currentDir === 'music/unreleased') {
+            var demos = TRACKS.unreleased;
+            lines.push({ t: 'text', v: 'C:\\heel\\music\\' });
+            lines.push({ t: 'text', v: tc(0, true) + 'unreleased\\' });
+            if (demos.length) {
+                for (var i = 0; i < demos.length; i++) {
+                    lines.push({ t: 'dirlink',
+                        label: tc(1, false) + demos[i].label + '.mp3',
+                        cmd:   'play ' + demos[i].id });
+                }
+            } else {
+                lines.push({ t: 'text', v: tc(1, false) + '(empty)', dim: true });
+            }
+            lines.push({ t: 'dirlink', label: tc(1, true) + '[../]', cmd: 'cd ..' });
+
         } else {
+            /* member directory */
             lines.push({ t: 'text', v: 'C:\\heel\\Users\\' });
             lines.push({ t: 'text', v: tc(0, true) + currentDir + '\\' });
             lines.push({ t: 'dirlink', label: tc(1, true) + '[../]', cmd: 'cd ..' });
@@ -227,13 +302,13 @@
             if (currentDir === 'root') {
                 return [{ t: 'blank' }, { t: 'error', v: 'already at root.' }, { t: 'blank' }];
             }
-            var goingToRoot = currentDir === 'users';
-            currentDir = goingToRoot ? 'root' : 'users';
+            var parent = DIR_PARENTS[currentDir] || 'root';
+            currentDir = parent;
             updatePrompt();
             var promptEl = output.lastChild;
             output.innerHTML = '';
             if (promptEl) output.appendChild(promptEl);
-            return goingToRoot ? [] : dirListing();
+            return parent === 'root' ? [] : dirListing();
         },
         'cd ../': function () { return COMMANDS['cd ..'](); },
 
@@ -282,6 +357,69 @@
             var promptEl = output.lastChild; output.innerHTML = '';
             if (promptEl) output.appendChild(promptEl);
             return memberLines('andres', 'drums');
+        },
+
+        'cd music': function () {
+            currentDir = 'music'; updatePrompt();
+            var promptEl = output.lastChild; output.innerHTML = '';
+            if (promptEl) output.appendChild(promptEl);
+            return dirListing();
+        },
+        'cd segmentation': function () {
+            currentDir = 'music/segmentation'; updatePrompt();
+            var promptEl = output.lastChild; output.innerHTML = '';
+            if (promptEl) output.appendChild(promptEl);
+            return dirListing();
+        },
+        'cd unreleased': function () {
+            currentDir = 'music/unreleased'; updatePrompt();
+            var promptEl = output.lastChild; output.innerHTML = '';
+            if (promptEl) output.appendChild(promptEl);
+            return dirListing();
+        },
+
+        'cat readme': function () {
+            return [
+                { t: 'blank' },
+                { t: 'text', v: 'MUSIC PLAYER', spaced: true },
+                { t: 'blank' },
+                { t: 'hrow', cmd: 'play &lt;track&gt;', desc: 'play a track by name' },
+                { t: 'hrow', cmd: 'pause',             desc: 'pause playback'       },
+                { t: 'hrow', cmd: 'resume',            desc: 'resume playback'      },
+                { t: 'hrow', cmd: 'stop',              desc: 'stop playback'        },
+                { t: 'blank' },
+                { t: 'text', v: "navigate to /segmentation or /demos and click a track,", dim: true },
+                { t: 'text', v: "or type 'play &lt;track name&gt;'", dim: true },
+                { t: 'blank' },
+            ];
+        },
+        'readme': function () { return COMMANDS['cat readme'](); },
+
+        'pause': function () {
+            if (!currentAudio || audioPaused) {
+                return [{ t: 'blank' }, { t: 'error', v: 'nothing is playing.' }, { t: 'blank' }];
+            }
+            currentAudio.pause();
+            audioPaused = true;
+            return [{ t: 'blank' }, { t: 'text', v: 'paused.', dim: true }, { t: 'blank' }];
+        },
+        'resume': function () {
+            if (!currentAudio || !audioPaused) {
+                return [{ t: 'blank' }, { t: 'error', v: 'nothing is paused.' }, { t: 'blank' }];
+            }
+            currentAudio.play().catch(function () {});
+            audioPaused = false;
+            return [{ t: 'blank' }, { t: 'text', v: 'resuming.', dim: true }, { t: 'blank' }];
+        },
+        'stop': function () {
+            if (!currentAudio) {
+                return [{ t: 'blank' }, { t: 'error', v: 'nothing is playing.' }, { t: 'blank' }];
+            }
+            currentAudio.pause();
+            currentAudio = null;
+            audioPaused = false;
+            updateNowPlaying(null);
+            return [{ t: 'blank' }, { t: 'text', v: 'stopped.', dim: true }, { t: 'blank' }];
         },
 
         /* ── command aliases ── */
@@ -614,6 +752,12 @@
         var fn = COMMANDS[lower];
         if (fn) {
             printLines(fn());
+        } else if (lower.indexOf('play ') === 0) {
+            printLines(playTrack(lower.slice(5).trim()));
+        } else if (lower === 'play') {
+            output.appendChild(render({ t: 'error', v: "usage: play &lt;track name&gt;" }));
+            output.appendChild(render({ t: 'blank' }));
+            scrollBottom();
         } else {
             output.appendChild(render({
                 t: 'error',
@@ -664,10 +808,17 @@
                 e.preventDefault();
                 var partial = input.value.toLowerCase().trim();
                 if (!partial) break;
-                var matches = Object.keys(COMMANDS).filter(function (k) {
-                    return k.indexOf(partial) === 0;
-                });
-                if (matches.length === 1) input.value = matches[0];
+                if (partial.indexOf('play ') === 0) {
+                    var tq = partial.slice(5);
+                    var allTracks = TRACKS.segmentation.concat(TRACKS.unreleased);
+                    var tm = allTracks.filter(function (t) { return t.id.indexOf(tq) === 0; });
+                    if (tm.length === 1) input.value = 'play ' + tm[0].id;
+                } else {
+                    var matches = Object.keys(COMMANDS).filter(function (k) {
+                        return k.indexOf(partial) === 0;
+                    });
+                    if (matches.length === 1) input.value = matches[0];
+                }
                 break;
         }
     });
@@ -741,6 +892,42 @@
     }, 70, 30);
 
     /* ─── helpers ──────────────────────────────────────────── */
+
+    function updateNowPlaying(label) {
+        var row = document.getElementById('nowplaying-row');
+        if (!row) return;
+        if (label) {
+            row.style.display = 'block';
+            row.querySelector('.nowplaying-text').textContent = '\u266a  ' + label;
+        } else {
+            row.style.display = 'none';
+        }
+    }
+
+    function playTrack(query) {
+        var allTracks = TRACKS.segmentation.concat(TRACKS.unreleased);
+        var found = null;
+        for (var i = 0; i < allTracks.length; i++) {
+            if (allTracks[i].id === query || allTracks[i].label.toLowerCase() === query) {
+                found = allTracks[i];
+                break;
+            }
+        }
+        if (!found) {
+            return [{ t: 'blank' }, { t: 'error', v: '\'' + esc(query) + '\' not found.' }, { t: 'blank' }];
+        }
+        if (currentAudio) { currentAudio.pause(); }
+        currentAudio = new Audio(found.file);
+        audioPaused  = false;
+        currentAudio.play().catch(function () {});
+        updateNowPlaying(found.label);
+        currentAudio.addEventListener('ended', function () {
+            currentAudio = null;
+            audioPaused  = false;
+            updateNowPlaying(null);
+        });
+        return [{ t: 'blank' }, { t: 'text', v: 'now playing: ' + found.label }, { t: 'blank' }];
+    }
 
     function typeAndExecute(cmd) {
         if (animating) return;

@@ -232,6 +232,17 @@ body {
     color: #ffffff;
 }
 
+/* ── now playing ── */
+#nowplaying-row {
+    display: none;
+    padding: 5px 0 2px;
+    font-size: 0.82em;
+    color: #33ff33;
+    border-top: 1px dotted #1a661a;
+    margin-top: 4px;
+    letter-spacing: 0.5px;
+}
+
 /* ── input row ── */
 .input-row {
     display: flex;
