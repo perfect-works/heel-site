@@ -70,8 +70,7 @@ body {
     background: #000000;
     color: #33ff33;
     padding: 16px 20px 20px;
-    min-height: 420px;
-    max-height: 80vh;
+    height: 420px;
     overflow-y: auto;
     overflow-x: hidden;
     margin: 3px;
@@ -260,6 +259,7 @@ body {
     }
     .content {
         padding: 12px 14px 16px;
+        height: auto;
         max-height: 85vh;
     }
 
