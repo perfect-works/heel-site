@@ -85,6 +85,7 @@ body {
 /* ── output line types ── */
 
 .out-prompt {
+    font-size: 0.82em;
     margin-top: 6px;
 }
 
@@ -93,16 +94,19 @@ body {
 }
 
 .out-text {
+    font-size: 0.85em;
     padding-left: 2px;
     line-height: 1.6;
 }
 
 .out-text.dim {
     opacity: 0.45;
+    font-size: 0.78em;
     letter-spacing: 0.5px;
 }
 
 .out-error {
+    font-size: 0.85em;
     opacity: 0.5;
     padding-left: 2px;
 }
@@ -111,6 +115,7 @@ body {
 .help-row {
     display: flex;
     align-items: baseline;
+    font-size: 0.85em;
     padding-left: 2px;
     margin-top: 3px;
     gap: 6px;
@@ -137,6 +142,7 @@ body {
     display: flex;
     align-items: center;
     gap: 8px;
+    font-size: 0.88em;
     padding-left: 2px;
     margin-top: 8px;
 }
@@ -193,6 +199,7 @@ body {
 .click-to-listen {
     display: block;
     margin-top: 8px;
+    font-size: 0.78em;
     color: #33ff33;
     letter-spacing: 1px;
 }
@@ -206,6 +213,7 @@ body {
     display: flex;
     align-items: center;
     margin-top: 6px;
+    font-size: 0.82em;
 }
 
 #cmd {
@@ -229,8 +237,36 @@ body {
         padding: 12px 14px 16px;
         max-height: 85vh;
     }
+
+    /* scale all terminal text up to 16px */
+    .out-prompt,
+    .out-text,
+    .out-error,
+    .social-line,
+    .term-row,
+    .click-to-listen {
+        font-size: 1em;
+    }
+    .input-row {
+        font-size: 1em;
+    }
+    #cmd {
+        font-size: 16px; /* prevent iOS zoom on focus */
+    }
+
+    /* help menu: stack command and description vertically */
+    .help-row {
+        font-size: 1em;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 2px;
+        margin-top: 14px;
+    }
     .help-cmd {
-        min-width: 20ch;
+        min-width: unset;
+    }
+    .help-desc {
+        padding-left: 1ch;
     }
 }
 
