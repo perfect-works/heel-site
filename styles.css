@@ -254,19 +254,13 @@ body {
         font-size: 16px; /* prevent iOS zoom on focus */
     }
 
-    /* help menu: stack command and description vertically */
+    /* help menu: more breathing room between rows */
     .help-row {
         font-size: 1em;
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 2px;
-        margin-top: 14px;
+        margin-top: 1em;
     }
     .help-cmd {
-        min-width: unset;
-    }
-    .help-desc {
-        padding-left: 1ch;
+        min-width: 20ch;
     }
 }
 
