@@ -73,7 +73,7 @@
 
     /* ── valid children per directory ── */
     var DIR_CHILDREN = {
-        'root':              ['users', 'music'],
+        'root':              ['users', 'music', 'merch'],
         'users':             ['adharsh', 'tayla', 'nick', 'andres'],
         'music':             ['segmentation', 'unreleased'],
         'music/segmentation': [],
@@ -88,6 +88,7 @@
     var DIR_PARENTS = {
         'users':              'root',
         'music':              'root',
+        'merch':              'root',
         'music/segmentation': 'music',
         'music/unreleased':   'music',
         'adharsh':            'users',
@@ -102,6 +103,7 @@
         if (currentDir === 'music')              return 'C:\\heel\\music';
         if (currentDir === 'music/segmentation') return 'C:\\heel\\music\\segmentation';
         if (currentDir === 'music/unreleased')   return 'C:\\heel\\music\\unreleased';
+        if (currentDir === 'merch')              return 'C:\\heel\\merch';
         return 'C:\\heel\\users\\' + currentDir;
     }
     function promptHTML() {
@@ -123,7 +125,8 @@
         if (currentDir === 'root') {
             lines.push({ t: 'text', v: 'C:\\heel\\' });
             lines.push({ t: 'dirlink', label: tc(0, false) + '[users]', cmd: 'cd users' });
-            lines.push({ t: 'dirlink', label: tc(0, true)  + '[music]', cmd: 'cd music' });
+            lines.push({ t: 'dirlink', label: tc(0, false) + '[music]', cmd: 'cd music' });
+            lines.push({ t: 'dirlink', label: tc(0, true)  + '[merch]', cmd: 'cd merch' });
             lines.push({ t: 'blank' });
             lines.push({ t: 'text', v: "click a folder or type 'cd &lt;dir&gt;'", dim: true });
 
@@ -174,6 +177,19 @@
                 lines.push({ t: 'text', v: tc(1, false) + '(empty)', dim: true });
             }
             lines.push({ t: 'dirlink', label: tc(1, true) + '[../]', cmd: 'cd ..' });
+
+        } else if (currentDir === 'merch') {
+            lines.push({ t: 'text', v: '[ STORE ]', center: true, spaced: true });
+            lines.push({ t: 'blank' });
+            lines.push({ t: 'link', label: 'obey_tshirt',           href: 'https://square.link/u/Fdrsrntv', value: '$20' });
+            lines.push({ t: 'text', v: 'segmentation' });
+            lines.push({ t: 'link', label: '<span class="tree-char">├── </span>cd',       href: 'https://square.link/u/PI2TUnAo', value: '$13' });
+            lines.push({ t: 'link', label: '<span class="tree-char">└── </span>cassette', href: 'https://square.link/u/XfokA7sz', value: '$11' });
+            lines.push({ t: 'link', label: 'bumper_sticker',        href: 'https://square.link/u/3hpALQsN', value: '$5'  });
+            lines.push({ t: 'blank' });
+            lines.push({ t: 'dirlink', label: '[../]', cmd: 'cd ..' });
+            lines.push({ t: 'blank' });
+            lines.push({ t: 'text', v: 'click an item to purchase', dim: true });
 
         } else {
             /* member directory */
@@ -352,6 +368,12 @@
             currentDir = 'andres'; updatePrompt();
             cdClear();
             return memberLines('andres', 'drums');
+        },
+
+        'cd merch': function () {
+            currentDir = 'merch'; updatePrompt();
+            cdClear();
+            return dirListing();
         },
 
         'cd music': function () {
