@@ -102,16 +102,16 @@
         { t: 'text', v: 'MEMORY TEST: 65536K ......... OK' },
         { t: 'blank' },
         { t: 'text', v: 'DETECTING STORAGE:' },
-        { t: 'detect', v: '&nbsp;&nbsp;C:\\ BITE.HDD', detectDelay: 1800, maxDots: 7 },
+        { t: 'detect', v: '&nbsp;&nbsp;C:\\ BITE.HDD', detectDelay: 1200, maxDots: 7 },
         { t: 'blank' },
         { t: 'text', v: 'LOADING DRIVERS:' },
-        { t: 'driver', label: 'DISTORTION.SYS', driverDelay: 1000, maxDots: 5 },
-        { t: 'driver', label: 'REVERB.DRV',     driverDelay: 800,  maxDots: 4 },
-        { t: 'driver', label: 'FEEDBACK.VXD',   driverDelay: 900,  maxDots: 4 },
+        { t: 'driver', label: 'DISTORTION.SYS', driverDelay: 700, maxDots: 5 },
+        { t: 'driver', label: 'REVERB.DRV',     driverDelay: 550, maxDots: 4 },
+        { t: 'driver', label: 'FEEDBACK.VXD',   driverDelay: 600, maxDots: 4 },
         { t: 'blank' },
         { t: 'text', v: 'AUTOEXEC.BAT: heel.exe /loud /nodisclaimer' },
         { t: 'blank' },
-        { t: 'progress', blocks: 20, duration: 3000 },
+        { t: 'progress', blocks: 20, duration: 2000 },
     ];
 
     var BOOT_LINES_POST = [
@@ -129,7 +129,7 @@
               '||=====|| ||===   ||===   ||     ',
               '||     || ||===== ||===== ||====='
           ],
-          charDelay: 45 },
+          charDelay: 30 },
     ];
 
     /* ─── command definitions ──────────────────────────────── */
@@ -220,34 +220,56 @@
             var goingToRoot = currentDir === 'users';
             currentDir = goingToRoot ? 'root' : 'users';
             updatePrompt();
+            var promptEl = output.lastChild;
             output.innerHTML = '';
+            if (promptEl) output.appendChild(promptEl);
             return goingToRoot ? [] : dirListing();
         },
 
-        'cd /':  function () { currentDir = 'root'; updatePrompt(); output.innerHTML = ''; return []; },
-        'cd \\': function () { currentDir = 'root'; updatePrompt(); output.innerHTML = ''; return []; },
+        'cd /':  function () {
+            var promptEl = output.lastChild;
+            currentDir = 'root'; updatePrompt(); output.innerHTML = '';
+            if (promptEl) output.appendChild(promptEl);
+            return [];
+        },
+        'cd \\': function () {
+            var promptEl = output.lastChild;
+            currentDir = 'root'; updatePrompt(); output.innerHTML = '';
+            if (promptEl) output.appendChild(promptEl);
+            return [];
+        },
 
         'cd users': function () {
             currentDir = 'users';
             updatePrompt();
+            var promptEl = output.lastChild;
             output.innerHTML = '';
+            if (promptEl) output.appendChild(promptEl);
             return dirListing();
         },
 
         'cd adharsh': function () {
-            currentDir = 'adharsh'; updatePrompt(); output.innerHTML = '';
+            currentDir = 'adharsh'; updatePrompt();
+            var promptEl = output.lastChild; output.innerHTML = '';
+            if (promptEl) output.appendChild(promptEl);
             return memberLines('adharsh', 'guitar / vocals');
         },
         'cd tayla': function () {
-            currentDir = 'tayla'; updatePrompt(); output.innerHTML = '';
+            currentDir = 'tayla'; updatePrompt();
+            var promptEl = output.lastChild; output.innerHTML = '';
+            if (promptEl) output.appendChild(promptEl);
             return memberLines('tayla', 'guitar / vocals');
         },
         'cd nick': function () {
-            currentDir = 'nick'; updatePrompt(); output.innerHTML = '';
+            currentDir = 'nick'; updatePrompt();
+            var promptEl = output.lastChild; output.innerHTML = '';
+            if (promptEl) output.appendChild(promptEl);
             return memberLines('nick', 'bass');
         },
         'cd andres': function () {
-            currentDir = 'andres'; updatePrompt(); output.innerHTML = '';
+            currentDir = 'andres'; updatePrompt();
+            var promptEl = output.lastChild; output.innerHTML = '';
+            if (promptEl) output.appendChild(promptEl);
             return memberLines('andres', 'drums');
         },
 
@@ -282,7 +304,7 @@
                 el.innerHTML = '<span class="help-cmd">' + line.cmd  + '</span>'
                              + '<span class="help-desc">' + line.desc + '</span>';
                 if (line.exec) el.addEventListener('click', (function (cmd) {
-                    return function () { execute(cmd); };
+                    return function () { typeAndExecute(cmd); };
                 }(line.exec)));
                 return el;
 
@@ -301,7 +323,7 @@
                              + '</span>'
                              + '<span class="help-desc">' + line.desc + '</span>';
                 if (line.exec) el.addEventListener('click', (function (cmd) {
-                    return function () { execute(cmd); };
+                    return function () { typeAndExecute(cmd); };
                 }(line.exec)));
                 return el;
 
@@ -371,7 +393,7 @@
                 el.className = 'dir-line';
                 el.innerHTML = line.label;
                 el.addEventListener('click', (function (cmd) {
-                    return function () { execute(cmd); };
+                    return function () { typeAndExecute(cmd); };
                 }(line.cmd)));
                 return el;
 
@@ -681,15 +703,35 @@
                         inputRow.style.visibility = 'visible';
                         input.focus();
                         if (window.innerWidth <= 500) {
-                            execute('help', true);
+                            execute('help');
                         }
-                    }, 1500);
-                }, 80, 40);
-            }, 80, 40);
-        }, 110, 45);
-    }, 110, 45);
+                    }, 1000);
+                }, 60, 30);
+            }, 60, 30);
+        }, 70, 30);
+    }, 70, 30);
 
     /* ─── helpers ──────────────────────────────────────────── */
+
+    function typeAndExecute(cmd) {
+        if (animating) return;
+        input.value = '';
+        input.focus();
+        var i = 0;
+        var iv = setInterval(function () {
+            if (i < cmd.length) {
+                input.value += cmd[i];
+                i++;
+            } else {
+                clearInterval(iv);
+                var val = input.value;
+                cmdHistory.unshift(val);
+                historyPos = -1;
+                input.value = '';
+                execute(val);
+            }
+        }, 40);
+    }
 
     function esc(s) {
         return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
