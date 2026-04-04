@@ -44,8 +44,9 @@
     var historyPos  = -1;
     var animating   = false;
     var currentDir  = 'root';
-    var currentAudio = null;
-    var audioPaused  = false;
+    var currentAudio       = null;
+    var audioPaused        = false;
+    var nowPlayingInterval = null;
 
     /* ── track registry — fill in file paths once audio/ is populated ── */
     var TRACKS = {
@@ -895,15 +896,36 @@
 
     /* ─── helpers ──────────────────────────────────────────── */
 
+    function fmtTime(s) {
+        if (!s || isNaN(s)) return '0:00';
+        var m = Math.floor(s / 60);
+        var sec = Math.floor(s % 60);
+        return m + ':' + (sec < 10 ? '0' : '') + sec;
+    }
+
     function updateNowPlaying(label) {
         var row = document.getElementById('nowplaying-row');
         if (!row) return;
-        if (label) {
-            row.style.display = 'block';
-            row.querySelector('.nowplaying-text').textContent = '\u266a  ' + label;
-        } else {
-            row.style.display = 'none';
+        if (nowPlayingInterval) { clearInterval(nowPlayingInterval); nowPlayingInterval = null; }
+        if (!label) { row.style.display = 'none'; return; }
+
+        row.style.display = 'block';
+        var span = row.querySelector('.nowplaying-text');
+
+        function refresh() {
+            if (!currentAudio) return;
+            var cur = currentAudio.currentTime || 0;
+            var dur = currentAudio.duration  || 0;
+            var pct = dur > 0 ? cur / dur : 0;
+            var filled = Math.round(pct * 20);
+            var bar = '[';
+            for (var i = 0; i < 20; i++) bar += i < filled ? '\u2588' : '\u2591';
+            bar += ']';
+            span.textContent = '\u266a  ' + label + '  ' + bar + '  ' + fmtTime(cur) + ' / ' + fmtTime(dur);
         }
+
+        refresh();
+        nowPlayingInterval = setInterval(refresh, 500);
     }
 
     function playTrack(query) {
