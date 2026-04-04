@@ -262,6 +262,10 @@ body {
     .help-cmd {
         min-width: 20ch;
     }
+    .help-desc {
+        text-align: right;
+        margin-left: auto;
+    }
 }
 
 /* ── jumpscare ── */
