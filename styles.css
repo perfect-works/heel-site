@@ -305,6 +305,14 @@ body {
         text-align: right;
         margin-left: auto;
     }
+
+    /* touch targets */
+    .dir-line,
+    .help-row.clickable,
+    .social-line {
+        padding-top: 5px;
+        padding-bottom: 5px;
+    }
 }
 
 /* ── jumpscare ── */

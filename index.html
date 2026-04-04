@@ -917,11 +917,16 @@
             var cur = currentAudio.currentTime || 0;
             var dur = currentAudio.duration  || 0;
             var pct = dur > 0 ? cur / dur : 0;
-            var filled = Math.round(pct * 20);
-            var bar = '[';
-            for (var i = 0; i < 20; i++) bar += i < filled ? '\u2588' : '\u2591';
-            bar += ']';
-            span.textContent = '\u266a  ' + label + '  ' + bar + '  ' + fmtTime(cur) + ' / ' + fmtTime(dur);
+            var text = '\u266a  ' + label + '  ';
+            if (window.innerWidth > 500) {
+                var filled = Math.round(pct * 20);
+                var bar = '[';
+                for (var i = 0; i < 20; i++) bar += i < filled ? '\u2588' : '\u2591';
+                bar += ']  ';
+                text += bar;
+            }
+            text += fmtTime(cur) + ' / ' + fmtTime(dur);
+            span.textContent = text;
         }
 
         refresh();
