@@ -237,38 +237,11 @@ body {
         padding: 12px 14px 16px;
         max-height: 85vh;
     }
-
-    /* scale all terminal text up to 16px */
-    .out-prompt,
-    .out-text,
-    .out-error,
-    .social-line,
-    .term-row,
-    .click-to-listen {
-        font-size: 1em;
-    }
-    .input-row {
-        font-size: 1em;
-    }
-    #cmd {
-        font-size: 16px; /* prevent iOS zoom on focus */
-    }
-
-    /* help menu: more breathing room between rows */
-    .help-row {
-        font-size: 1em;
-        margin-top: 1em;
-    }
     .help-cmd {
         min-width: 20ch;
     }
-    /* sub-rows use padding-top so border-left runs through the gap */
-    .help-sub {
-        margin-top: 0;
-        padding-top: 1em;
-        border-left: 1px solid rgba(51, 255, 51, 0.35);
-        padding-left: 10px;
-        margin-left: 4px;
+    #cmd {
+        font-size: 16px;
     }
 }
 
