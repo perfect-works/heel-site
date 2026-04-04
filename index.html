@@ -18,7 +18,10 @@
     </div>
     <div class="content" id="terminal">
         <div id="output"></div>
-        <div id="nowplaying-row"><span class="nowplaying-text"></span></div>
+        <div id="nowplaying-row">
+            <div class="nowplaying-label">NOW PLAYING</div>
+            <span class="nowplaying-text"></span>
+        </div>
         <div class="input-row" id="input-row">
             <span class="prompt-prefix">PS&nbsp;C:\heel&gt;&nbsp;</span><input
                 type="text" id="cmd"
@@ -922,7 +925,7 @@
             var bar = '[';
             for (var i = 0; i < blocks; i++) bar += i < filled ? '\u2588' : '\u2591';
             bar += ']';
-            var text = '\u266a  ' + label + '  ' + bar + '  ' + fmtTime(cur) + ' / ' + fmtTime(dur);
+            var text = 'NOW PLAYING  \u266a  ' + label + '  ' + bar + '  ' + fmtTime(cur) + ' / ' + fmtTime(dur);
             span.textContent = text;
         }
 

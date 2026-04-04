@@ -241,6 +241,17 @@ body {
     border-top: 1px dotted #1a661a;
     margin-top: 4px;
     letter-spacing: 0.5px;
+}
+
+.nowplaying-label {
+    opacity: 0.5;
+    font-size: 0.85em;
+    letter-spacing: 1px;
+    margin-bottom: 2px;
+}
+
+.nowplaying-text {
+    display: block;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
