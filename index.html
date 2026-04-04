@@ -144,7 +144,7 @@
                 { t: 'hrow', cmd: 'stream --heel',          desc: 'streaming links',          exec: 'stream --heel'          },
                 { t: 'hrow', cmd: 'watch --all',            desc: 'videos &amp; visualizers', exec: 'watch --all'           },
                 { t: 'hrow', cmd: 'cd &lt;dir&gt;',         desc: 'navigate'                                               },
-                { t: 'hrow', cmd: 'ls',                     desc: 'list directory',           exec: 'ls',  sub: true       },
+                { t: 'hrow', cmd: 'ls',                     desc: 'list directory',           exec: 'ls'                     },
                 { t: 'hrow-parent', cmd: 'fetch'                                                                             },
                 { t: 'hrow-sub',  flag: '--new-releases',   desc: 'new release info',         exec: 'fetch --new-releases',   last: false },
                 { t: 'hrow-sub',  flag: '--upcoming-shows', desc: 'show dates',               exec: 'fetch --upcoming-shows'              },
@@ -208,6 +208,7 @@
             return [
                 { t: 'blank' },
                 { t: 'text', v: promptPath() },
+                { t: 'text', v: "for a list of available directories, type 'ls'", dim: true },
                 { t: 'blank' },
             ];
         },
