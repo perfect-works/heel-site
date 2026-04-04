@@ -43,10 +43,11 @@
     var inputRow = document.getElementById('input-row');
     var terminal = document.getElementById('terminal');
 
-    var cmdHistory  = [];
-    var historyPos  = -1;
-    var animating   = false;
-    var currentDir  = 'root';
+    var cmdHistory       = [];
+    var historyPos       = -1;
+    var animating        = false;
+    var currentDir       = 'root';
+    var pendingSuggestion = null;
     var currentAudio       = null;
     var audioPaused        = false;
     var nowPlayingInterval = null;
@@ -304,76 +305,55 @@
             var parent = DIR_PARENTS[currentDir] || 'root';
             currentDir = parent;
             updatePrompt();
-            var promptEl = output.lastChild;
-            output.innerHTML = '';
-            if (promptEl) output.appendChild(promptEl);
+            cdClear();
             return parent === 'root' ? [] : dirListing();
         },
         'cd ../': function () { return COMMANDS['cd ..'](); },
 
-        'cd /':  function () {
-            var promptEl = output.lastChild;
-            currentDir = 'root'; updatePrompt(); output.innerHTML = '';
-            if (promptEl) output.appendChild(promptEl);
-            return [];
-        },
-        'cd \\': function () {
-            var promptEl = output.lastChild;
-            currentDir = 'root'; updatePrompt(); output.innerHTML = '';
-            if (promptEl) output.appendChild(promptEl);
-            return [];
-        },
+        'cd /':  function () { currentDir = 'root'; updatePrompt(); cdClear(); return []; },
+        'cd \\': function () { currentDir = 'root'; updatePrompt(); cdClear(); return []; },
 
         'cd users': function () {
             currentDir = 'users';
             updatePrompt();
-            var promptEl = output.lastChild;
-            output.innerHTML = '';
-            if (promptEl) output.appendChild(promptEl);
+            cdClear();
             return dirListing();
         },
 
         'cd adharsh': function () {
             currentDir = 'adharsh'; updatePrompt();
-            var promptEl = output.lastChild; output.innerHTML = '';
-            if (promptEl) output.appendChild(promptEl);
+            cdClear();
             return memberLines('adharsh', 'guitar / vocals');
         },
         'cd tayla': function () {
             currentDir = 'tayla'; updatePrompt();
-            var promptEl = output.lastChild; output.innerHTML = '';
-            if (promptEl) output.appendChild(promptEl);
+            cdClear();
             return memberLines('tayla', 'guitar / vocals');
         },
         'cd nick': function () {
             currentDir = 'nick'; updatePrompt();
-            var promptEl = output.lastChild; output.innerHTML = '';
-            if (promptEl) output.appendChild(promptEl);
+            cdClear();
             return memberLines('nick', 'bass');
         },
         'cd andres': function () {
             currentDir = 'andres'; updatePrompt();
-            var promptEl = output.lastChild; output.innerHTML = '';
-            if (promptEl) output.appendChild(promptEl);
+            cdClear();
             return memberLines('andres', 'drums');
         },
 
         'cd music': function () {
             currentDir = 'music'; updatePrompt();
-            var promptEl = output.lastChild; output.innerHTML = '';
-            if (promptEl) output.appendChild(promptEl);
+            cdClear();
             return dirListing();
         },
         'cd segmentation': function () {
             currentDir = 'music/segmentation'; updatePrompt();
-            var promptEl = output.lastChild; output.innerHTML = '';
-            if (promptEl) output.appendChild(promptEl);
+            cdClear();
             return dirListing();
         },
         'cd unreleased': function () {
             currentDir = 'music/unreleased'; updatePrompt();
-            var promptEl = output.lastChild; output.innerHTML = '';
-            if (promptEl) output.appendChild(promptEl);
+            cdClear();
             return dirListing();
         },
 
@@ -742,6 +722,15 @@
         var trimmed = raw.trim();
         var lower   = trimmed.toLowerCase();
 
+        /* confirm a pending suggestion */
+        if (pendingSuggestion && (lower === 'y' || lower === 'yes')) {
+            var cmd = pendingSuggestion;
+            pendingSuggestion = null;
+            execute(cmd);
+            return;
+        }
+        pendingSuggestion = null;
+
         if (!silent) {
             output.appendChild(render({ t: 'prompt', v: trimmed }));
             scrollBottom();
@@ -759,10 +748,31 @@
             output.appendChild(render({ t: 'blank' }));
             scrollBottom();
         } else {
-            output.appendChild(render({
-                t: 'error',
-                v: '\'' + esc(lower) + '\' is not recognized. type \'help\' for available commands.'
-            }));
+            /* fuzzy suggestion */
+            var keys = Object.keys(COMMANDS);
+            var best = null, bestDist = 3;
+            for (var ki = 0; ki < keys.length; ki++) {
+                var d = levenshtein(lower, keys[ki]);
+                if (d < bestDist) { bestDist = d; best = keys[ki]; }
+            }
+            if (best) {
+                pendingSuggestion = best;
+                output.appendChild(render({ t: 'error', v: '\'' + esc(lower) + '\' not recognized.' }));
+                var suggestEl = document.createElement('div');
+                suggestEl.className = 'out-text dim';
+                suggestEl.style.marginTop = '2px';
+                suggestEl.innerHTML = 'did you mean \'' + esc(best) + '\'? &nbsp;<span style="opacity:0.6">(type \'y\' to run)</span>';
+                suggestEl.style.cursor = 'pointer';
+                suggestEl.addEventListener('click', (function (c) {
+                    return function () { typeAndExecute(c); };
+                }(best)));
+                output.appendChild(suggestEl);
+            } else {
+                output.appendChild(render({
+                    t: 'error',
+                    v: '\'' + esc(lower) + '\' not recognized. type \'help\' for available commands.'
+                }));
+            }
             output.appendChild(render({ t: 'blank' }));
             scrollBottom();
         }
@@ -892,6 +902,26 @@
     }, 70, 30);
 
     /* ─── helpers ──────────────────────────────────────────── */
+
+    function levenshtein(a, b) {
+        var m = a.length, n = b.length, dp = [], i, j;
+        for (i = 0; i <= m; i++) {
+            dp[i] = [i];
+            for (j = 1; j <= n; j++) {
+                dp[i][j] = i === 0 ? j
+                    : a[i-1] === b[j-1] ? dp[i-1][j-1]
+                    : 1 + Math.min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]);
+            }
+        }
+        return dp[m][n];
+    }
+
+    function cdClear() {
+        if (window.innerWidth > 500) return;
+        var promptEl = output.lastChild;
+        output.innerHTML = '';
+        if (promptEl) output.appendChild(promptEl);
+    }
 
     function fmtTime(s) {
         if (!s || isNaN(s)) return '0:00';
