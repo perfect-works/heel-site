@@ -56,27 +56,37 @@
         document.querySelector('#input-row .prompt-prefix').innerHTML = promptHTML();
     }
 
+    function tc(indent, last) {
+        var pad = '';
+        for (var i = 0; i < indent; i++) pad += '&nbsp;&nbsp;&nbsp;&nbsp;';
+        return '<span class="tree-char">' + pad + (last ? '└── ' : '├── ') + '</span>';
+    }
+
     function dirListing() {
-        var lines = [
-            { t: 'blank' },
-            { t: 'text', v: 'Directory of ' + promptPath(), dim: true },
-            { t: 'blank' },
-        ];
+        var lines = [{ t: 'blank' }];
+
         if (currentDir === 'root') {
-            lines.push({ t: 'dirlink', label: '[Users]',   cmd: 'cd users'   });
+            lines.push({ t: 'text', v: 'C:\\' });
+            lines.push({ t: 'text', v: tc(0, true) + 'heel\\' });
+            lines.push({ t: 'dirlink', label: tc(1, true) + '[Users]', cmd: 'cd users' });
             lines.push({ t: 'blank' });
             lines.push({ t: 'text', v: "click a folder or type 'cd &lt;dir&gt;'", dim: true });
         } else if (currentDir === 'users') {
-            lines.push({ t: 'dirlink', label: '[adharsh]', cmd: 'cd adharsh' });
-            lines.push({ t: 'dirlink', label: '[tayla]',   cmd: 'cd tayla'   });
-            lines.push({ t: 'dirlink', label: '[nick]',    cmd: 'cd nick'    });
-            lines.push({ t: 'dirlink', label: '[andres]',  cmd: 'cd andres'  });
-            lines.push({ t: 'dirlink', label: '[../]',     cmd: 'cd ..'      });
+            lines.push({ t: 'text', v: 'C:\\heel\\' });
+            lines.push({ t: 'text', v: tc(0, true) + 'Users\\' });
+            lines.push({ t: 'dirlink', label: tc(1, false) + '[adharsh]', cmd: 'cd adharsh' });
+            lines.push({ t: 'dirlink', label: tc(1, false) + '[tayla]',   cmd: 'cd tayla'   });
+            lines.push({ t: 'dirlink', label: tc(1, false) + '[nick]',    cmd: 'cd nick'    });
+            lines.push({ t: 'dirlink', label: tc(1, false) + '[andres]',  cmd: 'cd andres'  });
+            lines.push({ t: 'dirlink', label: tc(1, true)  + '[../]',     cmd: 'cd ..'      });
             lines.push({ t: 'blank' });
             lines.push({ t: 'text', v: "click a folder or type 'cd &lt;dir&gt;'", dim: true });
         } else {
-            lines.push({ t: 'text', v: '(empty)', dim: true });
+            lines.push({ t: 'text', v: 'C:\\heel\\Users\\' });
+            lines.push({ t: 'text', v: tc(0, true) + currentDir + '\\' });
+            lines.push({ t: 'dirlink', label: tc(1, true) + '[../]', cmd: 'cd ..' });
         }
+
         lines.push({ t: 'blank' });
         return lines;
     }
