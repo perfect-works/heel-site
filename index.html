@@ -71,6 +71,19 @@
         ],
     };
 
+    /* ── valid children per directory ── */
+    var DIR_CHILDREN = {
+        'root':              ['users', 'music'],
+        'users':             ['adharsh', 'tayla', 'nick', 'andres'],
+        'music':             ['segmentation', 'unreleased'],
+        'music/segmentation': [],
+        'music/unreleased':   [],
+        'adharsh':            [],
+        'tayla':              [],
+        'nick':               [],
+        'andres':             [],
+    };
+
     /* ── parent directory map ── */
     var DIR_PARENTS = {
         'users':              'root',
@@ -737,6 +750,20 @@
         }
 
         if (!trimmed) return;
+
+        /* context-aware cd: validate against current directory */
+        if (lower.indexOf('cd ') === 0) {
+            var arg = lower.slice(3).trim();
+            if (arg !== '..' && arg !== '../' && arg !== '/' && arg !== '\\') {
+                var children = DIR_CHILDREN[currentDir] || [];
+                if (children.indexOf(arg) === -1) {
+                    output.appendChild(render({ t: 'error', v: '\'' + esc(arg) + '\': no such directory.' }));
+                    output.appendChild(render({ t: 'blank' }));
+                    scrollBottom();
+                    return;
+                }
+            }
+        }
 
         var fn = COMMANDS[lower];
         if (fn) {
