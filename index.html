@@ -109,7 +109,7 @@
         { t: 'driver', label: 'REVERB.DRV',     driverDelay: 550, maxDots: 4 },
         { t: 'driver', label: 'FEEDBACK.VXD',   driverDelay: 600, maxDots: 4 },
         { t: 'blank' },
-        { t: 'text', v: 'AUTOEXEC.BAT: heel.exe /loud /nodisclaimer' },
+        { t: 'text', v: 'AUTOEXEC.BAT: heel.exe' },
         { t: 'blank' },
         { t: 'progress', blocks: 20, duration: 2000 },
     ];
@@ -141,15 +141,15 @@
                 { t: 'blank' },
                 { t: 'text', v: 'USAGE:&nbsp;&nbsp;&#60;command&#62; [--flag]', dim: true },
                 { t: 'blank' },
-                { t: 'hrow', cmd: 'ls',                     desc: 'list directory',        exec: 'ls'                     },
-                { t: 'hrow', cmd: 'cd &lt;dir&gt;',         desc: 'navigate'                                               },
-                { t: 'hrow', cmd: 'stream --heel',          desc: 'streaming links',       exec: 'stream --heel'          },
+                { t: 'hrow', cmd: 'stream --heel',          desc: 'streaming links',          exec: 'stream --heel'          },
                 { t: 'hrow', cmd: 'watch --all',            desc: 'videos &amp; visualizers', exec: 'watch --all'           },
+                { t: 'hrow', cmd: 'cd &lt;dir&gt;',         desc: 'navigate'                                               },
+                { t: 'hrow', cmd: 'ls',                     desc: 'list directory',           exec: 'ls',  sub: true       },
                 { t: 'hrow-parent', cmd: 'fetch'                                                                             },
-                { t: 'hrow-sub',  flag: '--new-releases',   desc: 'new release info',      exec: 'fetch --new-releases',   last: false },
-                { t: 'hrow-sub',  flag: '--upcoming-shows', desc: 'show dates',            exec: 'fetch --upcoming-shows'              },
-                { t: 'hrow-sub',  flag: '--social',         desc: 'find us online',        exec: 'fetch --social',         last: true  },
-                { t: 'hrow', cmd: 'clear',                  desc: 'clear terminal',        exec: 'clear'                  },
+                { t: 'hrow-sub',  flag: '--new-releases',   desc: 'new release info',         exec: 'fetch --new-releases',   last: false },
+                { t: 'hrow-sub',  flag: '--upcoming-shows', desc: 'show dates',               exec: 'fetch --upcoming-shows'              },
+                { t: 'hrow-sub',  flag: '--social',         desc: 'find us online',           exec: 'fetch --social',         last: true  },
+                { t: 'hrow', cmd: 'clear',                  desc: 'clear terminal',           exec: 'clear'                  },
                 { t: 'blank' },
             ];
         },
@@ -302,6 +302,7 @@
             case 'hrow':
                 el = document.createElement('div');
                 el.className = 'help-row' + (line.exec ? ' clickable' : '');
+                if (line.sub) el.style.paddingLeft = '2ch';
                 el.innerHTML = '<span class="help-cmd">' + line.cmd  + '</span>'
                              + '<span class="help-desc">' + line.desc + '</span>';
                 if (line.exec) el.addEventListener('click', (function (cmd) {
