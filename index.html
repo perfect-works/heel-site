@@ -1067,7 +1067,10 @@
         }
     });
 
-    function focusInput() { if (window.innerWidth > 500) input.focus(); }
+    function focusInput() {
+        if (window.innerWidth > 500) input.focus();
+        else scrollBottom();
+    }
 
     /* click anywhere in the terminal to focus the input */
     terminal.addEventListener('click', function () { focusInput(); });
