@@ -109,6 +109,23 @@ Tab completion and arrow-key command history are supported. Typos auto-correct t
 - **New merch item**: add `{ id, href }` to `MERCH`, add a `link` descriptor in the merch `dirListing()` block.
 - **New track**: add `{ id, label, file }` to the appropriate `TRACKS` array.
 
+## Desktop UI
+
+The terminal window sits on a Win9x desktop with three additional UI layers:
+
+**Taskbar** (`#taskbar`) — pinned to the bottom. Contains:
+- Start button (`#start-btn`) — toggles the start menu
+- Task area (`#taskbar-tasks`) — one static button `heel.exe` (always active)
+- Tray (`#taskbar-tray`) — visitor count (from GoatCounter) + live clock
+
+**Start menu** (`#start-menu`) — appears above taskbar on Start click. Has a vertical "HEEL" sidebar and buttons that fire terminal commands directly (`data-cmd` attribute). Clicking outside dismisses it.
+
+**Desktop icons** (`#desktop-icons`) — rendered dynamically from a `DESKTOP_ICONS` array, each `{ label, icon, cmd }`. Clicking an icon runs its `cmd` in the terminal. Icons deselect on outside click.
+
+**Window dragging** — the `.window` element is draggable via its `.title-bar`. Constrained to viewport bounds. `body.dragging` class applied during drag to suppress text selection.
+
+**Visitor counter** — fetched from GoatCounter on page load, stored in `visitorCount`. Displayed in the tray and also surfaced during the boot sequence as a `detect` line.
+
 ## Boot sequence
 
 BIOS text → driver loading → progress bar → HEEL ASCII animation → `-- WELCOME --` → `[ press any key ]` gate → clear → prompt. On mobile, auto-runs `help` after the gate. Uses `localStorage` is not implemented — boot runs every visit.
