@@ -44,6 +44,35 @@
     </div>
 </div>
 
+<div id="vlc-window" class="window vlc-window">
+    <div class="title-bar" id="vlc-title-bar">
+        <span class="title-bar-text">HLC media player</span>
+        <div class="title-bar-controls">
+            <span class="wbtn" id="vlc-min-btn">_</span>
+            <span class="wbtn" id="vlc-close-btn">&#215;</span>
+        </div>
+    </div>
+    <div class="vlc-body">
+        <div class="vlc-video-area" id="vlc-video-area">
+            <div id="vlc-yt-player"></div>
+            <div id="vlc-no-media">no media loaded</div>
+            <div id="vlc-drag-overlay"></div>
+        </div>
+        <div class="vlc-controls">
+            <div class="vlc-progress-wrap" id="vlc-progress-wrap">
+                <div class="vlc-progress-fill" id="vlc-progress-fill"></div>
+            </div>
+            <div class="vlc-btn-row">
+                <button class="vlc-btn" id="vlc-rewind">&#9664;&#9664;</button>
+                <button class="vlc-btn vlc-btn-main" id="vlc-play-btn">&#9654;</button>
+                <button class="vlc-btn" id="vlc-stop-btn">&#9632;</button>
+                <button class="vlc-btn" id="vlc-ffwd">&#9654;&#9654;</button>
+                <span class="vlc-time"><span id="vlc-cur">0:00</span> / <span id="vlc-dur">0:00</span></span>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div id="player-window" class="window player-window">
     <div class="title-bar" id="player-title-bar">
         <span class="title-bar-text">weltamp.exe</span>
@@ -118,6 +147,15 @@
     var nowPlayingInterval = null;
     var printGeneration    = 0;
     var tabCycle = { partial: null, matches: [], index: -1 };
+
+    var ytApiReady        = false;
+    var ytPlayer          = null;
+    var vlcUpdateIv       = null;
+    var vlcPendingId      = null;
+    var vlcPendingTitle   = null;
+    var vlcMinimized      = false;
+    var vlcTaskBtn        = null;
+    var vlcWindowEl       = null; // assigned after DOM refs below
 
     var currentTrackLabel   = null;
     var playerTrackList     = [];
@@ -249,6 +287,22 @@
         'bumper_sticker':         'merch/stickers',
         'logo_sticker':           'merch/stickers',
         'obey_sticker':           'merch/stickers',
+    };
+
+    /* load YouTube IFrame API */
+    (function () {
+        var s = document.createElement('script');
+        s.src = 'https://www.youtube.com/iframe_api';
+        document.head.appendChild(s);
+    }());
+
+    window.onYouTubeIframeAPIReady = function () {
+        ytApiReady = true;
+        if (vlcPendingId) {
+            vlcCreatePlayer(vlcPendingId, vlcPendingTitle);
+            vlcPendingId    = null;
+            vlcPendingTitle = null;
+        }
     };
 
     function flashResolve(el, prefix, resolvedHTML, cb) {
@@ -383,7 +437,7 @@
         } else if (currentDir === 'videos') {
             lines.push({ t: 'text', v: 'C:\\heel\\videos\\' });
             for (var vi = 0; vi < VIDEOS.length; vi++) {
-                lines.push({ t: 'link', label: tc(0, false) + VIDEOS[vi].file, href: VIDEOS[vi].href });
+                lines.push({ t: 'link', label: tc(0, false) + VIDEOS[vi].file, href: VIDEOS[vi].href, vlcId: extractYouTubeId(VIDEOS[vi].href), vlcTitle: VIDEOS[vi].id });
             }
             lines.push({ t: 'dirlink', label: tc(0, true) + '[<- back]', cmd: 'cd ..' });
             lines.push({ t: 'blank' });
@@ -863,6 +917,14 @@
                 el.rel       = 'noopener';
                 el.innerHTML = '<span class="social-platform">' + line.label + '</span>'
                              + (line.value ? '<span class="social-dots"></span><span class="social-handle">' + line.value + '</span>' : '');
+                if (line.vlcId && window.innerWidth > 900) {
+                    (function (id, title) {
+                        el.addEventListener('click', function (e) {
+                            e.preventDefault();
+                            openVlc(id, title);
+                        });
+                    }(line.vlcId, line.vlcTitle));
+                }
                 return el;
 
             case 'nolink':
@@ -1450,6 +1512,9 @@
                 openPlayer();
                 return;
             }
+            if (dir === 'videos') {
+                openVlc(null, null);
+            }
             if (inputRow.style.visibility !== 'visible') return;
             currentDir = 'root';
             updatePrompt();
@@ -1751,6 +1816,7 @@
         playerWindowEl.style.left    = initialLeft + 'px';
         playerWindowEl.style.top     = initialTop  + 'px';
         playerWindowEl.style.display = 'block';
+        vlcBringToFront('player');
         playerMinimized = false;
         playerBuildPlaylist();
         if (playerUpdateIv) clearInterval(playerUpdateIv);
@@ -1868,15 +1934,174 @@
         document.body.classList.remove('dragging');
     });
 
+    /* ─── vlc media player ────────────────────────────────── */
+    vlcWindowEl = document.getElementById('vlc-window');
+
+    function extractYouTubeId(url) { // also called from dirListing — must stay hoisted
+        var m = url.match(/[?&]v=([^&]+)/);
+        if (m) return m[1];
+        m = url.match(/youtu\.be\/([^?&]+)/);
+        if (m) return m[1];
+        return null;
+    }
+
+    function vlcFmtTitle(id) {
+        return id.replace(/_/g, ' ');
+    }
+
+    function vlcOnStateChange(event) {
+        var playBtn = document.getElementById('vlc-play-btn');
+        if (event.data === YT.PlayerState.PLAYING) {
+            if (!vlcUpdateIv) vlcUpdateIv = setInterval(vlcTick, 500);
+            if (playBtn) playBtn.innerHTML = '&#9646;&#9646;';
+        } else {
+            if (vlcUpdateIv) { clearInterval(vlcUpdateIv); vlcUpdateIv = null; }
+            if (playBtn) playBtn.innerHTML = '&#9654;';
+            vlcTick();
+        }
+    }
+
+    function vlcTick() {
+        if (!ytPlayer || typeof ytPlayer.getCurrentTime !== 'function') return;
+        var cur = ytPlayer.getCurrentTime() || 0;
+        var dur = ytPlayer.getDuration()    || 0;
+        var pct = dur > 0 ? (cur / dur) * 100 : 0;
+        document.getElementById('vlc-progress-fill').style.width = pct + '%';
+        document.getElementById('vlc-cur').textContent = fmtTime(Math.floor(cur));
+        document.getElementById('vlc-dur').textContent = fmtTime(Math.floor(dur));
+    }
+
+    function vlcCreatePlayer(videoId, title) {
+        document.getElementById('vlc-no-media').style.display = 'none';
+        vlcWindowEl.querySelector('.title-bar-text').textContent = 'HLC —' + vlcFmtTitle(title || videoId);
+        ytPlayer = new YT.Player('vlc-yt-player', {
+            host:    'https://www.youtube-nocookie.com',
+            height: '100%',
+            width:  '100%',
+            videoId: videoId,
+            playerVars: { rel: 0, controls: 0 },
+            events: { onStateChange: vlcOnStateChange }
+        });
+    }
+
+    function vlcLoadVideo(videoId, title) {
+        document.getElementById('vlc-no-media').style.display = 'none';
+        vlcWindowEl.querySelector('.title-bar-text').textContent = 'HLC —' + vlcFmtTitle(title || videoId);
+        if (ytPlayer && typeof ytPlayer.loadVideoById === 'function') {
+            ytPlayer.loadVideoById(videoId);
+        } else if (ytApiReady) {
+            vlcCreatePlayer(videoId, title);
+        } else {
+            vlcPendingId    = videoId;
+            vlcPendingTitle = title;
+        }
+    }
+
+    function openVlc(videoId, title) {
+        vlcWindowEl.style.display = 'block';
+        vlcMinimized = false;
+        vlcWindowEl.classList.remove('minimized');
+        vlcBringToFront('vlc');
+        if (!vlcWindowEl.style.left) {
+            vlcWindowEl.style.left = '20px';
+            vlcWindowEl.style.top  = Math.min(Math.floor(window.innerHeight * 0.5), window.innerHeight - 370) + 'px';
+        }
+        if (!vlcTaskBtn) {
+            vlcTaskBtn = document.createElement('button');
+            vlcTaskBtn.className   = 'task-btn active';
+            vlcTaskBtn.textContent = 'HLC.exe';
+            vlcTaskBtn.addEventListener('click', function () {
+                vlcMinimized = !vlcMinimized;
+                vlcWindowEl.classList.toggle('minimized', vlcMinimized);
+                vlcTaskBtn.classList.toggle('active', !vlcMinimized);
+            });
+            document.getElementById('taskbar-tasks').appendChild(vlcTaskBtn);
+        } else {
+            vlcTaskBtn.classList.add('active');
+        }
+        if (videoId) vlcLoadVideo(videoId, title);
+    }
+
+    function closeVlc() {
+        vlcWindowEl.style.display = 'none';
+        if (vlcUpdateIv) { clearInterval(vlcUpdateIv); vlcUpdateIv = null; }
+        if (ytPlayer && typeof ytPlayer.stopVideo === 'function') ytPlayer.stopVideo();
+        if (vlcTaskBtn) { vlcTaskBtn.remove(); vlcTaskBtn = null; }
+    }
+
+    document.getElementById('vlc-close-btn').addEventListener('click', function (e) {
+        e.stopPropagation();
+        closeVlc();
+    });
+    document.getElementById('vlc-min-btn').addEventListener('click', function (e) {
+        e.stopPropagation();
+        vlcMinimized = !vlcMinimized;
+        vlcWindowEl.classList.toggle('minimized', vlcMinimized);
+        if (vlcTaskBtn) vlcTaskBtn.classList.toggle('active', !vlcMinimized);
+    });
+    document.getElementById('vlc-play-btn').addEventListener('click', function () {
+        if (!ytPlayer || typeof ytPlayer.getPlayerState !== 'function') return;
+        var state = ytPlayer.getPlayerState();
+        if (state === YT.PlayerState.PLAYING) {
+            ytPlayer.pauseVideo();
+        } else {
+            ytPlayer.playVideo();
+        }
+    });
+    document.getElementById('vlc-stop-btn').addEventListener('click', function () {
+        if (!ytPlayer || typeof ytPlayer.stopVideo !== 'function') return;
+        ytPlayer.stopVideo();
+        document.getElementById('vlc-progress-fill').style.width = '0%';
+        document.getElementById('vlc-cur').textContent = '0:00';
+    });
+    document.getElementById('vlc-rewind').addEventListener('click', function () {
+        if (!ytPlayer || typeof ytPlayer.getCurrentTime !== 'function') return;
+        ytPlayer.seekTo(Math.max(0, ytPlayer.getCurrentTime() - 10), true);
+        vlcTick();
+    });
+    document.getElementById('vlc-ffwd').addEventListener('click', function () {
+        if (!ytPlayer || typeof ytPlayer.getCurrentTime !== 'function') return;
+        ytPlayer.seekTo(ytPlayer.getCurrentTime() + 10, true);
+        vlcTick();
+    });
+    document.getElementById('vlc-progress-wrap').addEventListener('click', function (e) {
+        if (!ytPlayer || typeof ytPlayer.getDuration !== 'function') return;
+        var rect = this.getBoundingClientRect();
+        ytPlayer.seekTo((e.clientX - rect.left) / rect.width * ytPlayer.getDuration(), true);
+        vlcTick();
+    });
+
+    /* vlc dragging */
+    var vlcDragging = false, vlcDragOffX = 0, vlcDragOffY = 0;
+    document.getElementById('vlc-title-bar').addEventListener('mousedown', function (e) {
+        if (e.target.classList.contains('wbtn')) return;
+        if (vlcMinimized) return;
+        vlcDragging = true;
+        vlcDragOffX = e.clientX - vlcWindowEl.getBoundingClientRect().left;
+        vlcDragOffY = e.clientY - vlcWindowEl.getBoundingClientRect().top;
+        document.body.classList.add('dragging');
+        e.preventDefault();
+    });
+    document.addEventListener('mousemove', function (e) {
+        if (!vlcDragging) return;
+        vlcWindowEl.style.left = Math.max(0, Math.min(e.clientX - vlcDragOffX, window.innerWidth  - vlcWindowEl.offsetWidth))  + 'px';
+        vlcWindowEl.style.top  = Math.max(0, Math.min(e.clientY - vlcDragOffY, window.innerHeight - vlcWindowEl.offsetHeight)) + 'px';
+    });
+    document.addEventListener('mouseup', function () {
+        if (!vlcDragging) return;
+        vlcDragging = false;
+        document.body.classList.remove('dragging');
+    });
+
     /* ─── window focus / z-index ──────────────────────────── */
-    windowEl.addEventListener('mousedown', function () {
-        windowEl.style.zIndex       = '30';
-        playerWindowEl.style.zIndex = '20';
-    });
-    playerWindowEl.addEventListener('mousedown', function () {
-        playerWindowEl.style.zIndex = '30';
-        windowEl.style.zIndex       = '20';
-    });
+    function vlcBringToFront(focused) {
+        windowEl.style.zIndex       = focused === 'terminal' ? '30' : '20';
+        playerWindowEl.style.zIndex = focused === 'player'   ? '30' : '20';
+        vlcWindowEl.style.zIndex    = focused === 'vlc'      ? '30' : '20';
+    }
+    windowEl.addEventListener('mousedown',    function () { vlcBringToFront('terminal'); });
+    playerWindowEl.addEventListener('mousedown', function () { vlcBringToFront('player'); });
+    vlcWindowEl.addEventListener('mousedown',    function () { vlcBringToFront('vlc'); });
 
     function openMerch(query) {
         var normalized = query.replace(/\s+/g, '_');
