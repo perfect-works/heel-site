@@ -767,7 +767,7 @@
                             clearInterval(iv);
                             animating = false;
                             inputRow.style.visibility = 'visible';
-                            input.focus();
+                            focusInput();
                             scrollBottom();
                             if (done) done();
                         }
@@ -792,7 +792,7 @@
                                 clearInterval(iv);
                                 animating = false;
                                 inputRow.style.visibility = 'visible';
-                                input.focus();
+                                focusInput();
                                 scrollBottom();
                                 if (done) done();
                             }
@@ -820,7 +820,7 @@
                                     imgEl.style.clipPath = '';
                                     animating = false;
                                     inputRow.style.visibility = 'visible';
-                                    input.focus();
+                                    focusInput();
                                     scrollBottom();
                                     if (done) done();
                                 } else {
@@ -838,7 +838,7 @@
                                 el.textContent = '[image load error]';
                                 animating = false;
                                 inputRow.style.visibility = 'visible';
-                                input.focus();
+                                focusInput();
                                 if (done) done();
                             };
                         }
@@ -859,7 +859,7 @@
                         if (filled >= totalBlocks) {
                             animating = false;
                             inputRow.style.visibility = 'visible';
-                            input.focus();
+                            focusInput();
                             scrollBottom();
                             if (done) done();
                             return;
@@ -892,7 +892,7 @@
             setTimeout(function () {
                 animating = false;
                 inputRow.style.visibility = 'visible';
-                input.focus();
+                focusInput();
                 scrollBottom();
                 if (done) done();
             }, delay + 30);
@@ -1067,8 +1067,10 @@
         }
     });
 
+    function focusInput() { if (window.innerWidth > 500) input.focus(); }
+
     /* click anywhere in the terminal to focus the input */
-    terminal.addEventListener('click', function () { input.focus(); });
+    terminal.addEventListener('click', function () { focusInput(); });
 
     /* ─── jumpscare ────────────────────────────────────────── */
     var jumpscare     = document.getElementById('jumpscare');
@@ -1132,7 +1134,7 @@
                         handled = true;
                         output.innerHTML = '';
                         inputRow.style.visibility = 'visible';
-                        input.focus();
+                        focusInput();
                         if (mobile) {
                             execute('help');
                         } else {
@@ -1245,7 +1247,7 @@
     function typeAndExecute(cmd) {
         if (animating) return;
         input.value = '';
-        input.focus();
+        focusInput();
         var i = 0;
         var iv = setInterval(function () {
             if (i < cmd.length) {
