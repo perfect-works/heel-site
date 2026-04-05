@@ -47,17 +47,16 @@
     var historyPos       = -1;
     var animating        = false;
     var currentDir       = 'root';
-    var pendingSuggestion = null;
     var currentAudio       = null;
     var audioPaused        = false;
     var nowPlayingInterval = null;
 
     /* ── member registry ── */
     var MEMBERS = {
-        'adharsh': { instrument: 'guitar / vocals' },
-        'tayla':   { instrument: 'guitar / vocals' },
-        'nick':    { instrument: 'bass'             },
-        'andres':  { instrument: 'drums'            },
+        'adharsh': { instrument: 'guitar / vocals', profile: null,                                                                                                                                                                                                                                                                                                                      photo: 'images/users/adharsh/adharsh_rajavel.png',   photoName: 'adharsh_rajavel.png'   },
+        'tayla':   { instrument: 'guitar / vocals', profile: null,                                                                                                                                                                                                                                                                                                                      photo: 'images/users/tayla/tayla_diza.png',          photoName: 'tayla_diza.png'          },
+        'nick':    { instrument: 'bass',             profile: null,                                                                                                                                                                                                                                                                                                                      photo: 'images/users/nick/nicholas_dienstbier.png',  photoName: 'nicholas_dienstbier.png'  },
+        'andres':  { instrument: 'drums',            profile: '22 years old. spent his formative years in the california high desert before arriving in texas at the age of 14. just plays the drums. in the spaces between heel shows he spends his time playing overwatch and inbetween playing overwatch he spends his time studying ocean engineering.', gear: 'kit: tama imperialstar\nhi-hat: zildijan new beats\nride: paiste power ride\nsticks: promark hickory 5b', data: 'music: the beach boys, roly poly rag bear, bloodthirsty butchers\nmovies: love exposure\nbooks: childhood\'s end, dune\ngames: ocarina of time, xenogears\nfood: in n out burger\nplaces: seaside, bed', photo: 'images/users/andres/andres_gonzalez.png',    photoName: 'andres_gonzalez.png'    },
     };
 
     /* ── merch registry ── */
@@ -209,9 +208,13 @@
 
         } else if (MEMBERS[currentDir]) {
             /* member directory */
+            var mem = MEMBERS[currentDir];
             lines.push({ t: 'text', v: 'C:\\heel\\users\\' + currentDir + '\\' });
-            lines.push({ t: 'dirlink', label: tc(0, false) + 'instrument.txt', cmd: 'cat instrument.txt' });
-            lines.push({ t: 'dirlink', label: tc(0, true)  + '[<- back]',       cmd: 'cd ..'             });
+            lines.push({ t: 'dirlink', label: tc(0, false) + 'profile.txt',   cmd: 'cat profile.txt'  });
+            if (mem.gear)  lines.push({ t: 'dirlink', label: tc(0, false) + 'gear.txt',  cmd: 'cat gear.txt'  });
+            if (mem.data) lines.push({ t: 'dirlink', label: tc(0, false) + 'data.txt', cmd: 'cat data.txt' });
+            lines.push({ t: 'dirlink', label: tc(0, false) + 'photo.jpg', cmd: 'photo.jpg' });
+            lines.push({ t: 'dirlink', label: tc(0, true)  + '[<- back]', cmd: 'cd ..'     });
             lines.push({ t: 'blank' });
             lines.push({ t: 'text', v: "click a file or type 'cat &lt;file&gt;' to open", dim: true });
         }
@@ -221,15 +224,20 @@
     }
 
     function memberLines(name) {
-        return [
+        var mem = MEMBERS[name];
+        var lines = [
             { t: 'blank' },
             { t: 'text', v: 'C:\\heel\\users\\' + name + '\\' },
-            { t: 'dirlink', label: tc(0, false) + 'instrument.txt', cmd: 'cat instrument.txt' },
-            { t: 'dirlink', label: tc(0, true)  + '[<- back]',       cmd: 'cd ..'              },
-            { t: 'blank' },
-            { t: 'text', v: "click a file or type 'cat &lt;file&gt;' to open", dim: true },
-            { t: 'blank' },
+            { t: 'dirlink', label: tc(0, false) + 'profile.txt',   cmd: 'cat profile.txt'  },
         ];
+        if (mem.gear)  lines.push({ t: 'dirlink', label: tc(0, false) + 'gear.txt',  cmd: 'cat gear.txt'  });
+        if (mem.data) lines.push({ t: 'dirlink', label: tc(0, false) + 'data.txt', cmd: 'cat data.txt' });
+        lines.push({ t: 'dirlink', label: tc(0, false) + 'photo.jpg', cmd: 'photo.jpg' });
+        lines.push({ t: 'dirlink', label: tc(0, true)  + '[<- back]', cmd: 'cd ..'     });
+        lines.push({ t: 'blank' });
+        lines.push({ t: 'text', v: "click a file or type 'cat &lt;file&gt;' to open", dim: true });
+        lines.push({ t: 'blank' });
+        return lines;
     }
 
     /* ─── boot sequence ───────────────────────────────────── */
@@ -395,16 +403,39 @@
             return dirListing();
         },
 
-        'cat instrument.txt': function () {
+        'cat profile.txt': function () {
             var member = MEMBERS[currentDir];
             if (!member) return [{ t: 'blank' }, { t: 'error', v: 'no such file.' }, { t: 'blank' }];
-            return [
-                { t: 'blank' },
-                { t: 'nolink', label: 'instrument', value: member.instrument },
-                { t: 'blank' },
-            ];
+            var lines = [ { t: 'blank' } ];
+            if (member.profile) {
+                lines.push({ t: 'typewriter', v: member.profile });
+            } else {
+                lines.push({ t: 'nolink', label: 'instrument', value: member.instrument });
+            }
+            lines.push({ t: 'blank' });
+            return lines;
         },
-        'cat instrument': function () { return COMMANDS['cat instrument.txt'](); },
+        'cat profile':  function () { return COMMANDS['cat profile.txt'](); },
+        'profile.txt':  function () { return COMMANDS['cat profile.txt'](); },
+        'profile':      function () { return COMMANDS['cat profile.txt'](); },
+
+        'cat gear.txt': function () {
+            var member = MEMBERS[currentDir];
+            if (!member || !member.gear) return [{ t: 'blank' }, { t: 'error', v: 'no such file.' }, { t: 'blank' }];
+            return [{ t: 'blank' }, { t: 'typewriter', v: member.gear }, { t: 'blank' }];
+        },
+        'cat gear':  function () { return COMMANDS['cat gear.txt'](); },
+        'gear.txt':  function () { return COMMANDS['cat gear.txt'](); },
+        'gear':      function () { return COMMANDS['cat gear.txt'](); },
+
+        'cat data.txt': function () {
+            var member = MEMBERS[currentDir];
+            if (!member || !member.data) return [{ t: 'blank' }, { t: 'error', v: 'no such file.' }, { t: 'blank' }];
+            return [{ t: 'blank' }, { t: 'typewriter', v: member.data }, { t: 'blank' }];
+        },
+        'cat data':  function () { return COMMANDS['cat data.txt'](); },
+        'data.txt':  function () { return COMMANDS['cat data.txt'](); },
+        'data':      function () { return COMMANDS['cat data.txt'](); },
 
         'cat readme.txt': function () {
             return [
@@ -581,6 +612,30 @@
                 }
                 return el;
 
+            case 'typewriter':
+                el = document.createElement('div');
+                el.className = 'out-text';
+                el.style.paddingLeft  = '2px';
+                el.style.whiteSpace   = 'pre-wrap';
+                return el;
+
+            case 'img-reveal':
+                el = document.createElement('div');
+                el.style.marginTop = '8px';
+                el.style.overflow  = 'hidden';
+                el.style.maxWidth  = '100%';
+                var imgEl = document.createElement('img');
+                imgEl.src   = line.src;
+                imgEl.alt   = '';
+                imgEl.style.display             = 'block';
+                imgEl.style.width               = '150px';
+                imgEl.style.imageRendering      = 'pixelated';
+                imgEl.style.border              = '1px solid #33ff33';
+                imgEl.style.clipPath    = 'inset(0 0 100% 0)';
+                el.appendChild(imgEl);
+                el._imgEl = imgEl;
+                return el;
+
             case 'dirlink':
                 el = document.createElement('div');
                 el.className = 'dir-line';
@@ -621,9 +676,9 @@
         animating  = true;
         inputRow.style.visibility = 'hidden';
 
-        /* progress and ascii-anim fire done themselves */
+        /* progress, ascii-anim, img-reveal, and typewriter fire done themselves */
         var selfManagesDone = lines.some(function (l) {
-            return l.t === 'progress' || l.t === 'ascii-anim';
+            return l.t === 'progress' || l.t === 'ascii-anim' || l.t === 'img-reveal' || l.t === 'typewriter';
         });
 
         var delay = 0;
@@ -712,6 +767,77 @@
                 }, delay);
                 /* ascii-anim calls done itself — don't add to delay */
 
+            } else if (line.t === 'typewriter') {
+                (function (line, delay) {
+                    setTimeout(function () {
+                        var el = render(line);
+                        if (!el) return;
+                        output.appendChild(el);
+                        scrollBottom();
+                        var text = line.v;
+                        var i = 0;
+                        var iv = setInterval(function () {
+                            el.textContent += text[i];
+                            i++;
+                            scrollBottom();
+                            if (i >= text.length) {
+                                clearInterval(iv);
+                                animating = false;
+                                inputRow.style.visibility = 'visible';
+                                input.focus();
+                                scrollBottom();
+                                if (done) done();
+                            }
+                        }, line.charDelay || 14);
+                    }, delay);
+                }(line, delay));
+
+            } else if (line.t === 'img-reveal') {
+                (function (line, delay) {
+                    setTimeout(function () {
+                        var el = render(line);
+                        if (!el) return;
+                        output.appendChild(el);
+                        scrollBottom();
+
+                        var imgEl = el._imgEl;
+
+                        function startReveal() {
+                            var pct = 100;
+                            var iv = setInterval(function () {
+                                pct -= 2;
+                                if (pct <= 0) {
+                                    pct = 0;
+                                    clearInterval(iv);
+                                    imgEl.style.clipPath = '';
+                                    animating = false;
+                                    inputRow.style.visibility = 'visible';
+                                    input.focus();
+                                    scrollBottom();
+                                    if (done) done();
+                                } else {
+                                    imgEl.style.clipPath = 'inset(0 0 ' + pct + '% 0)';
+                                }
+                                scrollBottom();
+                            }, 30);
+                        }
+
+                        if (imgEl.complete && imgEl.naturalWidth) {
+                            startReveal();
+                        } else {
+                            imgEl.onload  = startReveal;
+                            imgEl.onerror = function () {
+                                el.textContent = '[image load error]';
+                                animating = false;
+                                inputRow.style.visibility = 'visible';
+                                input.focus();
+                                if (done) done();
+                            };
+                        }
+                    }, delay);
+                }(line, delay));
+                /* img-reveal calls done itself — don't add to delay */
+
             } else if (line.t === 'progress') {
                 var totalBlocks = line.blocks   || 20;
                 var msPerBlock  = (line.duration || 3000) / totalBlocks;
@@ -771,15 +897,6 @@
         var trimmed = raw.trim();
         var lower   = trimmed.toLowerCase();
 
-        /* confirm a pending suggestion */
-        if (pendingSuggestion && (lower === 'y' || lower === 'yes')) {
-            var cmd = pendingSuggestion;
-            pendingSuggestion = null;
-            execute(cmd);
-            return;
-        }
-        pendingSuggestion = null;
-
         if (!silent) {
             output.appendChild(render({ t: 'prompt', v: trimmed }));
             scrollBottom();
@@ -787,10 +904,34 @@
 
         if (!trimmed) return;
 
-        /* context-aware cd: validate against current directory */
+        /* context-aware cd: validate and handle single- and multi-segment paths */
         if (lower.indexOf('cd ') === 0) {
             var arg = lower.slice(3).trim();
             if (arg !== '..' && arg !== '../' && arg !== '/' && arg !== '\\' && arg !== 'back') {
+                if (arg.indexOf('/') !== -1) {
+                    /* multi-segment path: cd users/adharsh, cd music/segmentation, etc. */
+                    var segs = arg.split('/').filter(function (s) { return s !== ''; });
+                    var walkDir = currentDir;
+                    var valid = true;
+                    for (var si = 0; si < segs.length; si++) {
+                        var seg = segs[si];
+                        var ch = DIR_CHILDREN[walkDir] || [];
+                        if (ch.indexOf(seg) === -1) { valid = false; break; }
+                        /* resolve child dir key: composite (e.g. music/segmentation) or simple */
+                        var composite = (walkDir === 'root' ? '' : walkDir + '/') + seg;
+                        walkDir = (DIR_CHILDREN[composite] !== undefined) ? composite : seg;
+                    }
+                    if (!valid) {
+                        output.appendChild(render({ t: 'error', v: '\'' + esc(arg) + '\': no such path.' }));
+                        output.appendChild(render({ t: 'blank' }));
+                        scrollBottom();
+                        return;
+                    }
+                    var destFn = COMMANDS['cd ' + segs[segs.length - 1]];
+                    if (destFn) printLines(destFn());
+                    return;
+                }
+                /* single segment */
                 var children = DIR_CHILDREN[currentDir] || [];
                 if (children.indexOf(arg) === -1) {
                     output.appendChild(render({ t: 'error', v: '\'' + esc(arg) + '\': no such directory.' }));
@@ -799,6 +940,13 @@
                     return;
                 }
             }
+        }
+
+        /* photo commands: photo / photo.jpg / cat photo.jpg / open photo.jpg etc. */
+        var PHOTO_CMDS = ['photo', 'photo.jpg', 'cat photo.jpg', 'cat photo', 'open photo.jpg', 'open photo'];
+        if (MEMBERS[currentDir] && PHOTO_CMDS.indexOf(lower) !== -1) {
+            printLines([{ t: 'blank' }, { t: 'img-reveal', src: MEMBERS[currentDir].photo }, { t: 'blank' }]);
+            return;
         }
 
         var fn = COMMANDS[lower];
@@ -814,7 +962,7 @@
             output.appendChild(render({ t: 'blank' }));
             scrollBottom();
         } else {
-            /* fuzzy suggestion */
+            /* fuzzy match — auto-run closest command */
             var keys = Object.keys(COMMANDS);
             var best = null, bestDist = 3;
             for (var ki = 0; ki < keys.length; ki++) {
@@ -822,25 +970,21 @@
                 if (d < bestDist) { bestDist = d; best = keys[ki]; }
             }
             if (best) {
-                pendingSuggestion = best;
-                output.appendChild(render({ t: 'error', v: '\'' + esc(lower) + '\' not recognized.' }));
-                var suggestEl = document.createElement('div');
-                suggestEl.className = 'out-text dim';
-                suggestEl.style.marginTop = '2px';
-                suggestEl.innerHTML = 'did you mean \'' + esc(best) + '\'? &nbsp;<span style="opacity:0.6">(type \'y\' to run)</span>';
-                suggestEl.style.cursor = 'pointer';
-                suggestEl.addEventListener('click', (function (c) {
-                    return function () { typeAndExecute(c); };
-                }(best)));
-                output.appendChild(suggestEl);
+                var hintEl = document.createElement('div');
+                hintEl.className = 'out-text dim';
+                hintEl.style.marginTop = '2px';
+                hintEl.innerHTML = '\u2192 \'' + esc(best) + '\'';
+                output.appendChild(hintEl);
+                scrollBottom();
+                execute(best, true);
             } else {
                 output.appendChild(render({
                     t: 'error',
                     v: '\'' + esc(lower) + '\' not recognized. type \'help\' for available commands.'
                 }));
+                output.appendChild(render({ t: 'blank' }));
+                scrollBottom();
             }
-            output.appendChild(render({ t: 'blank' }));
-            scrollBottom();
         }
     }
 
@@ -889,16 +1033,27 @@
                     var allTracks = TRACKS.segmentation.concat(TRACKS.unreleased);
                     var tm = allTracks.filter(function (t) { return t.id.indexOf(tq) === 0; });
                     if (tm.length === 1) input.value = 'play ' + tm[0].id;
-                } else if (partial.indexOf('buy ') === 0 || partial.indexOf('cat ') === 0) {
+                } else if (partial.indexOf('open ') === 0) {
+                    if (MEMBERS[currentDir] && 'photo.jpg'.indexOf(partial.slice(5)) === 0)
+                        input.value = 'open photo.jpg';
+                } else if (partial.indexOf('cat ') === 0 || partial.indexOf('buy ') === 0) {
                     var prefix = partial.slice(0, 4);
                     var mq = partial.slice(4);
-                    var mm = MERCH.filter(function (m) { return m.id.indexOf(mq) === 0; });
-                    if (mm.length === 1) input.value = prefix + mm[0].id;
+                    if (MEMBERS[currentDir] && 'photo.jpg'.indexOf(mq) === 0) {
+                        input.value = prefix + 'photo.jpg';
+                    } else {
+                        var mm = MERCH.filter(function (m) { return m.id.indexOf(mq) === 0; });
+                        if (mm.length === 1) input.value = prefix + mm[0].id;
+                    }
                 } else {
-                    var matches = Object.keys(COMMANDS).filter(function (k) {
-                        return k.indexOf(partial) === 0;
-                    });
-                    if (matches.length === 1) input.value = matches[0];
+                    if (MEMBERS[currentDir] && 'photo.jpg'.indexOf(partial) === 0) {
+                        input.value = 'photo.jpg';
+                    } else {
+                        var matches = Object.keys(COMMANDS).filter(function (k) {
+                            return k.indexOf(partial) === 0;
+                        });
+                        if (matches.length === 1) input.value = matches[0];
+                    }
                 }
                 break;
         }
@@ -953,20 +1108,38 @@
                     { t: 'blank' },
                     { t: 'text', v: '-- WELCOME --', center: true, dim: true },
                 ], function () {
-                    animating = true;
-                    inputRow.style.visibility = 'hidden';
-                    setTimeout(function () {
+                    var mobile = window.innerWidth <= 500;
+                    var gateEl = document.createElement('div');
+                    gateEl.className = 'out-text dim';
+                    gateEl.style.textAlign = 'center';
+                    gateEl.style.marginTop = '1em';
+                    gateEl.innerHTML = mobile ? '[ tap to continue ]' : '[ press any key ]';
+                    output.appendChild(gateEl);
+                    scrollBottom();
+                    animating = false;
+
+                    var handled = false;
+                    function proceed() {
+                        if (handled) return;
+                        handled = true;
                         output.innerHTML = '';
-                        animating = false;
                         inputRow.style.visibility = 'visible';
                         input.focus();
-                        if (window.innerWidth <= 500) {
+                        if (mobile) {
                             execute('help');
                         } else {
                             var hint = render({ t: 'text', v: "type 'help' for a list of commands", dim: true });
                             if (hint) output.appendChild(hint);
                         }
-                    }, 1000);
+                    }
+
+                    document.addEventListener('keydown', function onKey(e) {
+                        if (e.key === 'Control' || e.key === 'Alt' || e.key === 'Shift' || e.key === 'Meta') return;
+                        e.preventDefault();
+                        document.removeEventListener('keydown', onKey);
+                        proceed();
+                    });
+                    terminal.addEventListener('touchstart', proceed, { once: true });
                 }, 60, 30);
             }, 60, 30);
         }, 70, 30);
@@ -1024,9 +1197,10 @@
     }
 
     function openMerch(query) {
+        var normalized = query.replace(/\s+/g, '_');
         var found = null;
         for (var i = 0; i < MERCH.length; i++) {
-            if (MERCH[i].id === query) { found = MERCH[i]; break; }
+            if (MERCH[i].id === normalized || MERCH[i].id === query) { found = MERCH[i]; break; }
         }
         if (!found) {
             return [{ t: 'blank' }, { t: 'error', v: '\'' + esc(query) + '\': item not found.' }, { t: 'blank' }];
