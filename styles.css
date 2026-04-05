@@ -610,7 +610,7 @@ body {
     /* help menu: more breathing room between rows */
     .help-row {
         font-size: 1em;
-        margin-top: 1em;
+        margin-top: 5px;
     }
     .help-cmd {
         min-width: 20ch;
