@@ -1367,8 +1367,13 @@
             var vcmd = lower.indexOf('cat ') === 0 ? lower.slice(4).trim() : lower;
             for (var vci = 0; vci < VIDEOS.length; vci++) {
                 if (VIDEOS[vci].file === vcmd || VIDEOS[vci].id === vcmd) {
-                    window.open(VIDEOS[vci].href, '_blank');
-                    printLines([{ t: 'blank' }, { t: 'text', v: 'opening ' + VIDEOS[vci].file + '...', dim: true }, { t: 'blank' }]);
+                    if (window.innerWidth > 900) {
+                        openVlc(extractYouTubeId(VIDEOS[vci].href), VIDEOS[vci].id);
+                        printLines([{ t: 'blank' }, { t: 'text', v: 'opening ' + VIDEOS[vci].file + '...', dim: true }, { t: 'blank' }]);
+                    } else {
+                        window.open(VIDEOS[vci].href, '_blank');
+                        printLines([{ t: 'blank' }, { t: 'text', v: 'opening ' + VIDEOS[vci].file + '...', dim: true }, { t: 'blank' }]);
+                    }
                     return;
                 }
             }
@@ -1980,7 +1985,7 @@
             height: '100%',
             width:  '100%',
             videoId: videoId,
-            playerVars: { rel: 0, controls: 0 },
+            playerVars: { rel: 0, controls: 0, autoplay: 1 },
             events: { onStateChange: vlcOnStateChange }
         });
     }
