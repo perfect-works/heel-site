@@ -540,15 +540,18 @@
             { t: 'text', v: pathLabel },
             { t: 'dirlink', label: tc(0, false) + 'photo.jpg', cmd: 'photo.jpg' },
         ];
+        if (mitem && mitem.photo) {
+            lines.push({ t: 'blank' });
+            lines.push({ t: 'img-reveal', src: mitem.photo, width: '80%' });
+        }
         if (mitem && mitem.price) {
+            lines.push({ t: 'blank' });
             lines.push({ t: 'dirlink', label: tc(0, false) + 'price.txt <span style="opacity:0.55">\u2014 ' + mitem.price + '</span>', cmd: 'cat price.txt' });
         }
         if (mitem && mitem.href) {
             lines.push({ t: 'dirlink', label: tc(0, false) + 'buy.exe', cmd: 'buy.exe' });
         }
         lines.push({ t: 'dirlink', label: tc(0, true) + '[<- back]', cmd: 'cd ..' });
-        lines.push({ t: 'blank' });
-        lines.push({ t: 'text', v: "click a file to open, or 'buy.exe' to purchase", dim: true });
         lines.push({ t: 'blank' });
         return lines;
     }
@@ -1376,6 +1379,16 @@
                     }
                     return;
                 }
+            }
+        }
+
+        /* merch folder shortcut: typing a folder name cds into it */
+        var isMerchContext = currentDir === 'merch' || currentDir === 'merch/segmentation' || currentDir === 'merch/stickers';
+        if (isMerchContext) {
+            var children = DIR_CHILDREN[currentDir] || [];
+            if (children.indexOf(lower) !== -1) {
+                printLines(COMMANDS['cd ' + lower]());
+                return;
             }
         }
 
