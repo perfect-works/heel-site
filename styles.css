@@ -371,6 +371,10 @@ body.maximized .content {
     flex: 1;
 }
 
+body.maximized #desktop-icons {
+    display: none;
+}
+
 /* ── taskbar ── */
 body {
     padding-bottom: 52px;
@@ -479,6 +483,12 @@ body {
     border-right: 1px solid #ffffff;
     border-bottom: 1px solid #ffffff;
     flex-shrink: 0;
+}
+
+#visitor-count-tray {
+    font-family: 'Courier New', monospace;
+    font-size: 0.72em;
+    color: #000000;
 }
 
 #taskbar-clock {

@@ -44,17 +44,6 @@
     </div>
 </div>
 
-<div id="np-popup">
-    <div class="np-title-bar">
-        <span class="np-title-text">heel.exe</span>
-        <span class="wbtn" id="np-close">&#215;</span>
-    </div>
-    <div class="np-body">
-        <div class="np-label">NOW PLAYING</div>
-        <div id="np-track"></div>
-    </div>
-</div>
-
 <div id="taskbar">
     <button id="start-btn">
         <span class="win-logo"><i></i><i></i><i></i><i></i></span>
@@ -64,7 +53,7 @@
         <button id="task-heel" class="task-btn active">heel.exe</button>
     </div>
     <div id="taskbar-tray">
-        <span id="visitor-count-tray" style="display:none">· </span><span id="taskbar-clock"></span>
+        <span id="visitor-count-tray"></span><span id="taskbar-clock"></span>
     </div>
 </div>
 
@@ -80,7 +69,6 @@
             var tray = document.getElementById('visitor-count-tray');
             if (tray && visitorCount) {
                 tray.textContent = visitorCount + ' visits  · ';
-                tray.style.display = 'inline';
             }
         })
         .catch(function () { visitorCount = null; });
@@ -461,7 +449,6 @@
         { t: 'blank' },
         { t: 'text', v: 'CPU: Intel(R) Pentium(R) II @ 300 MHz' },
         { t: 'text', v: 'MEMORY TEST: 65536K ......... OK' },
-        { t: 'detect', v: 'VISITOR COUNT', detectDelay: 900, maxDots: 7, result: function () { return '[' + (visitorCount || '---') + ']'; } },
         { t: 'blank' },
         { t: 'text', v: 'DETECTING STORAGE:' },
         { t: 'detect', v: '&nbsp;&nbsp;C:\\ BITE.HDD', detectDelay: 1200, maxDots: 7 },
@@ -470,6 +457,8 @@
         { t: 'driver', label: 'DISTORTION.SYS', driverDelay: 700, maxDots: 5 },
         { t: 'driver', label: 'REVERB.DRV',     driverDelay: 550, maxDots: 4 },
         { t: 'driver', label: 'FEEDBACK.VXD',   driverDelay: 600, maxDots: 4 },
+        { t: 'blank' },
+        { t: 'detect', v: 'VISITOR COUNT', detectDelay: 900, maxDots: 7, result: function () { return '[' + (visitorCount || '---') + ']'; } },
         { t: 'blank' },
         { t: 'text', v: 'AUTOEXEC.BAT: heel.exe' },
         { t: 'blank' },
@@ -1521,7 +1510,6 @@
         if (!row) return;
         if (nowPlayingInterval) { clearInterval(nowPlayingInterval); nowPlayingInterval = null; }
         if (!label) { row.style.display = 'none'; return; }
-        showNowPlayingPopup(label);
 
         row.style.display = 'block';
         var span = row.querySelector('.nowplaying-text');
@@ -1616,34 +1604,7 @@
         terminal.scrollTop = terminal.scrollHeight;
     }
 
-    /* ─── now-playing popup ───────────────────────────────── */
-    var npPopup      = document.getElementById('np-popup');
-    var npTrackEl    = document.getElementById('np-track');
-    var npDismissTimer = null;
-
-    document.getElementById('np-close').addEventListener('click', function () {
-        dismissNpPopup();
-    });
-
-    function showNowPlayingPopup(label) {
-        if (npDismissTimer) clearTimeout(npDismissTimer);
-        npTrackEl.textContent = label;
-        npPopup.classList.remove('np-hiding');
-        npPopup.classList.add('np-visible');
-        npDismissTimer = setTimeout(function () {
-            dismissNpPopup();
-        }, 4000);
-    }
-
-    function dismissNpPopup() {
-        if (npDismissTimer) { clearTimeout(npDismissTimer); npDismissTimer = null; }
-        npPopup.classList.add('np-hiding');
-        setTimeout(function () {
-            npPopup.classList.remove('np-visible', 'np-hiding');
-        }, 300);
-    }
-
-    /* ─── taskbar ─────────────────────────────────────────── */
+/* ─── taskbar ─────────────────────────────────────────── */
     function setMinimized(val) {
         windowEl.classList.toggle('minimized', val);
         document.getElementById('task-heel').classList.toggle('active', !val);
