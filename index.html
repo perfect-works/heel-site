@@ -44,6 +44,17 @@
     </div>
 </div>
 
+<div id="np-popup">
+    <div class="np-title-bar">
+        <span class="np-title-text">heel.exe</span>
+        <span class="wbtn" id="np-close">&#215;</span>
+    </div>
+    <div class="np-body">
+        <div class="np-label">NOW PLAYING</div>
+        <div id="np-track"></div>
+    </div>
+</div>
+
 <div id="taskbar">
     <button id="start-btn">
         <span class="win-logo"><i></i><i></i><i></i><i></i></span>
@@ -62,7 +73,7 @@
 
     /* ─── visitor count (GoatCounter) ─────────────────────── */
     var visitorCount = null;
-    fetch('https://heel.goatcounter.com/counter/%2F.json')
+    fetch('https://heel.goatcounter.com/counter/%2Fheel-site%2F.json')
         .then(function (r) { return r.json(); })
         .then(function (data) {
             visitorCount = data.count || null;
@@ -1510,6 +1521,7 @@
         if (!row) return;
         if (nowPlayingInterval) { clearInterval(nowPlayingInterval); nowPlayingInterval = null; }
         if (!label) { row.style.display = 'none'; return; }
+        showNowPlayingPopup(label);
 
         row.style.display = 'block';
         var span = row.querySelector('.nowplaying-text');
@@ -1602,6 +1614,33 @@
 
     function scrollBottom() {
         terminal.scrollTop = terminal.scrollHeight;
+    }
+
+    /* ─── now-playing popup ───────────────────────────────── */
+    var npPopup      = document.getElementById('np-popup');
+    var npTrackEl    = document.getElementById('np-track');
+    var npDismissTimer = null;
+
+    document.getElementById('np-close').addEventListener('click', function () {
+        dismissNpPopup();
+    });
+
+    function showNowPlayingPopup(label) {
+        if (npDismissTimer) clearTimeout(npDismissTimer);
+        npTrackEl.textContent = label;
+        npPopup.classList.remove('np-hiding');
+        npPopup.classList.add('np-visible');
+        npDismissTimer = setTimeout(function () {
+            dismissNpPopup();
+        }, 4000);
+    }
+
+    function dismissNpPopup() {
+        if (npDismissTimer) { clearTimeout(npDismissTimer); npDismissTimer = null; }
+        npPopup.classList.add('np-hiding');
+        setTimeout(function () {
+            npPopup.classList.remove('np-visible', 'np-hiding');
+        }, 300);
     }
 
     /* ─── taskbar ─────────────────────────────────────────── */
