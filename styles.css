@@ -393,6 +393,74 @@ body.dragging {
     background: radial-gradient(circle at 38% 32%, #ffffff, #d4d4d4 40%, #a8a8a8);
 }
 
+.vlc-icon {
+    width: 30px;
+    height: 42px;
+    position: relative;
+    margin: 0 auto;
+    margin-top: 2px;
+}
+
+/* cone body with two white stripes */
+.vlc-icon::before {
+    content: '';
+    position: absolute;
+    bottom: 6px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 26px;
+    height: 32px;
+    background: linear-gradient(
+        to top,
+        #ff7b00 0%,
+        #ff7b00 18%,
+        #ffffff 18%,
+        #ffffff 27%,
+        #ff7b00 27%,
+        #ff7b00 47%,
+        #ffffff 47%,
+        #ffffff 56%,
+        #ff7b00 56%,
+        #ff7b00 100%
+    );
+    clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
+}
+
+/* base plate */
+.vlc-icon::after {
+    content: '';
+    position: absolute;
+    bottom: 2px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 34px;
+    height: 5px;
+    background: #ff7b00;
+    border-radius: 1px;
+}
+
+.desktop-icon:hover .vlc-icon::before,
+.desktop-icon.active .vlc-icon::before {
+    background: linear-gradient(
+        to top,
+        #ffaa44 0%,
+        #ffaa44 18%,
+        #ffffff 18%,
+        #ffffff 27%,
+        #ffaa44 27%,
+        #ffaa44 47%,
+        #ffffff 47%,
+        #ffffff 56%,
+        #ffaa44 56%,
+        #ffaa44 100%
+    );
+}
+
+.desktop-icon:hover .vlc-icon::after,
+.desktop-icon.active .vlc-icon::after {
+    background: #ffaa44;
+}
+
 .desktop-icon.active span {
     color: #ffff99;
 }

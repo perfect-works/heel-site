@@ -1511,7 +1511,7 @@
         var icon = document.createElement('div');
         icon.className = 'desktop-icon';
         icon.dataset.dir = dir;
-        var iconDiv = dir === 'music' ? 'app-icon' : 'folder-icon';
+        var iconDiv = dir === 'music' ? 'app-icon' : dir === 'videos' ? 'vlc-icon' : 'folder-icon';
         icon.innerHTML = '<div class="' + iconDiv + '"></div><span>' + dir + '</span>';
         icon.addEventListener('dblclick', function () {
             if (dir === 'music') {
