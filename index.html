@@ -51,6 +51,7 @@
     var audioPaused        = false;
     var nowPlayingInterval = null;
     var printGeneration    = 0;
+    var tabCycle = { partial: null, matches: [], index: -1 };
 
     /* ── member registry ── */
     var MEMBERS = {
@@ -66,8 +67,8 @@
         { id: 'segmentation_cd',       href: 'https://square.link/u/PI2TUnAo', price: '$13', photo: 'images/merch/cd.jpg'               },
         { id: 'segmentation_cassette', href: 'https://square.link/u/XfokA7sz', price: '$11', photo: 'images/merch/cassette.jpg'         },
         { id: 'bumper_sticker',        href: 'https://square.link/u/3hpALQsN', price: '$5',  photo: 'images/merch/bumpersticker.png'    },
-        { id: 'logo_sticker',          href: null,                              price: null,  photo: 'images/merch/logo_sticker.png'    },
-        { id: 'obey_sticker',          href: null,                              price: null,  photo: 'images/merch/obey_sticker.png'    },
+        { id: 'logo_sticker',          href: 'https://square.link/u/VWqXQGUy',  price: '$1',  photo: 'images/merch/logo_sticker.png'    },
+        { id: 'obey_sticker',          href: 'https://square.link/u/VWqXQGUy',  price: '$1',  photo: 'images/merch/obey_sticker.png'    },
     ];
 
     function getMerchItem(id) {
@@ -259,7 +260,6 @@
         } else if (currentDir === 'music/unreleased') {
             lines.push({ t: 'text', v: 'C:\\heel\\music\\' });
             lines.push({ t: 'text', v: tc(0, true) + 'unreleased\\' });
-            lines.push({ t: 'dirlink', label: tc(1, false) + 'README.txt',      cmd: 'cat readme.txt'    });
             lines.push({ t: 'dirlink', label: tc(1, false) + '[sgmt_demos]',    cmd: 'cd sgmt_demos'     });
             lines.push({ t: 'dirlink', label: tc(1, false) + '[heel2_demos]',   cmd: 'cd heel2_demos'    });
             lines.push({ t: 'dirlink', label: tc(1, true)  + '[<- back]',       cmd: 'cd ..'             });
@@ -626,13 +626,6 @@
         'data':      function () { return COMMANDS['cat data.txt'](); },
 
         'cat readme.txt': function () {
-            if (currentDir === 'music/unreleased') {
-                return [
-                    { t: 'blank' },
-                    { t: 'typewriter', v: 'rough demos, loosely organized. treat them as such.' },
-                    { t: 'blank' },
-                ];
-            }
             return [
                 { t: 'blank' },
                 { t: 'text', v: 'MUSIC PLAYER', spaced: true },
@@ -1231,6 +1224,7 @@
 
     input.addEventListener('keydown', function (e) {
         if (animating && e.key !== 'Tab') { e.preventDefault(); return; }
+        if (e.key !== 'Tab') { tabCycle.partial = null; tabCycle.matches = []; tabCycle.index = -1; }
 
         switch (e.key) {
 
@@ -1270,8 +1264,15 @@
                 if (partial.indexOf('play ') === 0) {
                     var tq = partial.slice(5);
                     var allTracks = TRACKS.segmentation.concat(TRACKS.sgmt_demos).concat(TRACKS.heel2_demos);
-                    var tm = allTracks.filter(function (t) { return t.id.indexOf(tq) === 0; });
-                    if (tm.length === 1) input.value = 'play ' + tm[0].id;
+                    if (tabCycle.partial !== tq) {
+                        tabCycle.partial = tq;
+                        tabCycle.matches = allTracks.filter(function (t) { return t.id.indexOf(tq) === 0; });
+                        tabCycle.index   = -1;
+                    }
+                    if (tabCycle.matches.length) {
+                        tabCycle.index = (tabCycle.index + 1) % tabCycle.matches.length;
+                        input.value = 'play ' + tabCycle.matches[tabCycle.index].id;
+                    }
                 } else if (partial.indexOf('open ') === 0) {
                     if (MEMBERS[currentDir] && 'photo.jpg'.indexOf(partial.slice(5)) === 0)
                         input.value = 'open photo.jpg';
