@@ -21,6 +21,7 @@ body {
     width: 100%;
     max-width: 640px;
     position: relative;
+    z-index: 20;
     background: #c0c0c0;
     border-top: 2px solid #ffffff;
     border-left: 2px solid #ffffff;
@@ -34,6 +35,20 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    cursor: grab;
+}
+
+body.maximized .title-bar,
+body.dragging .title-bar {
+    cursor: default;
+}
+
+body.dragging .title-bar {
+    cursor: grabbing;
+}
+
+body.dragging {
+    user-select: none;
 }
 
 .title-bar-text {

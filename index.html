@@ -1404,7 +1404,53 @@
     document.getElementById('max-btn').addEventListener('click', function () {
         var maximized = document.body.classList.toggle('maximized');
         this.innerHTML = maximized ? '&#10064;' : '&#9633;';
+        if (maximized) {
+            windowEl.style.position = '';
+            windowEl.style.left     = '';
+            windowEl.style.top      = '';
+        }
         scrollBottom();
+    });
+
+    /* ─── window dragging ─────────────────────────────────── */
+    var isDragging  = false;
+    var dragOffsetX = 0;
+    var dragOffsetY = 0;
+
+    document.querySelector('.title-bar').addEventListener('mousedown', function (e) {
+        if (e.target.classList.contains('wbtn')) return;
+        if (windowEl.classList.contains('minimized')) return;
+        if (document.body.classList.contains('maximized')) return;
+
+        // Snap to fixed positioning at current visual position
+        if (!windowEl.style.left) {
+            var rect = windowEl.getBoundingClientRect();
+            windowEl.style.position = 'fixed';
+            windowEl.style.left     = rect.left + 'px';
+            windowEl.style.top      = rect.top  + 'px';
+        }
+
+        isDragging  = true;
+        dragOffsetX = e.clientX - windowEl.getBoundingClientRect().left;
+        dragOffsetY = e.clientY - windowEl.getBoundingClientRect().top;
+        document.body.classList.add('dragging');
+        e.preventDefault();
+    });
+
+    document.addEventListener('mousemove', function (e) {
+        if (!isDragging) return;
+        var x = e.clientX - dragOffsetX;
+        var y = e.clientY - dragOffsetY;
+        x = Math.max(0, Math.min(x, window.innerWidth  - windowEl.offsetWidth));
+        y = Math.max(0, Math.min(y, window.innerHeight - windowEl.offsetHeight));
+        windowEl.style.left = x + 'px';
+        windowEl.style.top  = y + 'px';
+    });
+
+    document.addEventListener('mouseup', function () {
+        if (!isDragging) return;
+        isDragging = false;
+        document.body.classList.remove('dragging');
     });
 
     /* ─── jumpscare ────────────────────────────────────────── */
