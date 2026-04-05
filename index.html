@@ -139,9 +139,10 @@
 
         if (currentDir === 'root') {
             lines.push({ t: 'text', v: 'C:\\heel\\' });
-            lines.push({ t: 'dirlink', label: tc(0, false) + '[users]', cmd: 'cd users' });
-            lines.push({ t: 'dirlink', label: tc(0, false) + '[music]', cmd: 'cd music' });
-            lines.push({ t: 'dirlink', label: tc(0, true)  + '[merch]', cmd: 'cd merch' });
+            lines.push({ t: 'dirlink', label: tc(0, false) + 'about.txt', cmd: 'cat about.txt' });
+            lines.push({ t: 'dirlink', label: tc(0, false) + '[users]',   cmd: 'cd users'      });
+            lines.push({ t: 'dirlink', label: tc(0, false) + '[music]',   cmd: 'cd music'      });
+            lines.push({ t: 'dirlink', label: tc(0, true)  + '[merch]',   cmd: 'cd merch'      });
             lines.push({ t: 'blank' });
             lines.push({ t: 'text', v: "click a folder or type 'cd &lt;dir&gt;'", dim: true });
 
@@ -402,6 +403,13 @@
             cdClear();
             return dirListing();
         },
+
+        'cat about.txt': function () {
+            return [{ t: 'blank' }, { t: 'typewriter', v: 'heel is a four-piece from college station, texas.' }, { t: 'blank' }];
+        },
+        'cat about': function () { return COMMANDS['cat about.txt'](); },
+        'about.txt': function () { return COMMANDS['cat about.txt'](); },
+        'about':     function () { return COMMANDS['cat about.txt'](); },
 
         'cat profile.txt': function () {
             var member = MEMBERS[currentDir];
