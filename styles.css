@@ -693,7 +693,7 @@ body.dragging #vlc-drag-overlay {
     display: none;
 }
 
-body.maximized .window:not(.player-window).minimized {
+body.maximized .window:not(.player-window):not(.vlc-window).minimized {
     height: auto;
     flex: none;
     align-self: flex-start;
@@ -705,7 +705,7 @@ body.maximized {
     align-items: stretch;
 }
 
-body.maximized .window:not(.player-window) {
+body.maximized .window:not(.player-window):not(.vlc-window) {
     max-width: none;
     display: flex;
     flex-direction: column;

@@ -917,9 +917,10 @@
                 el.rel       = 'noopener';
                 el.innerHTML = '<span class="social-platform">' + line.label + '</span>'
                              + (line.value ? '<span class="social-dots"></span><span class="social-handle">' + line.value + '</span>' : '');
-                if (line.vlcId && window.innerWidth > 900) {
+                if (line.vlcId) {
                     (function (id, title) {
                         el.addEventListener('click', function (e) {
+                            if (window.innerWidth <= 900) return;
                             e.preventDefault();
                             openVlc(id, title);
                         });
