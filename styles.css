@@ -20,6 +20,7 @@ body {
 .window {
     width: 100%;
     max-width: 640px;
+    position: relative;
     background: #c0c0c0;
     border-top: 2px solid #ffffff;
     border-left: 2px solid #ffffff;
@@ -277,10 +278,287 @@ body {
     padding: 0;
 }
 
+/* ── desktop icons ── */
+#desktop-icons {
+    position: fixed;
+    left: 16px;
+    top: 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.desktop-icon {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+    width: 56px;
+    text-align: center;
+    user-select: none;
+    padding: 3px;
+}
+
+.folder-icon {
+    width: 32px;
+    height: 26px;
+    background: #d4a832;
+    border: 1px solid #7a5c00;
+    position: relative;
+    margin: 0 auto;
+    margin-top: 6px;
+}
+
+.folder-icon::before {
+    content: '';
+    position: absolute;
+    top: -6px;
+    left: -1px;
+    width: 12px;
+    height: 7px;
+    background: #d4a832;
+    border: 1px solid #7a5c00;
+    border-bottom: none;
+    border-radius: 2px 3px 0 0;
+}
+
+.desktop-icon span {
+    font-family: 'Courier New', monospace;
+    font-size: 0.68em;
+    color: #ffffff;
+    text-shadow: 1px 1px 1px #000, -1px -1px 1px #000, 1px -1px 1px #000, -1px 1px 1px #000;
+    word-break: break-all;
+    line-height: 1.2;
+}
+
+.desktop-icon:hover .folder-icon,
+.desktop-icon.active .folder-icon {
+    background: #f0c84a;
+    border-color: #5a4000;
+}
+
+.desktop-icon.active span {
+    color: #ffff99;
+}
+
+@media (max-width: 900px) {
+    #desktop-icons { display: none; }
+}
+
+/* ── minimized ── */
+.window.minimized .content,
+.window.minimized #jumpscare {
+    display: none;
+}
+
+/* ── maximized ── */
+body.maximized {
+    padding: 0;
+    align-items: stretch;
+}
+
+body.maximized .window {
+    max-width: none;
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 36px);
+    height: calc(100dvh - 36px);
+}
+
+body.maximized .content {
+    height: auto;
+    flex: 1;
+}
+
+/* ── taskbar ── */
+body {
+    padding-bottom: 52px;
+}
+
+#taskbar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 36px;
+    background: #c0c0c0;
+    border-top: 2px solid #ffffff;
+    display: flex;
+    align-items: center;
+    padding: 2px 4px;
+    gap: 4px;
+    z-index: 50;
+    user-select: none;
+}
+
+#start-btn {
+    height: 28px;
+    padding: 0 8px 0 6px;
+    background: #c0c0c0;
+    border-top: 1px solid #ffffff;
+    border-left: 1px solid #ffffff;
+    border-right: 1px solid #404040;
+    border-bottom: 1px solid #404040;
+    font-family: 'Courier New', monospace;
+    font-size: 0.75em;
+    font-weight: bold;
+    cursor: default;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    flex-shrink: 0;
+}
+
+#start-btn.open,
+#start-btn:active {
+    border-top: 1px solid #404040;
+    border-left: 1px solid #404040;
+    border-right: 1px solid #ffffff;
+    border-bottom: 1px solid #ffffff;
+}
+
+.win-logo {
+    display: inline-grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    width: 14px;
+    height: 13px;
+    gap: 1px;
+    flex-shrink: 0;
+}
+
+.win-logo i { display: block; }
+.win-logo i:nth-child(1) { background: #e8001c; }
+.win-logo i:nth-child(2) { background: #00b050; }
+.win-logo i:nth-child(3) { background: #0050d0; }
+.win-logo i:nth-child(4) { background: #ffb900; }
+
+#taskbar-tasks {
+    flex: 1;
+    display: flex;
+    gap: 2px;
+    align-items: center;
+    overflow: hidden;
+}
+
+.task-btn {
+    height: 28px;
+    min-width: 80px;
+    max-width: 160px;
+    padding: 0 8px;
+    background: #c0c0c0;
+    border-top: 1px solid #ffffff;
+    border-left: 1px solid #ffffff;
+    border-right: 1px solid #404040;
+    border-bottom: 1px solid #404040;
+    font-family: 'Courier New', monospace;
+    font-size: 0.72em;
+    cursor: default;
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.task-btn.active {
+    border-top: 1px solid #808080;
+    border-left: 1px solid #808080;
+    border-right: 1px solid #dfdfdf;
+    border-bottom: 1px solid #dfdfdf;
+    background: #b8b8b8;
+}
+
+#taskbar-tray {
+    height: 28px;
+    display: flex;
+    align-items: center;
+    padding: 0 8px;
+    border-top: 1px solid #808080;
+    border-left: 1px solid #808080;
+    border-right: 1px solid #ffffff;
+    border-bottom: 1px solid #ffffff;
+    flex-shrink: 0;
+}
+
+#taskbar-clock {
+    font-family: 'Courier New', monospace;
+    font-size: 0.72em;
+    color: #000000;
+}
+
+/* ── start menu ── */
+#start-menu {
+    display: none;
+    position: fixed;
+    bottom: 36px;
+    left: 0;
+    width: 200px;
+    min-height: 240px;
+    background: #c0c0c0;
+    border-top: 2px solid #ffffff;
+    border-left: 2px solid #ffffff;
+    border-right: 2px solid #404040;
+    border-bottom: 2px solid #404040;
+    z-index: 60;
+    overflow: hidden;
+}
+
+#start-menu.open {
+    display: flex;
+}
+
+.start-sidebar {
+    width: 22px;
+    flex-shrink: 0;
+    background: linear-gradient(to top, #000080, #1084d0);
+    color: #ffffff;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    font-family: 'Courier New', monospace;
+    font-size: 0.85em;
+    font-weight: bold;
+    letter-spacing: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-bottom: 6px;
+}
+
+.start-items {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 2px 0;
+}
+
+.start-item {
+    background: transparent;
+    border: none;
+    outline: none;
+    font-family: 'Courier New', monospace;
+    font-size: 0.8em;
+    text-align: left;
+    padding: 5px 12px;
+    cursor: default;
+    color: #000000;
+    white-space: nowrap;
+}
+
+.start-item:hover {
+    background: #000080;
+    color: #ffffff;
+}
+
+@media (max-width: 500px) {
+    #taskbar,
+    #start-menu { display: none !important; }
+}
+
 /* ── mobile ── */
 @media (max-width: 500px) {
     body {
-        padding: 16px 8px;
+        padding: 16px 8px 16px;
     }
     .content {
         padding: 12px 14px 16px;
@@ -327,22 +605,12 @@ body {
 }
 
 /* ── jumpscare ── */
-#flash-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: #ffffff;
-    z-index: 9998;
-    pointer-events: none;
-    opacity: 0;
-}
 
 #jumpscare {
     display: none;
-    position: fixed;
+    position: absolute;
     inset: 0;
-    z-index: 9999;
-    cursor: pointer;
+    z-index: 10;
     background: #000;
 }
 
@@ -354,12 +622,6 @@ body {
 
 #jumpscare.active {
     display: block;
-    animation: expandFromTopRight 0.5s cubic-bezier(0.2, 0, 0.4, 1) forwards;
-}
-
-@keyframes expandFromTopRight {
-    from { clip-path: inset(0 0 100% 100%); }
-    to   { clip-path: inset(0 0 0% 0%);     }
 }
 
 /* ── line appear animation ── */

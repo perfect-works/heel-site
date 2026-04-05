@@ -5,14 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HEEL</title>
     <link rel="stylesheet" href="styles.css">
+<script data-goatcounter="https://heel.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </head>
 <body>
 <div class="window">
+    <div id="jumpscare"><img src="images/RussianSleepExperimentGuy.png" alt=""></div>
     <div class="title-bar">
         <span class="title-bar-text">heel.exe</span>
         <div class="title-bar-controls">
-            <span class="wbtn">_</span>
-            <span class="wbtn">&#9633;</span>
+            <span class="wbtn" id="min-btn">_</span>
+            <span class="wbtn" id="max-btn">&#9633;</span>
             <span class="wbtn" id="close-btn">&#215;</span>
         </div>
     </div>
@@ -30,18 +32,53 @@
     </div>
 </div>
 
-<div id="flash-overlay"></div>
-<div id="jumpscare">
-    <img src="images/RussianSleepExperimentGuy.png" alt="">
+<div id="desktop-icons"></div>
+
+<div id="start-menu">
+    <div class="start-sidebar">HEEL</div>
+    <div class="start-items">
+        <button class="start-item" data-cmd="fetch --new-releases">New Releases</button>
+        <button class="start-item" data-cmd="fetch --upcoming-shows">Upcoming Shows</button>
+        <button class="start-item" data-cmd="fetch --streaming">Streaming</button>
+        <button class="start-item" data-cmd="fetch --socials">Socials</button>
+    </div>
+</div>
+
+<div id="taskbar">
+    <button id="start-btn">
+        <span class="win-logo"><i></i><i></i><i></i><i></i></span>
+        Start
+    </button>
+    <div id="taskbar-tasks">
+        <button id="task-heel" class="task-btn active">heel.exe</button>
+    </div>
+    <div id="taskbar-tray">
+        <span id="visitor-count-tray" style="display:none">· </span><span id="taskbar-clock"></span>
+    </div>
 </div>
 
 <script>
 (function () {
 
-    var output   = document.getElementById('output');
-    var input    = document.getElementById('cmd');
-    var inputRow = document.getElementById('input-row');
-    var terminal = document.getElementById('terminal');
+    /* ─── visitor count (GoatCounter) ─────────────────────── */
+    var visitorCount = null;
+    fetch('https://heel.goatcounter.com/counter/%2F.json')
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+            visitorCount = data.count || null;
+            var tray = document.getElementById('visitor-count-tray');
+            if (tray && visitorCount) {
+                tray.textContent = visitorCount + ' visits  · ';
+                tray.style.display = 'inline';
+            }
+        })
+        .catch(function () { visitorCount = null; });
+
+    var output         = document.getElementById('output');
+    var input          = document.getElementById('cmd');
+    var inputRow       = document.getElementById('input-row');
+    var terminal       = document.getElementById('terminal');
+    var desktopIconsEl = document.getElementById('desktop-icons');
 
     var cmdHistory       = [];
     var historyPos       = -1;
@@ -203,6 +240,7 @@
     }
     function updatePrompt() {
         document.querySelector('#input-row .prompt-prefix').innerHTML = promptHTML();
+        if (desktopIconsEl) updateDesktopIcons();
     }
 
     function tc(indent, last) {
@@ -293,7 +331,7 @@
             }
             lines.push({ t: 'dirlink', label: tc(0, true) + '[<- back]', cmd: 'cd ..' });
             lines.push({ t: 'blank' });
-            lines.push({ t: 'text', v: "click a file or type its name to watch", dim: true });
+            lines.push({ t: 'text', v: "click a file or type 'cat <file>' to watch", dim: true });
 
         } else if (currentDir === 'merch') {
             lines.push({ t: 'text', v: 'C:\\heel\\merch\\' });
@@ -412,6 +450,7 @@
         { t: 'blank' },
         { t: 'text', v: 'CPU: Intel(R) Pentium(R) II @ 300 MHz' },
         { t: 'text', v: 'MEMORY TEST: 65536K ......... OK' },
+        { t: 'detect', v: 'VISITOR COUNT', detectDelay: 900, maxDots: 7, result: function () { return '[' + (visitorCount || '---') + ']'; } },
         { t: 'blank' },
         { t: 'text', v: 'DETECTING STORAGE:' },
         { t: 'detect', v: '&nbsp;&nbsp;C:\\ BITE.HDD', detectDelay: 1200, maxDots: 7 },
@@ -470,7 +509,7 @@
             return [
                 { t: 'blank' },
                 { t: 'text', v: 'SEGMENTATION \u2014 OUT NOW', center: true, spaced: true },
-                { t: 'album' },
+                { t: 'img-reveal', src: 'images/album_front_cover.png', width: '120px', pixelated: false, center: true, href: 'https://heelband.bandcamp.com/album/segmentation', caption: '> CLICK HERE TO LISTEN <' },
                 { t: 'blank' },
             ];
         },
@@ -818,15 +857,35 @@
                 el.style.marginTop = '8px';
                 el.style.overflow  = 'hidden';
                 el.style.maxWidth  = '100%';
+                if (line.center) { el.style.textAlign = 'center'; }
                 var imgEl = document.createElement('img');
                 imgEl.src   = line.src;
                 imgEl.alt   = '';
-                imgEl.style.display             = 'block';
+                imgEl.style.display             = line.center ? 'inline-block' : 'block';
                 imgEl.style.width               = line.width || '150px';
                 if (line.pixelated !== false) imgEl.style.imageRendering = 'pixelated';
                 imgEl.style.border              = '1px solid #33ff33';
                 imgEl.style.clipPath    = 'inset(0 0 100% 0)';
-                el.appendChild(imgEl);
+                if (line.href) {
+                    var imgWrap = document.createElement('a');
+                    imgWrap.href   = line.href;
+                    imgWrap.target = '_blank';
+                    imgWrap.rel    = 'noopener';
+                    imgWrap.style.display     = 'block';
+                    imgWrap.style.width       = 'fit-content';
+                    if (line.center) { imgWrap.style.margin = '0 auto'; }
+                    imgWrap.style.textDecoration = 'none';
+                    imgWrap.appendChild(imgEl);
+                    if (line.caption) {
+                        var capEl = document.createElement('span');
+                        capEl.className   = 'click-to-listen';
+                        capEl.textContent = line.caption;
+                        imgWrap.appendChild(capEl);
+                    }
+                    el.appendChild(imgWrap);
+                } else {
+                    el.appendChild(imgEl);
+                }
                 el._imgEl = imgEl;
                 return el;
 
@@ -911,7 +970,8 @@
                         } else {
                             var fs = '';
                             for (var fd = 0; fd < maxDots; fd++) fs += '.';
-                            el.innerHTML = line.v + ' ' + fs + ' [FOUND]';
+                            var resultText = typeof line.result === 'function' ? line.result() : (line.result || '[FOUND]');
+                            el.innerHTML = line.v + ' ' + fs + ' ' + resultText;
                             scrollBottom();
                             clearInterval(iv);
                         }
@@ -1307,36 +1367,57 @@
     /* click anywhere in the terminal to focus the input */
     terminal.addEventListener('click', function () { focusInput(); });
 
+    /* ─── desktop icons ───────────────────────────────────── */
+    var desktopDirs = ['users', 'music', 'merch', 'videos'];
+    desktopDirs.forEach(function (dir) {
+        var icon = document.createElement('div');
+        icon.className = 'desktop-icon';
+        icon.dataset.dir = dir;
+        icon.innerHTML = '<div class="folder-icon"></div><span>' + dir + '</span>';
+        icon.addEventListener('dblclick', function () {
+            if (inputRow.style.visibility !== 'visible') return;
+            currentDir = 'root';
+            updatePrompt();
+            execute('cd ' + dir);
+        });
+        desktopIconsEl.appendChild(icon);
+    });
+
+    function updateDesktopIcons() {
+        var active = currentDir === 'root' ? null : currentDir.split('/')[0];
+        desktopIconsEl.querySelectorAll('.desktop-icon').forEach(function (el) {
+            el.classList.toggle('active', el.dataset.dir === active);
+        });
+    }
+
+    /* ─── minimize toggle ─────────────────────────────────── */
+    var windowEl = document.querySelector('.window');
+    document.getElementById('min-btn').addEventListener('click', function (e) {
+        e.stopPropagation();
+        toggleMinimize();
+    });
+    document.querySelector('.title-bar').addEventListener('click', function () {
+        if (windowEl.classList.contains('minimized')) setMinimized(false);
+    });
+
+    /* ─── maximize toggle ──────────────────────────────────── */
+    document.getElementById('max-btn').addEventListener('click', function () {
+        var maximized = document.body.classList.toggle('maximized');
+        this.innerHTML = maximized ? '&#10064;' : '&#9633;';
+        scrollBottom();
+    });
+
     /* ─── jumpscare ────────────────────────────────────────── */
-    var jumpscare     = document.getElementById('jumpscare');
-    var flashOverlay  = document.getElementById('flash-overlay');
+    var jumpscare = document.getElementById('jumpscare');
 
     document.getElementById('close-btn').addEventListener('click', function (e) {
         e.stopPropagation();
-
-        /* flash — single pulse, 350ms on then fade out over 400ms */
-        flashOverlay.style.display  = 'block';
-        flashOverlay.style.opacity  = '1';
-        flashOverlay.style.transition = 'none';
-
+        var snd = new Audio('sounds/jumpscare.mp3');
+        snd.play().catch(function () {});
+        jumpscare.classList.add('active');
         setTimeout(function () {
-            flashOverlay.style.transition = 'opacity 0.4s ease';
-            flashOverlay.style.opacity    = '0';
-            setTimeout(function () { flashOverlay.style.display = 'none'; }, 450);
-        }, 350);
-
-        /* image expands + sound fires at peak of flash */
-        setTimeout(function () {
-            var snd = new Audio('sounds/jumpscare.mp3');
-            snd.play().catch(function () {});
-            jumpscare.classList.add('active');
-        }, 250);
-    });
-
-    jumpscare.addEventListener('click', function () {
-        jumpscare.classList.remove('active');
-        /* reset animation so it can fire again */
-        void jumpscare.offsetWidth;
+            jumpscare.classList.remove('active');
+        }, 1500);
     });
 
     /* ─── startup: boot → welcome → clear → prompt ────────── */
@@ -1522,6 +1603,61 @@
     function scrollBottom() {
         terminal.scrollTop = terminal.scrollHeight;
     }
+
+    /* ─── taskbar ─────────────────────────────────────────── */
+    function setMinimized(val) {
+        windowEl.classList.toggle('minimized', val);
+        document.getElementById('task-heel').classList.toggle('active', !val);
+    }
+    function toggleMinimize() {
+        setMinimized(!windowEl.classList.contains('minimized'));
+    }
+
+    // Clock
+    function updateClock() {
+        var now  = new Date();
+        var h    = now.getHours();
+        var m    = now.getMinutes();
+        var ampm = h >= 12 ? 'PM' : 'AM';
+        h = h % 12 || 12;
+        document.getElementById('taskbar-clock').textContent =
+            h + ':' + (m < 10 ? '0' : '') + m + ' ' + ampm;
+    }
+    updateClock();
+    setInterval(updateClock, 30000);
+
+    // Task button
+    document.getElementById('task-heel').addEventListener('click', function () {
+        toggleMinimize();
+    });
+
+    // Start menu
+    var startMenu = document.getElementById('start-menu');
+    var startBtn  = document.getElementById('start-btn');
+
+    startBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var open = startMenu.classList.toggle('open');
+        startBtn.classList.toggle('open', open);
+    });
+
+    document.addEventListener('click', function () {
+        startMenu.classList.remove('open');
+        startBtn.classList.remove('open');
+    });
+
+    startMenu.addEventListener('click', function (e) { e.stopPropagation(); });
+
+    startMenu.querySelectorAll('.start-item').forEach(function (item) {
+        item.addEventListener('click', function () {
+            var cmd = this.dataset.cmd;
+            startMenu.classList.remove('open');
+            startBtn.classList.remove('open');
+            if (windowEl.classList.contains('minimized')) setMinimized(false);
+            execute(cmd);
+            focusInput();
+        });
+    });
 
 }());
 </script>
