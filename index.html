@@ -103,6 +103,26 @@
     </div>
 </div>
 
+<div id="merch-window" class="window merch-window">
+    <div class="title-bar" id="merch-title-bar">
+        <span class="title-bar-text">HEEL Online Store - Microsoft Internet Explorer</span>
+        <div class="title-bar-controls">
+            <span class="wbtn" id="merch-min-btn">_</span>
+            <span class="wbtn" id="merch-close-btn">&#215;</span>
+        </div>
+    </div>
+    <div class="merch-ie-toolbar">
+        <button class="ie-nav-btn" id="merch-back-btn" disabled>&#9664; Back</button>
+        <button class="ie-nav-btn" id="merch-fwd-btn" disabled>Forward &#9654;</button>
+        <button class="ie-nav-btn" id="merch-home-btn" disabled>&#8962; Home</button>
+        <div class="ie-address-bar">
+            <span class="ie-addr-label">Address</span>
+            <div class="ie-addr-val" id="merch-address">http://www.heelband.com/store/</div>
+        </div>
+    </div>
+    <div class="merch-ie-body" id="merch-ie-body"></div>
+</div>
+
 <div id="taskbar">
     <button id="start-btn">
         <span class="win-logo"><i></i><i></i><i></i><i></i></span>
@@ -877,7 +897,7 @@
                 el.innerHTML = '<span class="help-cmd">' + line.cmd  + '</span>'
                              + '<span class="help-desc">' + line.desc + '</span>';
                 if (line.exec) el.addEventListener('click', (function (cmd) {
-                    return function () { typeAndExecute(cmd); };
+                    return function () { typeAndExecute(cmd, true); };
                 }(line.exec)));
                 return el;
 
@@ -896,7 +916,7 @@
                              + '</span>'
                              + '<span class="help-desc">' + line.desc + '</span>';
                 if (line.exec) el.addEventListener('click', (function (cmd) {
-                    return function () { typeAndExecute(cmd); };
+                    return function () { typeAndExecute(cmd, true); };
                 }(line.exec)));
                 return el;
 
@@ -1018,7 +1038,7 @@
                 el.className = 'dir-line';
                 el.innerHTML = line.label;
                 el.addEventListener('click', (function (cmd) {
-                    return function () { typeAndExecute(cmd); };
+                    return function () { typeAndExecute(cmd, true); };
                 }(line.cmd)));
                 return el;
 
@@ -1030,7 +1050,7 @@
                              + '<span class="social-dots"></span>'
                              + '<span class="social-handle">'   + line.value + '</span>';
                 el.addEventListener('click', (function (cmd) {
-                    return function () { typeAndExecute(cmd); };
+                    return function () { typeAndExecute(cmd, true); };
                 }(line.cmd)));
                 return el;
 
@@ -1298,7 +1318,7 @@
 
     /* ─── execute a command string ─────────────────────────── */
 
-    function execute(raw, silent) {
+    function execute(raw, silent, absolute) {
         var trimmed = raw.trim();
         var lower   = trimmed.toLowerCase();
 
@@ -1341,13 +1361,15 @@
                     printLines(navigateTo(walkDir));
                     return;
                 }
-                /* single segment */
-                var children = DIR_CHILDREN[currentDir] || [];
-                if (children.indexOf(arg) === -1) {
-                    output.appendChild(render({ t: 'error', v: '\'' + esc(arg) + '\': no such directory.' }));
-                    output.appendChild(render({ t: 'blank' }));
-                    scrollBottom();
-                    return;
+                /* single segment — skip hierarchy check for click-based navigation */
+                if (!absolute) {
+                    var children = DIR_CHILDREN[currentDir] || [];
+                    if (children.indexOf(arg) === -1) {
+                        output.appendChild(render({ t: 'error', v: '\'' + esc(arg) + '\': no such directory.' }));
+                        output.appendChild(render({ t: 'blank' }));
+                        scrollBottom();
+                        return;
+                    }
                 }
             }
         }
@@ -1524,7 +1546,7 @@
         var icon = document.createElement('div');
         icon.className = 'desktop-icon';
         icon.dataset.dir = dir;
-        var iconDiv = dir === 'music' ? 'app-icon' : dir === 'videos' ? 'vlc-icon' : 'folder-icon';
+        var iconDiv = dir === 'music' ? 'app-icon' : dir === 'videos' ? 'vlc-icon' : dir === 'merch' ? 'browser-icon' : 'folder-icon';
         icon.innerHTML = '<div class="' + iconDiv + '"></div><span>' + dir + '</span>';
         icon.addEventListener('dblclick', function () {
             if (dir === 'music') {
@@ -1534,7 +1556,11 @@
             if (dir === 'videos') {
                 openVlc(null, null);
             }
-            if (inputRow.style.visibility !== 'visible') return;
+            if (dir === 'merch') {
+                openMerchBrowser();
+                return;
+            }
+            skipToPrompt();
             currentDir = 'root';
             updatePrompt();
             execute('cd ' + dir);
@@ -1830,6 +1856,7 @@
     }
 
     function openPlayer() {
+        skipToPrompt();
         var initialLeft = Math.min(window.innerWidth - 310, Math.max(window.innerWidth / 2 + 340, 20));
         var initialTop  = 60;
         playerWindowEl.style.left    = initialLeft + 'px';
@@ -2017,6 +2044,7 @@
     }
 
     function openVlc(videoId, title) {
+        skipToPrompt();
         vlcWindowEl.style.display = 'block';
         vlcMinimized = false;
         vlcWindowEl.classList.remove('minimized');
@@ -2112,15 +2140,161 @@
         document.body.classList.remove('dragging');
     });
 
+    /* ─── merch browser ───────────────────────────────────── */
+    var merchWindowEl  = document.getElementById('merch-window');
+    var merchIeBody    = document.getElementById('merch-ie-body');
+    var merchAddress   = document.getElementById('merch-address');
+    var merchBackBtn   = document.getElementById('merch-back-btn');
+    var merchFwdBtn    = document.getElementById('merch-fwd-btn');
+    var merchHomeBtn   = document.getElementById('merch-home-btn');
+    var merchBrowserView = 'grid';
+    var merchBrowserIdx  = 0;
+    var merchMinimized   = false;
+
+    function merchDisplayName(id) {
+        return id.replace(/_/g, ' ').replace(/\b\w/g, function (c) { return c.toUpperCase(); });
+    }
+
+    function renderMerchGrid() {
+        merchBrowserView = 'grid';
+        merchAddress.textContent = 'http://www.heelband.com/store/';
+        merchBackBtn.disabled = true;
+        merchFwdBtn.disabled  = true;
+        merchHomeBtn.disabled = true;
+        var html = '<div class="merch-page">'
+            + '<div class="merch-page-header">&#9733; HEEL OFFICIAL MERCHANDISE &#9733;</div>'
+            + '<div class="merch-page-subheader">CLICK AN ITEM TO VIEW &nbsp;|&nbsp; SECURE CHECKOUT VIA SQUARE</div>'
+            + '<hr class="merch-page-hr">'
+            + '<div class="merch-grid">';
+        for (var i = 0; i < MERCH.length; i++) {
+            html += '<div class="merch-grid-item" data-idx="' + i + '">'
+                + '<img class="merch-grid-photo" src="' + MERCH[i].photo + '" alt="' + merchDisplayName(MERCH[i].id) + '">'
+                + '<div class="merch-grid-name">' + merchDisplayName(MERCH[i].id) + '</div>'
+                + '<div class="merch-grid-price">' + MERCH[i].price + '</div>'
+                + '</div>';
+        }
+        html += '</div>'
+            + '<div class="merch-page-footer">&copy; 1998 HEEL CORP. ALL RIGHTS RESERVED &nbsp;|&nbsp; BEST VIEWED IN INTERNET EXPLORER 5.5 AT 800&times;600</div>'
+            + '</div>';
+        merchIeBody.innerHTML = html;
+        merchIeBody.querySelectorAll('.merch-grid-item').forEach(function (el) {
+            el.addEventListener('click', function () {
+                renderMerchItem(parseInt(el.dataset.idx));
+            });
+        });
+        printGeneration++;
+        animating = false;
+        inputRow.style.visibility = 'visible';
+        currentDir = 'root';
+        updatePrompt();
+        execute('cd merch');
+    }
+
+    function renderMerchItem(idx) {
+        merchBrowserView = 'item';
+        merchBrowserIdx  = idx;
+        var item = MERCH[idx];
+        /* NOTE: Square checkout URLs are set in the MERCH array near the top of this script — update them there */
+        merchAddress.textContent = 'http://www.heelband.com/store/' + item.id + '.html';
+        merchBackBtn.disabled = (idx === 0);
+        merchFwdBtn.disabled  = (idx === MERCH.length - 1);
+        merchHomeBtn.disabled = false;
+        var html = '<div class="merch-page">'
+            + '<div class="merch-page-header">&#9733; HEEL OFFICIAL MERCHANDISE &#9733;</div>'
+            + '<hr class="merch-page-hr">'
+            + '<div class="merch-item-view">'
+            + '<img class="merch-item-photo" src="' + item.photo + '" alt="' + merchDisplayName(item.id) + '">'
+            + '<div class="merch-item-name">' + merchDisplayName(item.id) + '</div>'
+            + '<div class="merch-item-price">' + item.price + '</div>'
+            + (item.href ? '<a class="merch-buy-btn" href="' + item.href + '" target="_blank" rel="noopener">BUY NOW</a>' : '')
+            + '</div>'
+            + '<div class="merch-page-footer">&copy; 1998 HEEL CORP. ALL RIGHTS RESERVED &nbsp;|&nbsp; BEST VIEWED IN INTERNET EXPLORER 5.5 AT 800&times;600</div>'
+            + '</div>';
+        merchIeBody.innerHTML = html;
+        merchIeBody.scrollTop = 0;
+        printGeneration++;
+        animating = false;
+        inputRow.style.visibility = 'visible';
+        currentDir = DIR_PARENTS[item.id] || 'merch';
+        updatePrompt();
+        execute('cd ' + item.id);
+    }
+
+    function openMerchBrowser() {
+        skipToPrompt();
+        if (merchWindowEl.style.display !== 'block') {
+            var mw = 720, mh = 530;
+            merchWindowEl.style.left = Math.max(20, window.innerWidth  - mw - 20) + 'px';
+            merchWindowEl.style.top  = Math.max(40, window.innerHeight - mh - 56) + 'px';
+            merchWindowEl.style.display = 'block';
+            merchMinimized = false;
+            merchWindowEl.classList.remove('minimized');
+            renderMerchGrid();
+        } else {
+            merchWindowEl.style.display = 'block';
+            merchMinimized = false;
+            merchWindowEl.classList.remove('minimized');
+        }
+        vlcBringToFront('merch');
+        if (inputRow.style.visibility === 'visible') {
+            currentDir = 'root';
+            updatePrompt();
+            execute('cd merch');
+        }
+    }
+
+    merchBackBtn.addEventListener('click', function () {
+        if (merchBrowserIdx > 0) renderMerchItem(merchBrowserIdx - 1);
+    });
+    merchFwdBtn.addEventListener('click', function () {
+        if (merchBrowserIdx < MERCH.length - 1) renderMerchItem(merchBrowserIdx + 1);
+    });
+    merchHomeBtn.addEventListener('click', function () {
+        renderMerchGrid();
+    });
+    document.getElementById('merch-min-btn').addEventListener('click', function () {
+        merchMinimized = !merchMinimized;
+        merchWindowEl.classList.toggle('minimized', merchMinimized);
+    });
+    document.getElementById('merch-close-btn').addEventListener('click', function () {
+        merchWindowEl.style.display = 'none';
+        merchMinimized = false;
+        merchWindowEl.classList.remove('minimized');
+    });
+
+    /* merch window dragging */
+    var merchDragging = false, merchDragOffX = 0, merchDragOffY = 0;
+    document.getElementById('merch-title-bar').addEventListener('mousedown', function (e) {
+        if (e.target.classList.contains('wbtn')) return;
+        vlcBringToFront('merch');
+        merchDragging = true;
+        merchDragOffX = e.clientX - merchWindowEl.getBoundingClientRect().left;
+        merchDragOffY = e.clientY - merchWindowEl.getBoundingClientRect().top;
+        document.body.classList.add('dragging');
+        e.preventDefault();
+    });
+    document.addEventListener('mousemove', function (e) {
+        if (!merchDragging) return;
+        merchWindowEl.style.left = Math.max(0, Math.min(e.clientX - merchDragOffX, window.innerWidth  - merchWindowEl.offsetWidth))  + 'px';
+        merchWindowEl.style.top  = Math.max(0, Math.min(e.clientY - merchDragOffY, window.innerHeight - merchWindowEl.offsetHeight)) + 'px';
+    });
+    document.addEventListener('mouseup', function () {
+        if (!merchDragging) return;
+        merchDragging = false;
+        document.body.classList.remove('dragging');
+    });
+
     /* ─── window focus / z-index ──────────────────────────── */
     function vlcBringToFront(focused) {
-        windowEl.style.zIndex       = focused === 'terminal' ? '30' : '20';
-        playerWindowEl.style.zIndex = focused === 'player'   ? '30' : '20';
-        vlcWindowEl.style.zIndex    = focused === 'vlc'      ? '30' : '20';
+        windowEl.style.zIndex        = focused === 'terminal' ? '30' : '20';
+        playerWindowEl.style.zIndex  = focused === 'player'   ? '30' : '20';
+        vlcWindowEl.style.zIndex     = focused === 'vlc'      ? '30' : '20';
+        merchWindowEl.style.zIndex   = focused === 'merch'    ? '30' : '20';
     }
     windowEl.addEventListener('mousedown',    function () { vlcBringToFront('terminal'); });
     playerWindowEl.addEventListener('mousedown', function () { vlcBringToFront('player'); });
     vlcWindowEl.addEventListener('mousedown',    function () { vlcBringToFront('vlc'); });
+    merchWindowEl.addEventListener('mousedown',  function () { vlcBringToFront('merch'); });
 
     function openMerch(query) {
         var normalized = query.replace(/\s+/g, '_');
@@ -2166,7 +2340,7 @@
         return [{ t: 'blank' }, { t: 'text', v: 'now playing: ' + found.label }, { t: 'blank' }];
     }
 
-    function typeAndExecute(cmd) {
+    function typeAndExecute(cmd, absolute) {
         if (animating) return;
         input.value = '';
         focusInput();
@@ -2182,7 +2356,7 @@
                     cmdHistory.unshift(val);
                     historyPos = -1;
                     input.value = '';
-                    execute(val);
+                    execute(val, false, absolute);
                 }, 500);
             }
         }, 40);

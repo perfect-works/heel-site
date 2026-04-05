@@ -461,6 +461,48 @@ body.dragging {
     background: #ffaa44;
 }
 
+/* ── browser (Firefox-ish) icon for merch ── */
+.browser-icon {
+    width: 30px;
+    height: 30px;
+    position: relative;
+    margin: 0 auto;
+    margin-top: 4px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 38% 32%, #b8e0ff, #2277dd 42%, #061e6e);
+    box-shadow: inset -1px -2px 3px rgba(0,0,0,0.3);
+}
+
+/* orange flame arc */
+.browser-icon::before {
+    content: '';
+    position: absolute;
+    inset: -5px;
+    border-radius: 50%;
+    border: 8px solid transparent;
+    border-top-color: #ff7700;
+    border-right-color: #ee5500;
+    transform: rotate(10deg);
+}
+
+/* flame tip — small teardrop at leading edge */
+.browser-icon::after {
+    content: '';
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    top: -5px;
+    right: -1px;
+    background: radial-gradient(circle at 38% 38%, #ffcc44, #ff6600);
+    border-radius: 50% 0 50% 50%;
+    transform: rotate(40deg);
+}
+
+.desktop-icon:hover .browser-icon,
+.desktop-icon.active .browser-icon {
+    background: radial-gradient(circle at 38% 32%, #cceeff, #3388ee 42%, #0a2d88);
+}
+
 .desktop-icon.active span {
     color: #ffff99;
 }
@@ -755,13 +797,232 @@ body.dragging #vlc-drag-overlay {
     display: none;
 }
 
+/* ── merch browser ── */
+.merch-window {
+    position: fixed;
+    width: 720px;
+    display: none;
+    z-index: 25;
+}
+
+.merch-ie-toolbar {
+    background: #c0c0c0;
+    border-bottom: 1px solid #808080;
+    padding: 3px 4px;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.ie-nav-btn {
+    background: #c0c0c0;
+    border-top: 1px solid #ffffff;
+    border-left: 1px solid #ffffff;
+    border-right: 1px solid #404040;
+    border-bottom: 1px solid #404040;
+    padding: 2px 8px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.68em;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.ie-nav-btn:disabled {
+    color: #808080;
+    cursor: default;
+}
+
+.ie-nav-btn:active:not(:disabled) {
+    border-top: 1px solid #404040;
+    border-left: 1px solid #404040;
+    border-right: 1px solid #ffffff;
+    border-bottom: 1px solid #ffffff;
+}
+
+.ie-address-bar {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    gap: 5px;
+    margin-left: 6px;
+}
+
+.ie-addr-label {
+    font-family: 'Courier New', monospace;
+    font-size: 0.68em;
+    color: #000;
+    white-space: nowrap;
+}
+
+.ie-addr-val {
+    flex: 1;
+    background: #ffffff;
+    border-top: 1px solid #808080;
+    border-left: 1px solid #808080;
+    border-right: 1px solid #dfdfdf;
+    border-bottom: 1px solid #dfdfdf;
+    padding: 1px 5px;
+    font-size: 0.68em;
+    font-family: 'Courier New', monospace;
+    color: #000080;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.merch-ie-body {
+    height: 460px;
+    overflow-y: auto;
+    background: #0d0020;
+    scrollbar-width: thin;
+    scrollbar-color: #440066 #0d0020;
+}
+
+.merch-page {
+    font-family: 'Comic Sans MS', 'Comic Sans', cursive;
+    color: #ffffff;
+    padding: 10px 16px 20px;
+    min-height: 100%;
+    box-sizing: border-box;
+}
+
+.merch-page-header {
+    text-align: center;
+    color: #ff3333;
+    font-size: 1.2em;
+    letter-spacing: 3px;
+    padding: 10px 0 4px;
+    text-shadow: 1px 1px 0 #000;
+}
+
+.merch-page-subheader {
+    text-align: center;
+    color: #888888;
+    font-size: 0.7em;
+    margin-bottom: 6px;
+    font-family: 'Courier New', monospace;
+    letter-spacing: 1px;
+}
+
+.merch-page-hr {
+    border: none;
+    border-top: 1px solid #440066;
+    margin: 6px 0 10px;
+}
+
+.merch-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    padding: 4px 0;
+}
+
+.merch-grid-item {
+    background: #180028;
+    border: 1px solid #440066;
+    padding: 8px 6px;
+    cursor: pointer;
+    text-align: center;
+}
+
+.merch-grid-item:hover {
+    border-color: #ff3333;
+    background: #220033;
+}
+
+.merch-grid-photo {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: contain;
+    background: #0a001a;
+    display: block;
+}
+
+.merch-grid-name {
+    font-size: 0.7em;
+    color: #ffcc00;
+    margin-top: 5px;
+    line-height: 1.2;
+}
+
+.merch-grid-price {
+    font-size: 0.78em;
+    color: #cccccc;
+    margin-top: 2px;
+}
+
+.merch-item-view {
+    text-align: center;
+    padding: 10px 20px;
+}
+
+.merch-item-photo {
+    max-width: 55%;
+    max-height: 250px;
+    object-fit: contain;
+    border: 2px solid #440066;
+    background: #0a001a;
+    margin-bottom: 10px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.merch-item-name {
+    color: #ffcc00;
+    font-size: 1.25em;
+    margin: 0 0 4px;
+    text-shadow: 1px 1px #000;
+}
+
+.merch-item-price {
+    font-size: 1.4em;
+    color: #ff3333;
+    margin: 0 0 14px;
+}
+
+/* NOTE: update Square checkout URLs in the MERCH array at the top of this script */
+.merch-buy-btn {
+    display: inline-block;
+    background: #880000;
+    color: #ffffff;
+    font-family: 'Comic Sans MS', cursive;
+    font-size: 0.95em;
+    padding: 6px 24px;
+    border-top: 2px solid #ff6666;
+    border-left: 2px solid #ff6666;
+    border-right: 2px solid #440000;
+    border-bottom: 2px solid #440000;
+    text-decoration: none;
+    letter-spacing: 1px;
+}
+
+.merch-buy-btn:hover {
+    background: #aa0000;
+}
+
+.merch-page-footer {
+    text-align: center;
+    font-size: 0.6em;
+    color: #444444;
+    margin-top: 20px;
+    padding-top: 8px;
+    border-top: 1px solid #1a0033;
+    font-family: 'Courier New', monospace;
+    letter-spacing: 1px;
+}
+
+.merch-window.minimized .merch-ie-toolbar,
+.merch-window.minimized .merch-ie-body {
+    display: none;
+}
+
 /* ── minimized ── */
 .window.minimized .content,
 .window.minimized #jumpscare {
     display: none;
 }
 
-body.maximized .window:not(.player-window):not(.vlc-window).minimized {
+body.maximized .window:not(.player-window):not(.vlc-window):not(.merch-window).minimized {
     height: auto;
     flex: none;
     align-self: flex-start;
@@ -773,7 +1034,7 @@ body.maximized {
     align-items: stretch;
 }
 
-body.maximized .window:not(.player-window):not(.vlc-window) {
+body.maximized .window:not(.player-window):not(.vlc-window):not(.merch-window) {
     max-width: none;
     display: flex;
     flex-direction: column;
