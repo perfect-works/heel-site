@@ -56,6 +56,8 @@
         <button class="start-item" data-cmd="fetch --upcoming-shows">Upcoming Shows</button>
         <button class="start-item" data-cmd="fetch --streaming">Streaming</button>
         <button class="start-item" data-cmd="fetch --socials">Socials</button>
+        <hr class="start-sep">
+        <button class="start-item" data-cmd="breakout">Breakout</button>
     </div>
 </div>
 
@@ -157,6 +159,21 @@
     <div class="explorer-statusbar" id="explorer-status">4 objects</div>
 </div>
 
+<div id="breakout-window" class="window breakout-window">
+    <div class="title-bar" id="breakout-title-bar">
+        <span class="title-bar-text">BREAKOUT.EXE</span>
+        <div class="title-bar-controls">
+            <span class="wbtn" id="breakout-min-btn">_</span>
+            <span class="wbtn" id="breakout-close-btn">&#215;</span>
+        </div>
+    </div>
+    <div class="breakout-hud">
+        <span>SCORE:&nbsp;<span id="bk-score">0</span></span>
+        <span>LIVES:&nbsp;<span id="bk-lives">3</span></span>
+    </div>
+    <canvas id="breakout-canvas" width="480" height="360"></canvas>
+</div>
+
 <div id="taskbar">
     <button id="start-btn">
         <span class="win-logo"><i></i><i></i><i></i><i></i></span>
@@ -221,10 +238,36 @@
 
     /* ── member registry ── */
     var MEMBERS = {
-        'adharsh': { instrument: 'guitar / vocals', profile: null,                                                                                                                                                                                                                                                                                                                      photo: 'images/users/adharsh/adharsh_rajavel.png',   photoName: 'adharsh_rajavel.png'   },
-        'tayla':   { instrument: 'guitar / vocals', profile: null,                                                                                                                                                                                                                                                                                                                      photo: 'images/users/tayla/tayla_diza.png',          photoName: 'tayla_diza.png'          },
-        'nick':    { instrument: 'bass',             profile: null,                                                                                                                                                                                                                                                                                                                      photo: 'images/users/nick/nicholas_dienstbier.png',  photoName: 'nicholas_dienstbier.png'  },
-        'andres':  { instrument: 'drums',            profile: '22 years old. spent his formative years in the california high desert before arriving in texas at the age of 14. just plays the drums. in the spaces between heel shows he spends his time playing overwatch and inbetween playing overwatch he spends his time studying ocean engineering.', gear: 'kit: tama imperialstar\nhi-hat: zildijan new beats\nride: paiste power ride\nsticks: promark hickory 5b', data: 'music: the beach boys, roly poly rag bear, bloodthirsty butchers\nmovies: love exposure\nbooks: childhood\'s end, dune\ngames: ocarina of time, xenogears\nfood: in n out burger\nplaces: seaside, bed', photo: 'images/users/andres/andres_gonzalez.png',    photoName: 'andres_gonzalez.png'    },
+        'adharsh': { 
+            instrument: 'guitar / vocals', 
+            profile: '22 years old. born in cedar rapids, iowa. avid computer scientist. ', 
+            gear: 'guitar: squier jazzmaster\namp: peavey stereo chorus 212\npedal: memory man',
+            photo: 'images/users/adharsh/adharsh_rajavel.png', 
+            data: 'music: chief keef, medicine, tagabow\nmovies: sexy beast, snatch, and all movies with that one guy in it\n',
+            photoName: 'adharsh_rajavel.png'   
+        },
+        'tayla': { 
+            instrument: 'guitar / vocals', 
+            profile: 'gemini. from new braunfels, tx. surf gang fangirl, big enjoyer of urban planning, loves her dog named bruno.', 
+            gear: 'guitar: epiphone sg\namp: orange supercrush 100\ncab: line6 4x12',
+            photo: 'images/users/tayla/tayla_diza.png',
+            data: 'movies: gummo, the royal tenenbaums\ncolors: pink, orange, red, purple\nplaces: nearest body of water',
+            photoName: 'tayla_diza.png'
+        },
+        'nick': { 
+            instrument: 'bass',
+            profile: '22 years old. round rock born and raised. fan of long walks in urban and non-urban areas, posting instagram story collages, and the lesser known rage game pogostuck. loverboy.',
+            photo: 'images/users/nick/nicholas_dienstbier.png',  
+            photoName: 'nicholas_dienstbier.png'
+        },
+        'andres':  { 
+            instrument: 'drums',
+            profile: '22 years old. spent his formative years in the california high desert before arriving in texas at the age of 14. just plays the drums. in the spaces between heel shows he spends his time playing overwatch and inbetween playing overwatch he spends his time studying ocean engineering.', 
+            gear: 'kit: tama imperialstar\nhi-hat: zildijan new beats\nride: paiste power ride\nsticks: promark hickory 5b', 
+            data: 'music: the beach boys, roly poly rag bear, bloodthirsty butchers\nmovies: love exposure\nbooks: childhood\'s end, dune\ngames: ocarina of time, xenogears\nfood: in n out burger\nplaces: seaside, bed', 
+            photo: 'images/users/andres/andres_gonzalez.png',    
+            photoName: 'andres_gonzalez.png'    
+        },
     };
 
     /* ── merch registry ── */
@@ -905,6 +948,8 @@
             output.innerHTML = '';
             return [];
         },
+
+        'breakout': function () { openBreakout(); return []; },
     };
 
     /* ─── render a line descriptor into a DOM element ─────── */
@@ -2473,11 +2518,12 @@
     function vlcBringToFront(focused) {
         zTop++;
         var map = {
-            terminal: windowEl,
-            player:   playerWindowEl,
-            vlc:      vlcWindowEl,
-            merch:    merchWindowEl,
-            explorer: explorerWindowEl
+            terminal:  windowEl,
+            player:    playerWindowEl,
+            vlc:       vlcWindowEl,
+            merch:     merchWindowEl,
+            explorer:  explorerWindowEl,
+            breakout:  document.getElementById('breakout-window')
         };
         if (map[focused]) map[focused].style.zIndex = zTop;
     }
@@ -2486,6 +2532,7 @@
     vlcWindowEl.addEventListener('mousedown',    function () { vlcBringToFront('vlc'); });
     merchWindowEl.addEventListener('mousedown',  function () { vlcBringToFront('merch'); });
     explorerWindowEl.addEventListener('mousedown', function () { vlcBringToFront('explorer'); });
+    document.getElementById('breakout-window').addEventListener('mousedown', function () { vlcBringToFront('breakout'); });
 
     function openMerch(query) {
         var normalized = query.replace(/\s+/g, '_');
@@ -2560,6 +2607,305 @@
     function scrollBottom() {
         terminal.scrollTop = terminal.scrollHeight;
     }
+
+/* ─── breakout game ──────────────────────────────────── */
+    var breakoutWindowEl = document.getElementById('breakout-window');
+    var bkCanvas         = document.getElementById('breakout-canvas');
+    var bkCtx            = bkCanvas ? bkCanvas.getContext('2d') : null;
+    var bkScoreEl        = document.getElementById('bk-score');
+    var bkLivesEl        = document.getElementById('bk-lives');
+
+    var BK = {
+        W: 480, H: 360,
+        COLS: 8, ROWS: 5,
+        BRICK_W: 54, BRICK_H: 16, BRICK_GAP: 4,
+        BOFF_X: 10, BOFF_Y: 36,
+        PAD_W: 80, PAD_H: 10, PAD_Y: 330,
+        BALL_R: 7,
+        COLORS: ['#ff4444', '#ff8800', '#ffcc00', '#33ff33', '#33ccff']
+    };
+
+    var bkState   = 'idle';
+    var bkBricks  = [];
+    var bkPadX    = 200;
+    var bkBallX   = 240, bkBallY = 280;
+    var bkDX      = 3,   bkDY    = -4;
+    var bkScore   = 0,   bkLives = 3;
+    var bkKeys    = { left: false, right: false };
+    var bkRafId   = null;
+    var bkOpen    = false;
+    var bkTaskBtn = null;
+
+    function bkInitBricks() {
+        bkBricks = [];
+        for (var r = 0; r < BK.ROWS; r++) {
+            for (var c = 0; c < BK.COLS; c++) {
+                bkBricks.push({
+                    x: BK.BOFF_X + c * (BK.BRICK_W + BK.BRICK_GAP),
+                    y: BK.BOFF_Y + r * (BK.BRICK_H + BK.BRICK_GAP),
+                    w: BK.BRICK_W, h: BK.BRICK_H,
+                    color: BK.COLORS[r], alive: true
+                });
+            }
+        }
+    }
+
+    function bkReset() {
+        bkPadX  = (BK.W - BK.PAD_W) / 2;
+        bkBallX = BK.W / 2;
+        bkBallY = BK.PAD_Y - 20;
+        bkDX    = (Math.random() < 0.5 ? 1 : -1) * 3;
+        bkDY    = -4;
+    }
+
+    function bkNewGame() {
+        bkScore = 0; bkLives = 3;
+        bkInitBricks();
+        bkReset();
+        bkState = 'idle';
+        bkUpdateHud();
+        bkDraw();
+    }
+
+    function bkUpdateHud() {
+        if (bkScoreEl) bkScoreEl.textContent = bkScore;
+        if (bkLivesEl) bkLivesEl.textContent = bkLives;
+    }
+
+    function bkDraw() {
+        if (!bkCtx) return;
+        var ctx = bkCtx;
+        ctx.clearRect(0, 0, BK.W, BK.H);
+        ctx.fillStyle = '#000';
+        ctx.fillRect(0, 0, BK.W, BK.H);
+
+        // bricks
+        for (var i = 0; i < bkBricks.length; i++) {
+            var b = bkBricks[i];
+            if (!b.alive) continue;
+            ctx.fillStyle = b.color;
+            ctx.fillRect(b.x, b.y, b.w, b.h);
+            ctx.fillStyle = 'rgba(255,255,255,0.3)';
+            ctx.fillRect(b.x, b.y, b.w, 3);
+        }
+
+        // paddle
+        ctx.fillStyle = '#c0c0c0';
+        ctx.fillRect(bkPadX, BK.PAD_Y, BK.PAD_W, BK.PAD_H);
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(bkPadX, BK.PAD_Y, BK.PAD_W, 2);
+        ctx.fillStyle = '#808080';
+        ctx.fillRect(bkPadX, BK.PAD_Y + BK.PAD_H - 2, BK.PAD_W, 2);
+
+        // ball
+        if (bkState !== 'idle') {
+            ctx.beginPath();
+            ctx.arc(bkBallX, bkBallY, BK.BALL_R, 0, Math.PI * 2);
+            ctx.fillStyle = '#ffffff';
+            ctx.fill();
+        }
+
+        // overlays
+        ctx.textAlign = 'center';
+        if (bkState === 'idle') {
+            ctx.fillStyle = '#33ff33';
+            ctx.font = 'bold 14px monospace';
+            ctx.fillText('PRESS SPACE TO PLAY', BK.W / 2, BK.H / 2 + 10);
+            ctx.font = '11px monospace';
+            ctx.fillText('ARROW KEYS OR MOUSE TO MOVE', BK.W / 2, BK.H / 2 + 30);
+        } else if (bkState === 'gameover') {
+            ctx.fillStyle = 'rgba(0,0,0,0.55)';
+            ctx.fillRect(0, BK.H / 2 - 30, BK.W, 70);
+            ctx.fillStyle = '#ff4444';
+            ctx.font = 'bold 20px monospace';
+            ctx.fillText('GAME OVER', BK.W / 2, BK.H / 2 + 5);
+            ctx.fillStyle = '#33ff33';
+            ctx.font = '12px monospace';
+            ctx.fillText('SPACE TO RESTART', BK.W / 2, BK.H / 2 + 26);
+        } else if (bkState === 'win') {
+            ctx.fillStyle = 'rgba(0,0,0,0.55)';
+            ctx.fillRect(0, BK.H / 2 - 30, BK.W, 70);
+            ctx.fillStyle = '#33ff33';
+            ctx.font = 'bold 20px monospace';
+            ctx.fillText('YOU WIN!', BK.W / 2, BK.H / 2 + 5);
+            ctx.font = '12px monospace';
+            ctx.fillText('SPACE TO PLAY AGAIN', BK.W / 2, BK.H / 2 + 26);
+        }
+    }
+
+    function bkTick() {
+        if (bkState !== 'playing') return;
+
+        var PAD_SPEED = 6;
+        if (bkKeys.left)  bkPadX = Math.max(0, bkPadX - PAD_SPEED);
+        if (bkKeys.right) bkPadX = Math.min(BK.W - BK.PAD_W, bkPadX + PAD_SPEED);
+
+        bkBallX += bkDX;
+        bkBallY += bkDY;
+
+        // wall collisions
+        if (bkBallX - BK.BALL_R <= 0)       { bkBallX = BK.BALL_R;           bkDX =  Math.abs(bkDX); }
+        if (bkBallX + BK.BALL_R >= BK.W)    { bkBallX = BK.W - BK.BALL_R;   bkDX = -Math.abs(bkDX); }
+        if (bkBallY - BK.BALL_R <= 0)        { bkBallY = BK.BALL_R;           bkDY =  Math.abs(bkDY); }
+
+        // ball lost
+        if (bkBallY - BK.BALL_R > BK.H) {
+            bkLives--;
+            bkUpdateHud();
+            if (bkLives <= 0) {
+                bkState = 'gameover';
+            } else {
+                bkReset();
+                bkState = 'idle';
+            }
+            bkDraw();
+            return;
+        }
+
+        // paddle collision
+        if (bkBallY + BK.BALL_R >= BK.PAD_Y &&
+            bkBallY + BK.BALL_R <= BK.PAD_Y + BK.PAD_H + Math.abs(bkDY) + 1 &&
+            bkDY > 0 &&
+            bkBallX >= bkPadX - BK.BALL_R && bkBallX <= bkPadX + BK.PAD_W + BK.BALL_R) {
+            bkDY = -Math.abs(bkDY);
+            var hit = (bkBallX - bkPadX) / BK.PAD_W;
+            bkDX = (hit - 0.5) * 8;
+            if (Math.abs(bkDX) < 1) bkDX = bkDX < 0 ? -1 : 1;
+            bkBallY = BK.PAD_Y - BK.BALL_R;
+        }
+
+        // brick collisions
+        for (var i = 0; i < bkBricks.length; i++) {
+            var b = bkBricks[i];
+            if (!b.alive) continue;
+            if (bkBallX + BK.BALL_R > b.x && bkBallX - BK.BALL_R < b.x + b.w &&
+                bkBallY + BK.BALL_R > b.y && bkBallY - BK.BALL_R < b.y + b.h) {
+                b.alive = false;
+                bkScore += 10;
+                bkUpdateHud();
+                var ol = (bkBallX + BK.BALL_R) - b.x;
+                var or2 = (b.x + b.w) - (bkBallX - BK.BALL_R);
+                var ot = (bkBallY + BK.BALL_R) - b.y;
+                var ob = (b.y + b.h) - (bkBallY - BK.BALL_R);
+                if (Math.min(ol, or2) < Math.min(ot, ob)) { bkDX = -bkDX; } else { bkDY = -bkDY; }
+                break;
+            }
+        }
+
+        // check win
+        var allDead = true;
+        for (var j = 0; j < bkBricks.length; j++) { if (bkBricks[j].alive) { allDead = false; break; } }
+        if (allDead) { bkState = 'win'; bkDraw(); return; }
+
+        bkDraw();
+        bkRafId = requestAnimationFrame(bkTick);
+    }
+
+    function bkStart() {
+        if (bkRafId) cancelAnimationFrame(bkRafId);
+        bkState = 'playing';
+        bkRafId = requestAnimationFrame(bkTick);
+    }
+
+    function openBreakout() {
+        if (!bkOpen) {
+            breakoutWindowEl.style.left = '50%';
+            breakoutWindowEl.style.top  = '60px';
+            breakoutWindowEl.style.transform = 'translateX(-50%)';
+            breakoutWindowEl.style.display = 'block';
+            bkOpen = true;
+            bkNewGame();
+            bkTaskBtn = document.createElement('button');
+            bkTaskBtn.className = 'task-btn active';
+            bkTaskBtn.textContent = 'BREAKOUT.EXE';
+            bkTaskBtn.addEventListener('click', function () {
+                var min = breakoutWindowEl.classList.contains('minimized');
+                breakoutWindowEl.classList.toggle('minimized', !min);
+                bkTaskBtn.classList.toggle('active', min);
+            });
+            document.getElementById('taskbar-tasks').appendChild(bkTaskBtn);
+        } else {
+            if (breakoutWindowEl.classList.contains('minimized')) {
+                breakoutWindowEl.classList.remove('minimized');
+                if (bkTaskBtn) bkTaskBtn.classList.add('active');
+            }
+        }
+        vlcBringToFront('breakout');
+    }
+
+    // keyboard controls
+    document.addEventListener('keydown', function (e) {
+        if (!bkOpen || breakoutWindowEl.classList.contains('minimized')) return;
+        if (e.key === 'ArrowLeft')  { bkKeys.left  = true; if (bkState === 'playing') e.preventDefault(); }
+        if (e.key === 'ArrowRight') { bkKeys.right = true; if (bkState === 'playing') e.preventDefault(); }
+        if (e.key === ' ' || e.key === 'Spacebar') {
+            if (bkState === 'idle' || bkState === 'gameover' || bkState === 'win') {
+                if (bkState !== 'idle') { bkInitBricks(); bkReset(); bkScore = 0; bkUpdateHud(); }
+                bkStart();
+                e.preventDefault();
+            }
+        }
+    });
+    document.addEventListener('keyup', function (e) {
+        if (e.key === 'ArrowLeft')  bkKeys.left  = false;
+        if (e.key === 'ArrowRight') bkKeys.right = false;
+    });
+
+    // mouse control
+    if (bkCanvas) {
+        bkCanvas.addEventListener('mousemove', function (e) {
+            if (bkState !== 'playing') return;
+            var rect = bkCanvas.getBoundingClientRect();
+            var scaleX = BK.W / rect.width;
+            var mx = (e.clientX - rect.left) * scaleX;
+            bkPadX = Math.max(0, Math.min(BK.W - BK.PAD_W, mx - BK.PAD_W / 2));
+        });
+        bkCanvas.addEventListener('click', function () {
+            if (bkState === 'idle' || bkState === 'gameover' || bkState === 'win') {
+                if (bkState !== 'idle') { bkInitBricks(); bkReset(); bkScore = 0; bkUpdateHud(); }
+                bkStart();
+            }
+        });
+    }
+
+    // breakout window buttons
+    document.getElementById('breakout-min-btn').addEventListener('click', function () {
+        var min = breakoutWindowEl.classList.contains('minimized');
+        breakoutWindowEl.classList.toggle('minimized', !min);
+        if (bkTaskBtn) bkTaskBtn.classList.toggle('active', min);
+    });
+    document.getElementById('breakout-close-btn').addEventListener('click', function () {
+        if (bkRafId) { cancelAnimationFrame(bkRafId); bkRafId = null; }
+        bkState = 'idle';
+        bkOpen = false;
+        breakoutWindowEl.style.display = 'none';
+        breakoutWindowEl.style.transform = '';
+        if (bkTaskBtn) { bkTaskBtn.parentNode.removeChild(bkTaskBtn); bkTaskBtn = null; }
+    });
+
+    // breakout window dragging
+    var bkDragging = false, bkDragOffX = 0, bkDragOffY = 0;
+    document.getElementById('breakout-title-bar').addEventListener('mousedown', function (e) {
+        if (e.target.classList.contains('wbtn')) return;
+        vlcBringToFront('breakout');
+        bkDragging = true;
+        breakoutWindowEl.style.transform = '';
+        var r = breakoutWindowEl.getBoundingClientRect();
+        bkDragOffX = e.clientX - r.left;
+        bkDragOffY = e.clientY - r.top;
+        document.body.classList.add('dragging');
+        e.preventDefault();
+    });
+    document.addEventListener('mousemove', function (e) {
+        if (!bkDragging) return;
+        breakoutWindowEl.style.left = Math.max(0, Math.min(e.clientX - bkDragOffX, window.innerWidth  - breakoutWindowEl.offsetWidth))  + 'px';
+        breakoutWindowEl.style.top  = Math.max(0, Math.min(e.clientY - bkDragOffY, window.innerHeight - breakoutWindowEl.offsetHeight)) + 'px';
+    });
+    document.addEventListener('mouseup', function () {
+        if (!bkDragging) return;
+        bkDragging = false;
+        document.body.classList.remove('dragging');
+    });
 
 /* ─── taskbar ─────────────────────────────────────────── */
     function setMinimized(val) {
