@@ -2333,7 +2333,7 @@
             vlc:       vlcWindowEl,
             merch:     merchWindowEl,
             explorer:  explorerWindowEl,
-            breakout:  document.getElementById('breakout-window')
+            game:      document.getElementById('game-window')
         };
         if (map[focused]) map[focused].style.zIndex = zTop;
     }
@@ -2342,7 +2342,7 @@
     vlcWindowEl.addEventListener('mousedown',    function () { vlcBringToFront('vlc'); });
     merchWindowEl.addEventListener('mousedown',  function () { vlcBringToFront('merch'); });
     explorerWindowEl.addEventListener('mousedown', function () { vlcBringToFront('explorer'); });
-    document.getElementById('breakout-window').addEventListener('mousedown', function () { vlcBringToFront('breakout'); });
+    document.getElementById('game-window').addEventListener('mousedown', function () { vlcBringToFront('game'); });
 
     function openMerch(query) {
         var normalized = query.replace(/\s+/g, '_');
@@ -2418,12 +2418,46 @@
         terminal.scrollTop = terminal.scrollHeight;
     }
 
+/* ─── game window (shared container for all games) ───── */
+    var gameWindowEl  = document.getElementById('game-window');
+    var gameCanvas    = document.getElementById('game-canvas');
+    var gameTitleEl   = document.getElementById('game-title-text');
+    var gameOpen      = false;
+    var gameTaskBtn   = null;
+    var activeGame    = null;
+    var stopActiveGame = function () {};
+
+    function openGameWindow(title) {
+        if (!gameOpen) {
+            gameWindowEl.style.left = '20px';
+            gameWindowEl.style.top  = Math.max(20, Math.floor((window.innerHeight - 412) / 2)) + 'px';
+            gameWindowEl.style.display = 'block';
+            gameOpen = true;
+            gameTaskBtn = document.createElement('button');
+            gameTaskBtn.className = 'task-btn active';
+            gameTaskBtn.addEventListener('click', function () {
+                var min = gameWindowEl.classList.contains('minimized');
+                gameWindowEl.classList.toggle('minimized', !min);
+                gameTaskBtn.classList.toggle('active', min);
+            });
+            document.getElementById('taskbar-tasks').appendChild(gameTaskBtn);
+        } else {
+            stopActiveGame();
+            if (gameWindowEl.classList.contains('minimized')) {
+                gameWindowEl.classList.remove('minimized');
+                gameTaskBtn.classList.add('active');
+            }
+        }
+        gameTitleEl.textContent = title;
+        gameTaskBtn.textContent = title;
+        vlcBringToFront('game');
+    }
+
 /* ─── breakout game ──────────────────────────────────── */
-    var breakoutWindowEl = document.getElementById('breakout-window');
-    var bkCanvas         = document.getElementById('breakout-canvas');
-    var bkCtx            = bkCanvas ? bkCanvas.getContext('2d') : null;
-    var bkScoreEl        = document.getElementById('bk-score');
-    var bkLivesEl        = document.getElementById('bk-lives');
+    var bkCanvas = gameCanvas;
+    var bkCtx    = bkCanvas ? bkCanvas.getContext('2d') : null;
+    var bkScoreEl = document.getElementById('bk-score');
+    var bkLivesEl = document.getElementById('bk-lives');
 
     var BK = {
         W: 480, H: 360,
@@ -2443,8 +2477,6 @@
     var bkScore   = 0,   bkLives = 3;
     var bkKeys    = { left: false, right: false };
     var bkRafId   = null;
-    var bkOpen    = false;
-    var bkTaskBtn = null;
 
     function bkInitBricks() {
         bkBricks = [];
@@ -2618,34 +2650,20 @@
     }
 
     function openBreakout() {
-        if (!bkOpen) {
-            breakoutWindowEl.style.left = '50%';
-            breakoutWindowEl.style.top  = '60px';
-            breakoutWindowEl.style.transform = 'translateX(-50%)';
-            breakoutWindowEl.style.display = 'block';
-            bkOpen = true;
+        openGameWindow('BREAKOUT.EXE');
+        if (activeGame !== 'breakout') {
+            activeGame = 'breakout';
+            stopActiveGame = function () {
+                if (bkRafId) { cancelAnimationFrame(bkRafId); bkRafId = null; }
+                bkState = 'idle';
+            };
             bkNewGame();
-            bkTaskBtn = document.createElement('button');
-            bkTaskBtn.className = 'task-btn active';
-            bkTaskBtn.textContent = 'BREAKOUT.EXE';
-            bkTaskBtn.addEventListener('click', function () {
-                var min = breakoutWindowEl.classList.contains('minimized');
-                breakoutWindowEl.classList.toggle('minimized', !min);
-                bkTaskBtn.classList.toggle('active', min);
-            });
-            document.getElementById('taskbar-tasks').appendChild(bkTaskBtn);
-        } else {
-            if (breakoutWindowEl.classList.contains('minimized')) {
-                breakoutWindowEl.classList.remove('minimized');
-                if (bkTaskBtn) bkTaskBtn.classList.add('active');
-            }
         }
-        vlcBringToFront('breakout');
     }
 
     // keyboard controls
     document.addEventListener('keydown', function (e) {
-        if (!bkOpen || breakoutWindowEl.classList.contains('minimized')) return;
+        if (!gameOpen || gameWindowEl.classList.contains('minimized')) return;
         if (e.key === 'ArrowLeft')  { bkKeys.left  = true; if (bkState === 'playing') e.preventDefault(); }
         if (e.key === 'ArrowRight') { bkKeys.right = true; if (bkState === 'playing') e.preventDefault(); }
         if (e.key === ' ' || e.key === 'Spacebar') {
@@ -2679,28 +2697,27 @@
     }
 
     // breakout window buttons
-    document.getElementById('breakout-min-btn').addEventListener('click', function () {
-        var min = breakoutWindowEl.classList.contains('minimized');
-        breakoutWindowEl.classList.toggle('minimized', !min);
-        if (bkTaskBtn) bkTaskBtn.classList.toggle('active', min);
+    document.getElementById('game-min-btn').addEventListener('click', function () {
+        var min = gameWindowEl.classList.contains('minimized');
+        gameWindowEl.classList.toggle('minimized', !min);
+        if (gameTaskBtn) gameTaskBtn.classList.toggle('active', min);
     });
-    document.getElementById('breakout-close-btn').addEventListener('click', function () {
-        if (bkRafId) { cancelAnimationFrame(bkRafId); bkRafId = null; }
-        bkState = 'idle';
-        bkOpen = false;
-        breakoutWindowEl.style.display = 'none';
-        breakoutWindowEl.style.transform = '';
-        if (bkTaskBtn) { bkTaskBtn.parentNode.removeChild(bkTaskBtn); bkTaskBtn = null; }
+    document.getElementById('game-close-btn').addEventListener('click', function () {
+        stopActiveGame();
+        activeGame = null;
+        gameOpen = false;
+        gameWindowEl.style.display = 'none';
+        if (gameTaskBtn) { gameTaskBtn.parentNode.removeChild(gameTaskBtn); gameTaskBtn = null; }
     });
 
     // breakout window dragging
     var bkDragging = false, bkDragOffX = 0, bkDragOffY = 0;
-    document.getElementById('breakout-title-bar').addEventListener('mousedown', function (e) {
+    document.getElementById('game-title-bar').addEventListener('mousedown', function (e) {
         if (e.target.classList.contains('wbtn')) return;
-        vlcBringToFront('breakout');
+        vlcBringToFront('game');
         bkDragging = true;
-        breakoutWindowEl.style.transform = '';
-        var r = breakoutWindowEl.getBoundingClientRect();
+        gameWindowEl.style.transform = '';
+        var r = gameWindowEl.getBoundingClientRect();
         bkDragOffX = e.clientX - r.left;
         bkDragOffY = e.clientY - r.top;
         document.body.classList.add('dragging');
@@ -2708,8 +2725,8 @@
     });
     document.addEventListener('mousemove', function (e) {
         if (!bkDragging) return;
-        breakoutWindowEl.style.left = Math.max(0, Math.min(e.clientX - bkDragOffX, window.innerWidth  - breakoutWindowEl.offsetWidth))  + 'px';
-        breakoutWindowEl.style.top  = Math.max(0, Math.min(e.clientY - bkDragOffY, window.innerHeight - breakoutWindowEl.offsetHeight)) + 'px';
+        gameWindowEl.style.left = Math.max(0, Math.min(e.clientX - bkDragOffX, window.innerWidth  - gameWindowEl.offsetWidth))  + 'px';
+        gameWindowEl.style.top  = Math.max(0, Math.min(e.clientY - bkDragOffY, window.innerHeight - gameWindowEl.offsetHeight)) + 'px';
     });
     document.addEventListener('mouseup', function () {
         if (!bkDragging) return;

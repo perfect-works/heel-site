@@ -1465,15 +1465,15 @@ body {
     }
 }
 
-/* ── breakout window ── */
-.breakout-window {
+/* ── game window ── */
+.game-window {
     position: fixed;
     display: none;
     user-select: none;
     width: 484px;
 }
 
-.breakout-hud {
+.game-hud {
     background: #c0c0c0;
     padding: 3px 8px;
     font-family: monospace;
@@ -1483,7 +1483,7 @@ body {
     border-bottom: 2px solid #808080;
 }
 
-#breakout-canvas {
+#game-canvas {
     display: block;
     background: #000;
     cursor: none;
@@ -1491,8 +1491,8 @@ body {
     height: 360px;
 }
 
-.breakout-window.minimized .breakout-hud,
-.breakout-window.minimized #breakout-canvas {
+.game-window.minimized .game-hud,
+.game-window.minimized #game-canvas {
     display: none;
 }
 
