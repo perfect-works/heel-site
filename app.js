@@ -1618,16 +1618,12 @@
                     gateEl.style.textAlign = 'center';
                     gateEl.style.marginTop = '1em';
                     gateEl.innerHTML = mobile ? '[ tap here to continue ]' : '[ press any key ]';
-                    if (mobile) {
-                        gateEl.style.cursor = 'pointer';
-                        gateEl.addEventListener('touchstart', function (e) {
-                            e.preventDefault();
-                            skipToPrompt();
-                        }, { once: true });
-                    }
+                    if (mobile) gateEl.style.cursor = 'pointer';
                     output.appendChild(gateEl);
                     scrollBottom();
                     animating = false;
+
+                    gateEl.addEventListener('click', skipToPrompt, { once: true });
 
                     document.addEventListener('keydown', function onKey(e) {
                         if (e.key === 'Control' || e.key === 'Alt' || e.key === 'Shift' || e.key === 'Meta') return;
@@ -1635,7 +1631,6 @@
                         document.removeEventListener('keydown', onKey);
                         skipToPrompt();
                     });
-                    terminal.addEventListener('touchstart', skipToPrompt, { once: true });
                 }, 60, 30);
             }, 60, 30);
         }, 70, 30);
