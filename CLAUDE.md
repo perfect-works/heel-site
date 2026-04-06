@@ -12,9 +12,10 @@ python3 -m http.server 8000
 
 ## Architecture
 
-Two files plus assets:
+Three files plus assets:
 
-- `index.html` — entire site: window chrome, terminal UI, all JS logic, all app windows
+- `index.html` — HTML structure only: window chrome, terminal UI, all app windows
+- `app.js` — all JavaScript logic (IIFE)
 - `styles.css` — all styles
 
 ### Assets
