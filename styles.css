@@ -1485,9 +1485,15 @@ body {
     }
     .input-row {
         font-size: 1em;
+        align-items: baseline;
+    }
+    .prompt-prefix {
+        white-space: nowrap;
+        flex-shrink: 0;
     }
     #cmd {
         font-size: 16px;
+        line-height: 1.2;
     }
 
     /* help menu: more breathing room between rows */

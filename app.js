@@ -262,8 +262,8 @@
     }
     function promptHTML() {
         var path = promptPath();
-        if (window.innerWidth <= 500 && path.length > 22) {
-            path = '\u2026' + path.slice(path.length - 21);
+        if (window.innerWidth <= 500 && path.length > 18) {
+            path = '\u2026' + path.slice(path.length - 17);
         }
         return 'PS&nbsp;' + path + '&gt;&nbsp;';
     }
@@ -2096,6 +2096,7 @@
     }
 
     function openVlc(videoId, title) {
+        ensureTerminalVisible();
         skipToPrompt();
         vlcWindowEl.style.display = 'block';
         vlcMinimized = false;
@@ -2379,6 +2380,7 @@
             icon.innerHTML = '<div class="' + (f.type === 'img' ? 'expl-file-img' : 'expl-file-txt') + '"></div><span>' + f.name + '</span>';
             icon.addEventListener('dblclick', (function (cmd) {
                 return function () {
+                    ensureTerminalVisible();
                     vlcBringToFront('terminal');
                     focusInput();
                     execute(cmd);
@@ -3145,6 +3147,13 @@
     mineWindowEl.addEventListener('mousedown', function () { vlcBringToFront('mine'); });
 
 /* ─── taskbar ─────────────────────────────────────────── */
+    function ensureTerminalVisible() {
+        if (windowEl.style.display === 'none') {
+            windowEl.style.display = '';
+        }
+        setMinimized(false);
+    }
+
     function setMinimized(val) {
         if (val && document.body.classList.contains('maximized')) {
             document.body.classList.remove('maximized');
