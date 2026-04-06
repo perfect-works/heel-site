@@ -261,7 +261,11 @@
         return 'C:\\heel\\users\\' + currentDir;
     }
     function promptHTML() {
-        return 'PS&nbsp;' + promptPath() + '&gt;&nbsp;';
+        var path = promptPath();
+        if (window.innerWidth <= 500 && path.length > 22) {
+            path = '\u2026' + path.slice(path.length - 21);
+        }
+        return 'PS&nbsp;' + path + '&gt;&nbsp;';
     }
     function updatePrompt() {
         document.querySelector('#input-row .prompt-prefix').innerHTML = promptHTML();
@@ -795,7 +799,8 @@
             return [];
         },
 
-        'breakout': function () { openBreakout(); return []; },
+        'breakout':     function () { openBreakout();     return []; },
+        'minesweeper':  function () { openMinesweeper(); return []; },
 
         'segmentation tracklist': function () {
             return [
@@ -2466,7 +2471,8 @@
             vlc:       vlcWindowEl,
             merch:     merchWindowEl,
             explorer:  explorerWindowEl,
-            game:      document.getElementById('game-window')
+            game:      document.getElementById('game-window'),
+            mine:      document.getElementById('mine-window')
         };
         if (map[focused]) map[focused].style.zIndex = zTop;
     }
@@ -2875,6 +2881,268 @@
         bkDragging = false;
         document.body.classList.remove('dragging');
     });
+
+/* ─── minesweeper game ───────────────────────────────── */
+    var mineWindowEl  = document.getElementById('mine-window');
+    var mineGridEl    = document.getElementById('mine-grid');
+    var mineCountLcd  = document.getElementById('mine-count-lcd');
+    var mineTimeLcd   = document.getElementById('mine-time-lcd');
+    var mineSmileBtn  = document.getElementById('mine-smile');
+    var mineOpen      = false;
+    var mineTaskBtn   = null;
+
+    var MS_ROWS  = 9;
+    var MS_COLS  = 9;
+    var MS_MINES = 10;
+
+    var msGrid       = [];
+    var msState      = 'idle';
+    var msTimer      = 0;
+    var msTimerIv    = null;
+    var msFlagsLeft  = MS_MINES;
+    var msFirstClick = true;
+
+    var MS_COLORS = ['', '#0000ff', '#008000', '#ff0000', '#000080', '#800000', '#008080', '#000000', '#808080'];
+
+    function msCell(r, c) { return msGrid[r * MS_COLS + c]; }
+
+    function msInit() {
+        msGrid = [];
+        for (var i = 0; i < MS_ROWS * MS_COLS; i++) {
+            msGrid.push({ mine: false, count: 0, revealed: false, flagged: false });
+        }
+        msState = 'idle';
+        msTimer = 0;
+        msFlagsLeft = MS_MINES;
+        msFirstClick = true;
+        if (msTimerIv) { clearInterval(msTimerIv); msTimerIv = null; }
+        msBuildDom();
+        msUpdateLcds();
+        mineSmileBtn.textContent = '\u263A';
+    }
+
+    function msPlaceMines(safeR, safeC) {
+        var placed = 0;
+        while (placed < MS_MINES) {
+            var r = Math.floor(Math.random() * MS_ROWS);
+            var c = Math.floor(Math.random() * MS_COLS);
+            if (msCell(r, c).mine) continue;
+            if (Math.abs(r - safeR) <= 1 && Math.abs(c - safeC) <= 1) continue;
+            msCell(r, c).mine = true;
+            placed++;
+        }
+        for (var row = 0; row < MS_ROWS; row++) {
+            for (var col = 0; col < MS_COLS; col++) {
+                if (msCell(row, col).mine) continue;
+                var n = 0;
+                for (var dr = -1; dr <= 1; dr++) {
+                    for (var dc = -1; dc <= 1; dc++) {
+                        if (dr === 0 && dc === 0) continue;
+                        var nr = row + dr, nc = col + dc;
+                        if (nr >= 0 && nr < MS_ROWS && nc >= 0 && nc < MS_COLS && msCell(nr, nc).mine) n++;
+                    }
+                }
+                msCell(row, col).count = n;
+            }
+        }
+    }
+
+    function msReveal(r, c) {
+        var cell = msCell(r, c);
+        if (cell.revealed || cell.flagged) return;
+        cell.revealed = true;
+        if (cell.count === 0 && !cell.mine) {
+            for (var dr = -1; dr <= 1; dr++) {
+                for (var dc = -1; dc <= 1; dc++) {
+                    if (dr === 0 && dc === 0) continue;
+                    var nr = r + dr, nc = c + dc;
+                    if (nr >= 0 && nr < MS_ROWS && nc >= 0 && nc < MS_COLS) msReveal(nr, nc);
+                }
+            }
+        }
+    }
+
+    function msBuildDom() {
+        mineGridEl.innerHTML = '';
+        for (var r = 0; r < MS_ROWS; r++) {
+            for (var c = 0; c < MS_COLS; c++) {
+                var el = document.createElement('div');
+                el.className = 'mine-cell';
+                el.dataset.r = r;
+                el.dataset.c = c;
+                mineGridEl.appendChild(el);
+            }
+        }
+    }
+
+    function msRenderCell(r, c) {
+        var cell = msCell(r, c);
+        var el   = mineGridEl.children[r * MS_COLS + c];
+        if (!el) return;
+        el.className    = 'mine-cell';
+        el.textContent  = '';
+        el.style.color  = '';
+        if (cell.revealed) {
+            el.classList.add('revealed');
+            if (cell.mine) {
+                el.textContent = '\u25CF';
+                el.classList.add('mine-explode');
+            } else if (cell.count > 0) {
+                el.textContent = cell.count;
+                el.style.color = MS_COLORS[cell.count];
+            }
+        } else if (cell.flagged) {
+            el.textContent = '\u2691';
+            el.style.color = '#ff0000';
+        }
+    }
+
+    function msRenderAll() {
+        for (var r = 0; r < MS_ROWS; r++) {
+            for (var c = 0; c < MS_COLS; c++) msRenderCell(r, c);
+        }
+    }
+
+    function msUpdateLcds() {
+        mineCountLcd.textContent = String(Math.max(0, Math.min(999, msFlagsLeft))).padStart(3, '0');
+        mineTimeLcd.textContent  = String(Math.min(999, msTimer)).padStart(3, '0');
+    }
+
+    function msCheckWin() {
+        for (var i = 0; i < msGrid.length; i++) {
+            if (!msGrid[i].mine && !msGrid[i].revealed) return false;
+        }
+        return true;
+    }
+
+    function msRevealAllMines() {
+        for (var i = 0; i < msGrid.length; i++) {
+            if (msGrid[i].mine && !msGrid[i].flagged) msGrid[i].revealed = true;
+        }
+        msRenderAll();
+    }
+
+    function msHandleClick(r, c) {
+        if (msState === 'dead' || msState === 'win') return;
+        var cell = msCell(r, c);
+        if (cell.flagged || cell.revealed) return;
+        if (msFirstClick) {
+            msFirstClick = false;
+            msPlaceMines(r, c);
+            msState = 'playing';
+            msTimerIv = setInterval(function () {
+                if (msState !== 'playing') { clearInterval(msTimerIv); msTimerIv = null; return; }
+                msTimer = Math.min(999, msTimer + 1);
+                msUpdateLcds();
+            }, 1000);
+        }
+        if (cell.mine) {
+            cell.revealed = true;
+            msState = 'dead';
+            if (msTimerIv) { clearInterval(msTimerIv); msTimerIv = null; }
+            mineSmileBtn.textContent = '\u2639';
+            msRevealAllMines();
+        } else {
+            msReveal(r, c);
+            msRenderAll();
+            if (msCheckWin()) {
+                msState = 'win';
+                if (msTimerIv) { clearInterval(msTimerIv); msTimerIv = null; }
+                mineSmileBtn.textContent = '\u263B';
+                for (var i = 0; i < msGrid.length; i++) {
+                    if (msGrid[i].mine) msGrid[i].flagged = true;
+                }
+                msFlagsLeft = 0;
+            }
+            msUpdateLcds();
+        }
+    }
+
+    function msHandleRightClick(r, c) {
+        if (msState === 'dead' || msState === 'win' || msFirstClick) return;
+        var cell = msCell(r, c);
+        if (cell.revealed) return;
+        cell.flagged = !cell.flagged;
+        msFlagsLeft += cell.flagged ? -1 : 1;
+        msRenderCell(r, c);
+        msUpdateLcds();
+    }
+
+    mineGridEl.addEventListener('click', function (e) {
+        var el = e.target.closest('.mine-cell');
+        if (!el) return;
+        msHandleClick(+el.dataset.r, +el.dataset.c);
+    });
+
+    mineGridEl.addEventListener('contextmenu', function (e) {
+        e.preventDefault();
+        var el = e.target.closest('.mine-cell');
+        if (!el) return;
+        msHandleRightClick(+el.dataset.r, +el.dataset.c);
+    });
+
+    mineSmileBtn.addEventListener('click', function () { msInit(); });
+
+    function openMinesweeper() {
+        if (!mineOpen) {
+            mineWindowEl.style.left = '80px';
+            mineWindowEl.style.top  = Math.max(20, Math.floor((window.innerHeight - 320) / 2)) + 'px';
+            mineWindowEl.style.display = 'block';
+            mineOpen = true;
+            mineTaskBtn = document.createElement('button');
+            mineTaskBtn.className   = 'task-btn active';
+            mineTaskBtn.textContent = 'Minesweeper';
+            mineTaskBtn.addEventListener('click', function () {
+                var min = mineWindowEl.classList.contains('minimized');
+                mineWindowEl.classList.toggle('minimized', !min);
+                mineTaskBtn.classList.toggle('active', min);
+            });
+            document.getElementById('taskbar-tasks').appendChild(mineTaskBtn);
+            msInit();
+        } else {
+            if (mineWindowEl.classList.contains('minimized')) {
+                mineWindowEl.classList.remove('minimized');
+                mineTaskBtn.classList.add('active');
+            }
+        }
+        vlcBringToFront('mine');
+    }
+
+    document.getElementById('mine-min-btn').addEventListener('click', function () {
+        var min = mineWindowEl.classList.contains('minimized');
+        mineWindowEl.classList.toggle('minimized', !min);
+        if (mineTaskBtn) mineTaskBtn.classList.toggle('active', min);
+    });
+
+    document.getElementById('mine-close-btn').addEventListener('click', function () {
+        if (msTimerIv) { clearInterval(msTimerIv); msTimerIv = null; }
+        mineOpen = false;
+        mineWindowEl.style.display = 'none';
+        if (mineTaskBtn) { mineTaskBtn.parentNode.removeChild(mineTaskBtn); mineTaskBtn = null; }
+    });
+
+    var mineDragging = false, mineDragOffX = 0, mineDragOffY = 0;
+    document.getElementById('mine-title-bar').addEventListener('mousedown', function (e) {
+        if (e.target.classList.contains('wbtn')) return;
+        vlcBringToFront('mine');
+        mineDragging = true;
+        mineWindowEl.style.transform = '';
+        var rect = mineWindowEl.getBoundingClientRect();
+        mineDragOffX = e.clientX - rect.left;
+        mineDragOffY = e.clientY - rect.top;
+        document.body.classList.add('dragging');
+    });
+    document.addEventListener('mousemove', function (e) {
+        if (!mineDragging) return;
+        mineWindowEl.style.left = Math.max(0, Math.min(e.clientX - mineDragOffX, window.innerWidth  - mineWindowEl.offsetWidth))  + 'px';
+        mineWindowEl.style.top  = Math.max(0, Math.min(e.clientY - mineDragOffY, window.innerHeight - mineWindowEl.offsetHeight)) + 'px';
+    });
+    document.addEventListener('mouseup', function () {
+        if (!mineDragging) return;
+        mineDragging = false;
+        document.body.classList.remove('dragging');
+    });
+    mineWindowEl.addEventListener('mousedown', function () { vlcBringToFront('mine'); });
 
 /* ─── taskbar ─────────────────────────────────────────── */
     function setMinimized(val) {
