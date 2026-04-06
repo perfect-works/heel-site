@@ -1617,7 +1617,14 @@
                     gateEl.className = 'out-text dim';
                     gateEl.style.textAlign = 'center';
                     gateEl.style.marginTop = '1em';
-                    gateEl.innerHTML = mobile ? '[ tap to continue ]' : '[ press any key ]';
+                    gateEl.innerHTML = mobile ? '[ tap here to continue ]' : '[ press any key ]';
+                    if (mobile) {
+                        gateEl.style.cursor = 'pointer';
+                        gateEl.addEventListener('touchstart', function (e) {
+                            e.preventDefault();
+                            skipToPrompt();
+                        }, { once: true });
+                    }
                     output.appendChild(gateEl);
                     scrollBottom();
                     animating = false;
@@ -1679,6 +1686,8 @@
             bar += ']';
             var text = '\u266a  ' + label + '  ' + bar + '  ' + fmtTime(cur) + ' / ' + fmtTime(dur);
             span.textContent = text;
+            var ppBtn = document.getElementById('np-playpause');
+            if (ppBtn) ppBtn.textContent = audioPaused ? '[play]' : '[pause]';
         }
 
         refresh();
@@ -1810,10 +1819,40 @@
     }
 
     function closePlayer() {
+        if (currentAudio) {
+            currentAudio.pause();
+            currentAudio = null;
+            audioPaused = false;
+            currentTrackLabel = null;
+            updateNowPlaying(null);
+        }
         playerWindowEl.style.display = 'none';
         if (playerUpdateIv) { clearInterval(playerUpdateIv); playerUpdateIv = null; }
         if (playerTaskBtn) { playerTaskBtn.remove(); playerTaskBtn = null; }
     }
+
+    /* now-playing bar controls (mobile) */
+    document.getElementById('np-playpause').addEventListener('click', function () {
+        if (!currentAudio) return;
+        if (audioPaused) {
+            currentAudio.play().catch(function () {});
+            audioPaused = false;
+            this.textContent = '[pause]';
+        } else {
+            currentAudio.pause();
+            audioPaused = true;
+            this.textContent = '[play]';
+        }
+    });
+    document.getElementById('np-stop').addEventListener('click', function () {
+        if (currentAudio) {
+            currentAudio.pause();
+            currentAudio = null;
+            audioPaused = false;
+            currentTrackLabel = null;
+            updateNowPlaying(null);
+        }
+    });
 
     /* player controls */
     document.getElementById('player-close-btn').addEventListener('click', function (e) {

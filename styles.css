@@ -273,6 +273,29 @@ body.dragging {
     text-overflow: ellipsis;
 }
 
+.nowplaying-controls {
+    display: none;
+    margin-top: 5px;
+    gap: 12px;
+}
+
+.np-btn {
+    background: none;
+    border: none;
+    color: #33ff33;
+    font-family: 'Courier New', monospace;
+    font-size: 1em;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    padding: 0;
+}
+
+.np-btn:active { opacity: 0.6; }
+
+@media (max-width: 900px) {
+    .nowplaying-controls { display: flex; }
+}
+
 /* ── input row ── */
 .input-row {
     display: flex;
