@@ -365,7 +365,7 @@
             }
             lines.push({ t: 'dirlink', label: tc(0, true) + '[<- back]', cmd: 'cd ..' });
             lines.push({ t: 'blank' });
-            lines.push({ t: 'text', v: "click a file or type './<file>' to watch", dim: true });
+            lines.push({ t: 'text', v: "click a file or type './&lt;file&gt;' to open", dim: true });
 
         } else if (currentDir === 'merch') {
             lines.push({ t: 'text', v: 'C:\\heel\\merch\\' });
@@ -420,7 +420,7 @@
             lines.push({ t: 'dirlink', label: tc(0, false) + 'photo.jpg', cmd: './photo.jpg' });
             lines.push({ t: 'dirlink', label: tc(0, true)  + '[<- back]', cmd: 'cd ..'      });
             lines.push({ t: 'blank' });
-            lines.push({ t: 'text', v: "click a file, 'cat &lt;file.txt&gt;', or './<file>' to open", dim: true });
+            lines.push({ t: 'text', v: "click a file, 'cat &lt;file.txt&gt;', or './&lt;file&gt;' to open", dim: true });
         }
 
         lines.push({ t: 'blank' });
@@ -439,7 +439,7 @@
         lines.push({ t: 'dirlink', label: tc(0, false) + 'photo.jpg', cmd: './photo.jpg' });
         lines.push({ t: 'dirlink', label: tc(0, true)  + '[<- back]', cmd: 'cd ..'      });
         lines.push({ t: 'blank' });
-        lines.push({ t: 'text', v: "click a file, 'cat &lt;file.txt&gt;', or './<file>' to open", dim: true });
+        lines.push({ t: 'text', v: "click a file, 'cat &lt;file.txt&gt;', or './&lt;file&gt;' to open", dim: true });
         lines.push({ t: 'blank' });
         return lines;
     }
@@ -735,9 +735,15 @@
         'cat readme': function () { return COMMANDS['cat readme.txt'](); },
         'readme':     function () { return COMMANDS['cat readme.txt'](); },
 
-        'sudo rm -rf': function () { window.close(); return [{ t: 'blank' }, { t: 'text', v: 'obliterating...', dim: true }, { t: 'blank' }]; },
-        'sudo rm -rf /': function () { return COMMANDS['sudo rm -rf'](); },
-        'delete system32': function () { return COMMANDS['sudo rm -rf'](); },
+        'sudo rm -rf':         function () { triggerJumpscare(); return []; },
+        'sudo rm -rf /':       function () { triggerJumpscare(); return []; },
+        'delete system32':     function () { triggerJumpscare(); return []; },
+        'format c:':           function () { triggerJumpscare(); return []; },
+        'format c:/':          function () { triggerJumpscare(); return []; },
+        'shutdown /s':         function () { triggerJumpscare(); return []; },
+        'shutdown /s /t 0':    function () { triggerJumpscare(); return []; },
+        'rd /s /q c:':         function () { triggerJumpscare(); return []; },
+        ':(){:|:&};:':         function () { triggerJumpscare(); return []; },
 
         'cat cat': function () {
             var cats = ['(=^･ω･^=)', '(=^･^=)', '/ᐠ｡ꞈ｡ᐟ\\', '(=ΦωΦ=)', '=^_^=', '(^･o･^)', ':3'];
