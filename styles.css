@@ -1031,6 +1031,7 @@ body.dragging #vlc-drag-overlay {
 
 .ie-addr-val {
     flex: 1;
+    min-width: 0;
     background: #ffffff;
     border-top: 1px solid #808080;
     border-left: 1px solid #808080;
@@ -1042,6 +1043,7 @@ body.dragging #vlc-drag-overlay {
     color: #000080;
     white-space: nowrap;
     overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .merch-ie-body {
