@@ -2362,11 +2362,17 @@
 
     function playTrack(query) {
         var allTracks = TRACKS.segmentation.concat(TRACKS.sgmt_demos).concat(TRACKS.heel2_demos);
-        var normalized = query.replace(/\s+/g, '_');
+        var q         = query.toLowerCase().trim();
+        var qUnder    = q.replace(/\s+/g, '_');
         var found = null;
         for (var i = 0; i < allTracks.length; i++) {
-            if (allTracks[i].id === normalized || allTracks[i].label.toLowerCase() === normalized) {
-                found = allTracks[i];
+            var t         = allTracks[i];
+            var idUnder   = t.id.replace(/\s+/g, '_');
+            var labelFull = t.label.toLowerCase();
+            // strip leading "NN - " track number prefix for bare-name matching
+            var labelBare = labelFull.replace(/^\d+\s*-\s*/, '');
+            if (idUnder === qUnder || labelFull === q || labelBare === q || labelBare.replace(/\s+/g, '_') === qUnder) {
+                found = t;
                 break;
             }
         }
