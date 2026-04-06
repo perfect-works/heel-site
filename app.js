@@ -530,7 +530,7 @@
         'help': function () {
             return [
                 { t: 'blank' },
-                { t: 'text', v: 'click or type commands', dim: true, center: true },
+                { t: 'text', v: '<span style="opacity:0.35">click or type commands</span>' },
                 { t: 'blank' },
                 { t: 'text', v: 'USAGE:&nbsp;&nbsp;&#60;command&#62; [--flag]', dim: true },
                 { t: 'blank' },
