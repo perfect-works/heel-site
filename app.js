@@ -82,13 +82,20 @@
 
     /* ── merch registry ── */
     var MERCH = [
-        { id: 'obey_tshirt',           href: 'https://square.link/u/Fdrsrntv', price: '$20', photo: 'images/merch/obey_shirt.png'       },
-        { id: 'segmentation_cd',       href: 'https://square.link/u/PI2TUnAo', price: '$13', photo: 'images/merch/cd.jpg'               },
-        { id: 'segmentation_cassette', href: 'https://square.link/u/XfokA7sz', price: '$11', photo: 'images/merch/cassette.jpg'         },
-        { id: 'bumper_sticker',        href: 'https://square.link/u/3hpALQsN', price: '$5',  photo: 'images/merch/bumpersticker.png'    },
-        { id: 'logo_sticker',          href: 'https://square.link/u/VWqXQGUy',  price: '$1',  photo: 'images/merch/logo_sticker.png'    },
-        { id: 'obey_sticker',          href: 'https://square.link/u/VWqXQGUy',  price: '$1',  photo: 'images/merch/obey_sticker.png'    },
+        { id: 'obey_tshirt',           label: 'obey_tshirt', href: 'https://square.link/u/Fdrsrntv', price: '$20', photo: 'images/merch/obey_shirt.png'    },
+        { id: 'segmentation_cd',       label: 'cd',       href: 'https://square.link/u/PI2TUnAo', price: '$13', photo: 'images/merch/cd.jpg'            },
+        { id: 'segmentation_cassette', label: 'cassette', href: 'https://square.link/u/XfokA7sz', price: '$11', photo: 'images/merch/cassette.jpg'      },
+        { id: 'bumper_sticker',        label: 'bumper',   href: 'https://square.link/u/3hpALQsN', price: '$5',  photo: 'images/merch/bumpersticker.png' },
+        { id: 'logo_sticker',          label: 'logo',     href: 'https://square.link/u/VWqXQGUy', price: '$1',  photo: 'images/merch/logo_sticker.png'  },
+        { id: 'obey_sticker',          label: 'obey',     href: 'https://square.link/u/VWqXQGUy', price: '$1',  photo: 'images/merch/obey_sticker.png'  },
     ];
+
+    /* label → id map for short-name cd navigation (e.g. 'cd' → 'segmentation_cd') */
+    var MERCH_LABEL_MAP = {};
+    for (var _mi = 0; _mi < MERCH.length; _mi++) {
+        if (MERCH[_mi].label && MERCH[_mi].label !== MERCH[_mi].id)
+            MERCH_LABEL_MAP[MERCH[_mi].label] = MERCH[_mi].id;
+    }
 
     function getMerchItem(id) {
         for (var i = 0; i < MERCH.length; i++) {
@@ -159,8 +166,8 @@
         'music/unreleased':   ['sgmt_demos', 'heel2_demos'],
         'sgmt_demos':         [],
         'heel2_demos':        [],
-        'merch/segmentation': ['segmentation_cd', 'segmentation_cassette'],
-        'merch/stickers':     ['bumper_sticker', 'logo_sticker', 'obey_sticker'],
+        'merch/segmentation': ['segmentation_cd', 'segmentation_cassette', 'cd', 'cassette'],
+        'merch/stickers':     ['bumper_sticker', 'logo_sticker', 'obey_sticker', 'bumper', 'logo', 'obey'],
         'adharsh':            [],
         'tayla':              [],
         'nick':               [],
@@ -267,6 +274,10 @@
         for (var i = 0; i < indent; i++) pad += '&nbsp;&nbsp;&nbsp;&nbsp;';
         return '<span class="tree-char">' + pad + (last ? '└── ' : '├── ') + '</span>';
     }
+    // sub-item under a non-last parent: shows │ continuation line
+    function tcsub(last) {
+        return '<span class="tree-char">│&nbsp;&nbsp;&nbsp;' + (last ? '└── ' : '├── ') + '</span>';
+    }
 
     function dirListing() {
         var lines = [{ t: 'blank' }];
@@ -354,31 +365,32 @@
 
         } else if (currentDir === 'merch') {
             lines.push({ t: 'text', v: 'C:\\heel\\merch\\' });
-            lines.push({ t: 'dirlink', label: tc(0, false) + '[obey_tshirt]',  cmd: 'cd obey_tshirt'  });
-            lines.push({ t: 'dirlink', label: tc(0, false) + '[segmentation]', cmd: 'cd segmentation' });
-            lines.push({ t: 'dirlink', label: tc(0, false) + '[stickers]',     cmd: 'cd stickers'     });
-            lines.push({ t: 'dirlink', label: tc(0, true)  + '[<- back]',      cmd: 'cd ..'           });
+            lines.push({ t: 'dirlink', label: tc(0, false)    + '[obey_tshirt]',  cmd: 'cd obey_tshirt'  });
+            lines.push({ t: 'dirlink', label: tc(0, false)    + '[segmentation]', cmd: 'cd segmentation' });
+            lines.push({ t: 'dirlink', label: tcsub(false)    + '[cd]',           cmd: 'cd cd'           });
+            lines.push({ t: 'dirlink', label: tcsub(true)     + '[cassette]',     cmd: 'cd cassette'     });
+            lines.push({ t: 'dirlink', label: tc(0, false)    + '[stickers]',     cmd: 'cd stickers'     });
+            lines.push({ t: 'dirlink', label: tcsub(false)    + '[bumper]',       cmd: 'cd bumper'       });
+            lines.push({ t: 'dirlink', label: tcsub(false)    + '[logo]',         cmd: 'cd logo'         });
+            lines.push({ t: 'dirlink', label: tcsub(true)     + '[obey]',         cmd: 'cd obey'         });
+            lines.push({ t: 'dirlink', label: tc(0, true)     + '[<- back]',      cmd: 'cd ..'           });
             lines.push({ t: 'blank' });
-            lines.push({ t: 'text', v: "click a folder or type 'cd &lt;dir&gt;' to browse", dim: true });
+            lines.push({ t: 'text', v: "click an item or type 'cd &lt;item&gt;' to view", dim: true });
 
         } else if (currentDir === 'merch/segmentation') {
             lines.push({ t: 'text', v: 'C:\\heel\\merch\\' });
             lines.push({ t: 'text', v: tc(0, true) + 'segmentation\\' });
-            lines.push({ t: 'dirlink', label: tc(1, false) + '[segmentation_cd]',       cmd: 'cd segmentation_cd'       });
-            lines.push({ t: 'dirlink', label: tc(1, false) + '[segmentation_cassette]', cmd: 'cd segmentation_cassette' });
-            lines.push({ t: 'dirlink', label: tc(1, true)  + '[<- back]',               cmd: 'cd ..'                    });
-            lines.push({ t: 'blank' });
-            lines.push({ t: 'text', v: "click a folder or type 'cd &lt;item&gt;' to browse", dim: true });
+            lines.push({ t: 'dirlink', label: tc(1, false) + '[cd]',       cmd: 'cd cd'       });
+            lines.push({ t: 'dirlink', label: tc(1, false) + '[cassette]', cmd: 'cd cassette' });
+            lines.push({ t: 'dirlink', label: tc(1, true)  + '[<- back]',  cmd: 'cd ..'       });
 
         } else if (currentDir === 'merch/stickers') {
             lines.push({ t: 'text', v: 'C:\\heel\\merch\\' });
             lines.push({ t: 'text', v: tc(0, true) + 'stickers\\' });
-            lines.push({ t: 'dirlink', label: tc(1, false) + '[bumper_sticker]', cmd: 'cd bumper_sticker' });
-            lines.push({ t: 'dirlink', label: tc(1, false) + '[logo_sticker]',   cmd: 'cd logo_sticker'   });
-            lines.push({ t: 'dirlink', label: tc(1, false) + '[obey_sticker]',   cmd: 'cd obey_sticker'   });
-            lines.push({ t: 'dirlink', label: tc(1, true)  + '[<- back]',        cmd: 'cd ..'             });
-            lines.push({ t: 'blank' });
-            lines.push({ t: 'text', v: "click a folder or type 'cd &lt;item&gt;' to browse", dim: true });
+            lines.push({ t: 'dirlink', label: tc(1, false) + '[bumper]', cmd: 'cd bumper' });
+            lines.push({ t: 'dirlink', label: tc(1, false) + '[logo]',   cmd: 'cd logo'   });
+            lines.push({ t: 'dirlink', label: tc(1, false) + '[obey]',   cmd: 'cd obey'   });
+            lines.push({ t: 'dirlink', label: tc(1, true)  + '[<- back]', cmd: 'cd ..'    });
 
         } else if (getMerchItem(currentDir)) {
             var mitem = getMerchItem(currentDir);
@@ -429,6 +441,7 @@
     }
 
     function navigateTo(dir) {
+        dir = MERCH_LABEL_MAP[dir] || dir;
         currentDir = dir;
         updatePrompt();
         cdClear();
@@ -461,6 +474,10 @@
             lines.push({ t: 'dirlink', label: tc(0, false) + 'buy.exe', cmd: 'buy.exe' });
         }
         lines.push({ t: 'dirlink', label: tc(0, true) + '[<- back]', cmd: 'cd ..' });
+        lines.push({ t: 'blank' });
+        if (mitem && mitem.href) {
+            lines.push({ t: 'text', v: "click 'buy.exe' or type 'buy' to purchase", dim: true });
+        }
         lines.push({ t: 'blank' });
         return lines;
     }
@@ -603,12 +620,18 @@
 
         'cd video':              function () { return navigateTo('video');               },
         'cd merch':               function () { return navigateTo('merch');                },
-        'cd obey_tshirt':         function () { return navigateTo('obey_tshirt');         },
-        'cd segmentation_cd':     function () { return navigateTo('segmentation_cd');     },
+        'cd obey_tshirt':           function () { return navigateTo('obey_tshirt');         },
+        'cd segmentation_cd':       function () { return navigateTo('segmentation_cd');     },
         'cd segmentation_cassette': function () { return navigateTo('segmentation_cassette'); },
-        'cd bumper_sticker':      function () { return navigateTo('bumper_sticker');      },
-        'cd logo_sticker':        function () { return navigateTo('logo_sticker');        },
-        'cd obey_sticker':        function () { return navigateTo('obey_sticker');        },
+        'cd bumper_sticker':        function () { return navigateTo('bumper_sticker');      },
+        'cd logo_sticker':          function () { return navigateTo('logo_sticker');        },
+        'cd obey_sticker':          function () { return navigateTo('obey_sticker');        },
+        /* short-name aliases */
+        'cd cd':       function () { return navigateTo('cd');       },
+        'cd cassette': function () { return navigateTo('cassette'); },
+        'cd bumper':   function () { return navigateTo('bumper');   },
+        'cd logo':     function () { return navigateTo('logo');     },
+        'cd obey':     function () { return navigateTo('obey');     },
 
         'buy.exe': function () {
             var mitem = getMerchItem(currentDir);
@@ -1406,8 +1429,10 @@
                     if (MEMBERS[currentDir] && 'photo.jpg'.indexOf(mq) === 0) {
                         input.value = prefix + 'photo.jpg';
                     } else {
-                        var mm = MERCH.filter(function (m) { return m.id.indexOf(mq) === 0; });
-                        if (mm.length === 1) input.value = prefix + mm[0].id;
+                        var mm = MERCH.filter(function (m) {
+                            return m.id.indexOf(mq) === 0 || (m.label && m.label.indexOf(mq) === 0);
+                        });
+                        if (mm.length === 1) input.value = prefix + (mm[0].label || mm[0].id);
                     }
                 } else {
                     if (MEMBERS[currentDir] && 'photo.jpg'.indexOf(partial) === 0) {
@@ -2065,9 +2090,10 @@
             + '<hr class="merch-page-hr">'
             + '<div class="merch-grid">';
         for (var i = 0; i < MERCH.length; i++) {
+            var displayName = MERCH[i].label ? merchDisplayName(MERCH[i].label) : merchDisplayName(MERCH[i].id);
             html += '<div class="merch-grid-item" data-idx="' + i + '">'
-                + '<img class="merch-grid-photo" src="' + MERCH[i].photo + '" alt="' + merchDisplayName(MERCH[i].id) + '">'
-                + '<div class="merch-grid-name">' + merchDisplayName(MERCH[i].id) + '</div>'
+                + '<img class="merch-grid-photo" src="' + MERCH[i].photo + '" alt="' + displayName + '">'
+                + '<div class="merch-grid-name">' + displayName + '</div>'
                 + '<div class="merch-grid-price">' + MERCH[i].price + '</div>'
                 + '</div>';
         }
@@ -2080,12 +2106,6 @@
                 renderMerchItem(parseInt(el.dataset.idx));
             });
         });
-        printGeneration++;
-        animating = false;
-        inputRow.style.visibility = 'visible';
-        currentDir = 'root';
-        updatePrompt();
-        execute('cd merch');
     }
 
     function renderMerchItem(idx) {
@@ -2093,7 +2113,7 @@
         merchBrowserIdx  = idx;
         var item = MERCH[idx];
         /* NOTE: Square checkout URLs are set in the MERCH array near the top of this script — update them there */
-        merchAddress.textContent = 'http://www.heelband.com/store/' + item.id + '.html';
+        merchAddress.textContent = 'http://www.heelband.com/store/' + (item.label || item.id) + '.html';
         merchBackBtn.disabled = (idx === 0);
         merchFwdBtn.disabled  = (idx === MERCH.length - 1);
         merchHomeBtn.disabled = false;
@@ -2101,8 +2121,8 @@
             + '<div class="merch-page-header">&#9733; HEEL OFFICIAL MERCHANDISE &#9733;</div>'
             + '<hr class="merch-page-hr">'
             + '<div class="merch-item-view">'
-            + '<img class="merch-item-photo" src="' + item.photo + '" alt="' + merchDisplayName(item.id) + '">'
-            + '<div class="merch-item-name">' + merchDisplayName(item.id) + '</div>'
+            + '<img class="merch-item-photo" src="' + item.photo + '" alt="' + merchDisplayName(item.label || item.id) + '">'
+            + '<div class="merch-item-name">' + merchDisplayName(item.label || item.id) + '</div>'
             + '<div class="merch-item-price">' + item.price + '</div>'
             + (item.href ? '<a class="merch-buy-btn" href="' + item.href + '" target="_blank" rel="noopener">BUY NOW</a>' : '')
             + '</div>'
@@ -2110,16 +2130,9 @@
             + '</div>';
         merchIeBody.innerHTML = html;
         merchIeBody.scrollTop = 0;
-        printGeneration++;
-        animating = false;
-        inputRow.style.visibility = 'visible';
-        currentDir = DIR_PARENTS[item.id] || 'merch';
-        updatePrompt();
-        execute('cd ' + item.id);
     }
 
     function openMerchBrowser() {
-        skipToPrompt();
         if (merchWindowEl.style.display !== 'block') {
             var mw = 720, mh = 530;
             merchWindowEl.style.left = Math.max(20, window.innerWidth  - mw - 20) + 'px';
@@ -2145,11 +2158,6 @@
             document.getElementById('taskbar-tasks').appendChild(merchTaskBtn);
         }
         vlcBringToFront('merch');
-        if (inputRow.style.visibility === 'visible') {
-            currentDir = 'root';
-            updatePrompt();
-            execute('cd merch');
-        }
     }
 
     merchBackBtn.addEventListener('click', function () {
@@ -2348,7 +2356,10 @@
         var normalized = query.replace(/\s+/g, '_');
         var found = null;
         for (var i = 0; i < MERCH.length; i++) {
-            if (MERCH[i].id === normalized || MERCH[i].id === query) { found = MERCH[i]; break; }
+            var m = MERCH[i];
+            if (m.id === normalized || m.id === query || m.label === query || m.label === normalized) {
+                found = m; break;
+            }
         }
         if (!found) {
             return [{ t: 'blank' }, { t: 'error', v: '\'' + esc(query) + '\': item not found.' }, { t: 'blank' }];
