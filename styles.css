@@ -689,6 +689,7 @@ body.dragging {
     width: 300px;
     display: none;
     z-index: 25;
+    user-select: none;
 }
 
 .player-body {
@@ -860,6 +861,7 @@ body.dragging {
     width: 460px;
     display: none;
     z-index: 25;
+    user-select: none;
 }
 
 .vlc-body {
@@ -975,6 +977,7 @@ body.dragging #vlc-drag-overlay {
     width: 720px;
     display: none;
     z-index: 25;
+    user-select: none;
 }
 
 .merch-ie-toolbar {
@@ -1240,7 +1243,7 @@ body {
     align-items: center;
     padding: 2px 4px;
     gap: 4px;
-    z-index: 50;
+    z-index: 9998;
     user-select: none;
 }
 
@@ -1358,7 +1361,7 @@ body {
     border-left: 2px solid #ffffff;
     border-right: 2px solid #404040;
     border-bottom: 2px solid #404040;
-    z-index: 60;
+    z-index: 9999;
     overflow: hidden;
 }
 
