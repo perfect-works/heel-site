@@ -530,6 +530,8 @@
         'help': function () {
             return [
                 { t: 'blank' },
+                { t: 'text', v: 'click or type commands', dim: true, center: true },
+                { t: 'blank' },
                 { t: 'text', v: 'USAGE:&nbsp;&nbsp;&#60;command&#62; [--flag]', dim: true },
                 { t: 'blank' },
                 { t: 'hrow', cmd: 'ls',                     desc: 'list current directory', exec: 'ls'                     },
