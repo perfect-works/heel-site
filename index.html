@@ -105,7 +105,7 @@
 
 <div id="merch-window" class="window merch-window">
     <div class="title-bar" id="merch-title-bar">
-        <span class="title-bar-text">HEEL Online Store - Microsoft Internet Explorer</span>
+        <span class="title-bar-text">HEEL Online Store - Internet Explorer</span>
         <div class="title-bar-controls">
             <span class="wbtn" id="merch-min-btn">_</span>
             <span class="wbtn" id="merch-close-btn">&#215;</span>
@@ -121,6 +121,25 @@
         </div>
     </div>
     <div class="merch-ie-body" id="merch-ie-body"></div>
+</div>
+
+<div id="explorer-window" class="window explorer-window">
+    <div class="title-bar" id="explorer-title-bar">
+        <span class="title-bar-text" id="explorer-title-text">users - Welt Explorer</span>
+        <div class="title-bar-controls">
+            <span class="wbtn" id="explorer-min-btn">_</span>
+            <span class="wbtn" id="explorer-close-btn">&#215;</span>
+        </div>
+    </div>
+    <div class="explorer-toolbar">
+        <button class="ie-nav-btn" id="explorer-back-btn" disabled>&#9664; Back</button>
+        <div class="ie-address-bar">
+            <span class="ie-addr-label">Address</span>
+            <div class="ie-addr-val" id="explorer-address">C:\heel\users\</div>
+        </div>
+    </div>
+    <div class="explorer-body" id="explorer-body"></div>
+    <div class="explorer-statusbar" id="explorer-status">4 objects</div>
 </div>
 
 <div id="taskbar">
@@ -160,6 +179,7 @@
 
     var cmdHistory       = [];
     var historyPos       = -1;
+    var updateExplorerState = function () {}; // assigned after explorer init
     var animating        = false;
     var currentDir       = 'root';
     var currentAudio       = null;
@@ -263,7 +283,7 @@
 
     /* ── valid children per directory ── */
     var DIR_CHILDREN = {
-        'root':               ['users', 'music', 'videos', 'merch'],
+        'root':               ['users', 'music', 'video', 'merch'],
         'users':              ['adharsh', 'tayla', 'nick', 'andres'],
         'music':              ['segmentation', 'unreleased'],
         'merch':              ['obey_tshirt', 'segmentation', 'stickers'],
@@ -289,7 +309,7 @@
     var DIR_PARENTS = {
         'users':              'root',
         'music':              'root',
-        'videos':             'root',
+        'video':             'root',
         'merch':              'root',
         'music/segmentation':  'music',
         'music/unreleased':    'music',
@@ -353,7 +373,7 @@
         if (currentDir === 'music/unreleased')   return 'C:\\heel\\music\\unreleased';
         if (currentDir === 'sgmt_demos')  return 'C:\\heel\\music\\unreleased\\sgmt_demos';
         if (currentDir === 'heel2_demos') return 'C:\\heel\\music\\unreleased\\heel2_demos';
-        if (currentDir === 'videos')             return 'C:\\heel\\videos';
+        if (currentDir === 'video')             return 'C:\\heel\\video';
         if (currentDir === 'merch')              return 'C:\\heel\\merch';
         if (currentDir === 'merch/segmentation') return 'C:\\heel\\merch\\segmentation';
         if (currentDir === 'merch/stickers')     return 'C:\\heel\\merch\\stickers';
@@ -371,6 +391,7 @@
     function updatePrompt() {
         document.querySelector('#input-row .prompt-prefix').innerHTML = promptHTML();
         if (desktopIconsEl) updateDesktopIcons();
+        updateExplorerState();
     }
 
     function tc(indent, last) {
@@ -387,7 +408,7 @@
             lines.push({ t: 'dirlink', label: tc(0, false) + '[users]',   cmd: 'cd users'      });
             lines.push({ t: 'dirlink', label: tc(0, false) + '[merch]',   cmd: 'cd merch'      });
             lines.push({ t: 'dirlink', label: tc(0, false) + '[music]',   cmd: 'cd music'      });
-            lines.push({ t: 'dirlink', label: tc(0, true)  + '[videos]',  cmd: 'cd videos'     });
+            lines.push({ t: 'dirlink', label: tc(0, true)  + '[video]',  cmd: 'cd video'     });
             lines.push({ t: 'dirlink', label: tc(0, true)  + 'about.txt', cmd: 'cat about.txt' });
             lines.push({ t: 'blank' });
             lines.push({ t: 'text', v: "click a folder or type 'cd &lt;dir&gt;'", dim: true });
@@ -454,8 +475,8 @@
             }
             lines.push({ t: 'dirlink', label: tc(1, true) + '[<- back]', cmd: 'cd ..' });
 
-        } else if (currentDir === 'videos') {
-            lines.push({ t: 'text', v: 'C:\\heel\\videos\\' });
+        } else if (currentDir === 'video') {
+            lines.push({ t: 'text', v: 'C:\\heel\\video\\' });
             for (var vi = 0; vi < VIDEOS.length; vi++) {
                 lines.push({ t: 'link', label: tc(0, false) + VIDEOS[vi].file, href: VIDEOS[vi].href, vlcId: extractYouTubeId(VIDEOS[vi].href), vlcTitle: VIDEOS[vi].id });
             }
@@ -659,7 +680,7 @@
         },
         'stream --heel': function () { return COMMANDS['fetch --streaming'](); },
 
-        'watch --all': function () { return COMMANDS['cd videos'](); },
+        'watch --all': function () { return COMMANDS['cd video'](); },
 
         'fetch --socials': function () {
             return [
@@ -712,7 +733,7 @@
         'cd nick':    function () { currentDir = 'nick';    updatePrompt(); cdClear(); return memberLines('nick');    },
         'cd andres':  function () { currentDir = 'andres';  updatePrompt(); cdClear(); return memberLines('andres'); },
 
-        'cd videos':              function () { return navigateTo('videos');               },
+        'cd video':              function () { return navigateTo('video');               },
         'cd merch':               function () { return navigateTo('merch');                },
         'cd obey_tshirt':         function () { return navigateTo('obey_tshirt');         },
         'cd segmentation_cd':     function () { return navigateTo('segmentation_cd');     },
@@ -1388,7 +1409,7 @@
         }
 
         /* video file commands: filename.mp4 or cat filename.mp4 */
-        if (currentDir === 'videos') {
+        if (currentDir === 'video') {
             var vcmd = lower.indexOf('cat ') === 0 ? lower.slice(4).trim() : lower;
             for (var vci = 0; vci < VIDEOS.length; vci++) {
                 if (VIDEOS[vci].file === vcmd || VIDEOS[vci].id === vcmd) {
@@ -1541,23 +1562,29 @@
     terminal.addEventListener('click', function () { focusInput(); });
 
     /* ─── desktop icons ───────────────────────────────────── */
-    var desktopDirs = ['users', 'merch', 'music', 'videos'];
+    var desktopDirs = ['users', 'merch', 'music', 'video'];
     desktopDirs.forEach(function (dir) {
         var icon = document.createElement('div');
         icon.className = 'desktop-icon';
         icon.dataset.dir = dir;
-        var iconDiv = dir === 'music' ? 'app-icon' : dir === 'videos' ? 'vlc-icon' : dir === 'merch' ? 'browser-icon' : 'folder-icon';
+        var iconDiv = dir === 'music' ? 'app-icon' : dir === 'video' ? 'vlc-icon' : dir === 'merch' ? 'globe-icon' : 'folder-icon';
         icon.innerHTML = '<div class="' + iconDiv + '"></div><span>' + dir + '</span>';
         icon.addEventListener('dblclick', function () {
             if (dir === 'music') {
                 openPlayer();
                 return;
             }
-            if (dir === 'videos') {
+            if (dir === 'video') {
                 openVlc(null, null);
+                execute('cd video', false, true);
+                return;
             }
             if (dir === 'merch') {
                 openMerchBrowser();
+                return;
+            }
+            if (dir === 'users') {
+                openExplorer();
                 return;
             }
             skipToPrompt();
@@ -2150,6 +2177,7 @@
     var merchBrowserView = 'grid';
     var merchBrowserIdx  = 0;
     var merchMinimized   = false;
+    var merchTaskBtn     = null;
 
     function merchDisplayName(id) {
         return id.replace(/_/g, ' ').replace(/\b\w/g, function (c) { return c.toUpperCase(); });
@@ -2235,6 +2263,17 @@
             merchMinimized = false;
             merchWindowEl.classList.remove('minimized');
         }
+        if (!merchTaskBtn) {
+            merchTaskBtn = document.createElement('button');
+            merchTaskBtn.className = 'task-btn active';
+            merchTaskBtn.textContent = 'internet.exe';
+            merchTaskBtn.addEventListener('click', function () {
+                merchMinimized = !merchMinimized;
+                merchWindowEl.classList.toggle('minimized', merchMinimized);
+                merchTaskBtn.classList.toggle('active', !merchMinimized);
+            });
+            document.getElementById('taskbar-tasks').appendChild(merchTaskBtn);
+        }
         vlcBringToFront('merch');
         if (inputRow.style.visibility === 'visible') {
             currentDir = 'root';
@@ -2255,11 +2294,13 @@
     document.getElementById('merch-min-btn').addEventListener('click', function () {
         merchMinimized = !merchMinimized;
         merchWindowEl.classList.toggle('minimized', merchMinimized);
+        if (merchTaskBtn) merchTaskBtn.classList.toggle('active', !merchMinimized);
     });
     document.getElementById('merch-close-btn').addEventListener('click', function () {
         merchWindowEl.style.display = 'none';
         merchMinimized = false;
         merchWindowEl.classList.remove('minimized');
+        if (merchTaskBtn) { merchTaskBtn.remove(); merchTaskBtn = null; }
     });
 
     /* merch window dragging */
@@ -2284,17 +2325,152 @@
         document.body.classList.remove('dragging');
     });
 
-    /* ─── window focus / z-index ──────────────────────────── */
-    function vlcBringToFront(focused) {
-        windowEl.style.zIndex        = focused === 'terminal' ? '30' : '20';
-        playerWindowEl.style.zIndex  = focused === 'player'   ? '30' : '20';
-        vlcWindowEl.style.zIndex     = focused === 'vlc'      ? '30' : '20';
-        merchWindowEl.style.zIndex   = focused === 'merch'    ? '30' : '20';
+    /* ─── windows explorer (users) ───────────────────────── */
+    var explorerWindowEl  = document.getElementById('explorer-window');
+    var explorerBodyEl    = document.getElementById('explorer-body');
+    var explorerAddressEl = document.getElementById('explorer-address');
+    var explorerTitleEl   = document.getElementById('explorer-title-text');
+    var explorerBackBtn   = document.getElementById('explorer-back-btn');
+    var explorerStatusEl  = document.getElementById('explorer-status');
+    var explorerMinimized = false;
+    var explorerTaskBtn   = null;
+    var explorerDragging  = false, explorerDragOffX = 0, explorerDragOffY = 0;
+
+    var MEMBER_NAMES = Object.keys(MEMBERS);
+
+    function getMemberFiles(name) {
+        var m = MEMBERS[name];
+        var files = [{ name: 'photo.jpg', type: 'img', cmd: 'photo.jpg' },
+                     { name: 'profile.txt', type: 'txt', cmd: 'profile' }];
+        if (m.gear) files.push({ name: 'gear.txt', type: 'txt', cmd: 'gear' });
+        if (m.data) files.push({ name: 'data.txt', type: 'txt', cmd: 'data' });
+        return files;
     }
-    windowEl.addEventListener('mousedown',    function () { vlcBringToFront('terminal'); });
+
+    function explorerRenderUsers() {
+        explorerBodyEl.innerHTML = '';
+        MEMBER_NAMES.forEach(function (name) {
+            var icon = document.createElement('div');
+            icon.className = 'explorer-icon';
+            icon.innerHTML = '<div class="expl-folder"></div><span>' + name + '</span>';
+            icon.addEventListener('dblclick', function () { execute('cd ' + name, false, true); });
+            explorerBodyEl.appendChild(icon);
+        });
+        explorerAddressEl.textContent = 'C:\\heel\\users\\';
+        explorerTitleEl.textContent   = 'users - Welt Explorer';
+        explorerStatusEl.textContent  = MEMBER_NAMES.length + ' objects';
+        explorerBackBtn.disabled = true;
+    }
+
+    function explorerRenderMember(name) {
+        var files = getMemberFiles(name);
+        explorerBodyEl.innerHTML = '';
+        files.forEach(function (f) {
+            var icon = document.createElement('div');
+            icon.className = 'explorer-icon';
+            icon.innerHTML = '<div class="' + (f.type === 'img' ? 'expl-file-img' : 'expl-file-txt') + '"></div><span>' + f.name + '</span>';
+            icon.addEventListener('dblclick', (function (cmd) {
+                return function () {
+                    vlcBringToFront('terminal');
+                    focusInput();
+                    execute(cmd);
+                };
+            })(f.cmd));
+            explorerBodyEl.appendChild(icon);
+        });
+        explorerAddressEl.textContent = 'C:\\heel\\users\\' + name + '\\';
+        explorerTitleEl.textContent   = name + ' - Welt Explorer';
+        explorerStatusEl.textContent  = files.length + ' objects';
+        explorerBackBtn.disabled = false;
+    }
+
+    explorerBackBtn.addEventListener('click', function () {
+        execute('cd ..');
+    });
+
+    document.getElementById('explorer-min-btn').addEventListener('click', function () {
+        explorerMinimized = !explorerMinimized;
+        explorerWindowEl.classList.toggle('minimized', explorerMinimized);
+        if (explorerTaskBtn) explorerTaskBtn.classList.toggle('active', !explorerMinimized);
+    });
+
+    document.getElementById('explorer-close-btn').addEventListener('click', function () {
+        explorerWindowEl.style.display = 'none';
+        if (explorerTaskBtn) { explorerTaskBtn.remove(); explorerTaskBtn = null; }
+    });
+
+    document.getElementById('explorer-title-bar').addEventListener('mousedown', function (e) {
+        if (explorerMinimized) return;
+        vlcBringToFront('explorer');
+        explorerDragging = true;
+        explorerDragOffX = e.clientX - explorerWindowEl.getBoundingClientRect().left;
+        explorerDragOffY = e.clientY - explorerWindowEl.getBoundingClientRect().top;
+        document.body.classList.add('dragging');
+        e.preventDefault();
+    });
+    document.addEventListener('mousemove', function (e) {
+        if (!explorerDragging) return;
+        explorerWindowEl.style.left = Math.max(0, Math.min(e.clientX - explorerDragOffX, window.innerWidth  - explorerWindowEl.offsetWidth))  + 'px';
+        explorerWindowEl.style.top  = Math.max(0, Math.min(e.clientY - explorerDragOffY, window.innerHeight - explorerWindowEl.offsetHeight)) + 'px';
+    });
+    document.addEventListener('mouseup', function () {
+        if (!explorerDragging) return;
+        explorerDragging = false;
+        document.body.classList.remove('dragging');
+    });
+
+    function openExplorer() {
+        if (explorerWindowEl.style.display !== 'block') {
+            explorerWindowEl.style.left = '20px';
+            explorerWindowEl.style.top  = '40px';
+        }
+        explorerWindowEl.style.display = 'block';
+        explorerMinimized = false;
+        explorerWindowEl.classList.remove('minimized');
+        skipToPrompt();
+        execute('cd users', false, true);
+        if (!explorerTaskBtn) {
+            explorerTaskBtn = document.createElement('button');
+            explorerTaskBtn.className = 'task-btn active';
+            explorerTaskBtn.textContent = 'explorer.exe';
+            explorerTaskBtn.addEventListener('click', function () {
+                explorerMinimized = !explorerMinimized;
+                explorerWindowEl.classList.toggle('minimized', explorerMinimized);
+                explorerTaskBtn.classList.toggle('active', !explorerMinimized);
+            });
+            document.getElementById('taskbar-tasks').appendChild(explorerTaskBtn);
+        }
+        vlcBringToFront('explorer');
+    }
+
+    /* sync explorer body + chrome with terminal currentDir */
+    updateExplorerState = function () {
+        if (explorerWindowEl.style.display !== 'block') return;
+        if (currentDir === 'users') {
+            explorerRenderUsers();
+        } else if (MEMBERS[currentDir]) {
+            explorerRenderMember(currentDir);
+        }
+    };
+
+    /* ─── window focus / z-index ──────────────────────────── */
+    var zTop = 25;
+    function vlcBringToFront(focused) {
+        zTop++;
+        var map = {
+            terminal: windowEl,
+            player:   playerWindowEl,
+            vlc:      vlcWindowEl,
+            merch:    merchWindowEl,
+            explorer: explorerWindowEl
+        };
+        if (map[focused]) map[focused].style.zIndex = zTop;
+    }
+    windowEl.addEventListener('mousedown',       function () { vlcBringToFront('terminal'); });
     playerWindowEl.addEventListener('mousedown', function () { vlcBringToFront('player'); });
     vlcWindowEl.addEventListener('mousedown',    function () { vlcBringToFront('vlc'); });
     merchWindowEl.addEventListener('mousedown',  function () { vlcBringToFront('merch'); });
+    explorerWindowEl.addEventListener('mousedown', function () { vlcBringToFront('explorer'); });
 
     function openMerch(query) {
         var normalized = query.replace(/\s+/g, '_');
@@ -2372,6 +2548,10 @@
 
 /* ─── taskbar ─────────────────────────────────────────── */
     function setMinimized(val) {
+        if (val && document.body.classList.contains('maximized')) {
+            document.body.classList.remove('maximized');
+            document.getElementById('max-btn').innerHTML = '&#9633;';
+        }
         windowEl.classList.toggle('minimized', val);
         document.getElementById('task-heel').classList.toggle('active', !val);
     }

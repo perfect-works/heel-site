@@ -14,7 +14,7 @@ python3 -m http.server 8000
 
 Two files plus assets:
 
-- `index.html` — entire site: window chrome, terminal UI, and all JS logic
+- `index.html` — entire site: window chrome, terminal UI, all JS logic, all app windows
 - `styles.css` — all styles
 
 ### Assets
@@ -53,9 +53,20 @@ All content lives in the `COMMANDS` object in `index.html`. Each key is a comman
 
 **`MERCH`** — array of `{ id, href }`. Spaces and underscores in `buy` queries are treated the same.
 
+**`VIDEOS`** — array of `{ id, file, href }` for YouTube-linked video files.
+
 ### Directory system
 
-`DIR_CHILDREN` maps each `currentDir` key to its valid children. `DIR_PARENTS` maps back up. Multi-segment paths (`cd users/andres`) are supported. `currentDir` values: `root`, `users`, `music`, `merch`, `music/segmentation`, `music/unreleased`, and member names (`adharsh`, `tayla`, `nick`, `andres`).
+`DIR_CHILDREN` maps each `currentDir` key to its valid children. `DIR_PARENTS` maps back up. Multi-segment paths (`cd users/andres`) are supported. `currentDir` values: `root`, `users`, `music`, `video`, `merch`, `music/segmentation`, `music/unreleased`, and member names (`adharsh`, `tayla`, `nick`, `andres`).
+
+Note: the directory is `video` (singular), not `videos`.
+
+### `execute(raw, silent, absolute)`
+
+The core command dispatcher. Key behaviours:
+- **Hierarchy check**: single-segment `cd` commands validate that the target is a child of `currentDir` in `DIR_CHILDREN`. This prevents navigating to sibling/parent dirs by name.
+- **`absolute = true`**: bypasses the hierarchy check entirely. Always pass this when navigating programmatically from GUI windows (desktop icons, explorer clicks, app open functions), so navigation works regardless of where the terminal currently sits.
+- **`silent = true`**: suppresses printing the prompt echo line.
 
 ### Commands
 
@@ -111,24 +122,71 @@ Tab completion and arrow-key command history are supported. Typos auto-correct t
 
 ## Desktop UI
 
-The terminal window sits on a Win9x desktop with three additional UI layers:
+The terminal window sits on a Win9x desktop. Additional layers:
 
 **Taskbar** (`#taskbar`) — pinned to the bottom. Contains:
 - Start button (`#start-btn`) — toggles the start menu
-- Task area (`#taskbar-tasks`) — one static button `heel.exe` (always active)
+- Task area (`#taskbar-tasks`) — one static button `HL-DOS.exe` (always active); app windows append their own buttons dynamically when opened and remove them on close
 - Tray (`#taskbar-tray`) — visitor count (from GoatCounter) + live clock
 
 **Start menu** (`#start-menu`) — appears above taskbar on Start click. Has a vertical "HEEL" sidebar and buttons that fire terminal commands directly (`data-cmd` attribute). Clicking outside dismisses it.
 
-**Desktop icons** (`#desktop-icons`) — rendered dynamically from a `DESKTOP_ICONS` array, each `{ label, icon, cmd }`. Clicking an icon runs its `cmd` in the terminal. Icons deselect on outside click.
+**Desktop icons** (`#desktop-icons`) — rendered dynamically from the `desktopDirs` array `['users', 'merch', 'music', 'video']`. Each icon has a CSS class for its graphic:
+- `users` → `.folder-icon` (Win9x yellow folder)
+- `merch` → `.globe-icon` (CSS blue sphere with latitude/longitude lines)
+- `music` → `.app-icon` (grey disc with ♪)
+- `video` → `.vlc-icon` (orange traffic cone)
 
-**Window dragging** — the `.window` element is draggable via its `.title-bar`. Constrained to viewport bounds. `body.dragging` class applied during drag to suppress text selection.
+Double-clicking a desktop icon opens its app window AND navigates the terminal using `execute('cd <dir>', false, true)` (absolute mode). Icons highlight when their directory is active in the terminal.
+
+**Window dragging** — all `.window` elements are draggable via their `.title-bar`. Constrained to viewport bounds. `body.dragging` class applied during drag to suppress text selection.
+
+**Window focus / z-index** — managed by `vlcBringToFront(focused)`. Uses a global `zTop` counter (starts at 25): each call increments `zTop` and assigns it only to the focused window. Other windows keep their current z-index, preserving natural stacking order. Registered for: `terminal`, `player`, `vlc`, `merch`, `explorer`.
 
 **Visitor counter** — fetched from GoatCounter on page load, stored in `visitorCount`. Displayed in the tray and also surfaced during the boot sequence as a `detect` line.
 
+## App Windows
+
+Four floating Win9x-style windows sit on the desktop alongside the terminal. All are draggable, minimizable (title bar `_` button collapses body, taskbar button toggles), and closeable (taskbar button removed on close). Each appends/removes its own taskbar button.
+
+### weltamp.exe — music player
+- Element: `#player-window` / `.player-window`
+- Opened by: `openPlayer()` — double-clicking the music desktop icon
+- Contains: LCD track display, progress bar, prev/play/stop/next controls, album tabs (Segmentation / Demos), playlist
+- Taskbar label: `weltamp.exe`
+
+### HLC.exe — video player
+- Element: `#vlc-window` / `.vlc-window`
+- Opened by: `openVlc(videoId, title)` — double-clicking video desktop icon, clicking a video dirlink in the terminal, or typing a `.mp4` filename
+- Contains: YouTube embed (privacy-enhanced), drag overlay, playback controls, progress bar
+- Also navigates terminal to `cd video` on open
+- Taskbar label: `HLC.exe`
+
+### internet.exe — merch browser
+- Element: `#merch-window` / `.merch-window`
+- Opened by: `openMerchBrowser()` — double-clicking the merch desktop icon or typing `buy <item>`
+- Styled as Internet Explorer with Back/Forward/Home toolbar and address bar (`http://www.heelband.com/store/`)
+- Title bar: `HEEL Online Store - Internet Explorer`
+- Contains a grid of merch items; clicking one opens the item detail view
+- Taskbar label: `internet.exe`
+
+### explorer.exe — Welt Explorer (users folder)
+- Element: `#explorer-window` / `.explorer-window`
+- Opened by: `openExplorer()` — double-clicking the users desktop icon
+- Title bar: `users - Welt Explorer` (updates to `<name> - Welt Explorer` when inside a member folder)
+- Toolbar: Back button + address bar (`C:\heel\users\`)
+- **Two views**:
+  - **Users view**: shows 4 member folder icons; double-clicking navigates into that member
+  - **Member view**: shows that member's files (`photo.jpg`, `profile.txt`, optionally `gear.txt` / `data.txt`); double-clicking a file focuses the terminal and runs the file command
+- **Bidirectional terminal sync**: `updateExplorerState()` is called from `updatePrompt()` on every navigation. If the explorer is open and `currentDir` is `users` or a member name, the explorer re-renders to match. This means typing `cd andres` in the terminal also updates the explorer.
+- **Back button**: runs `cd ..` in terminal (which sets `currentDir` back to `users`)
+- **Opening**: calls `execute('cd users', false, true)` to navigate terminal; also renders users view directly
+- **IMPORTANT**: `explorerStatusEl` (`#explorer-status`) must exist in the HTML. If it's missing, `explorerRenderUsers()` throws a TypeError inside `updatePrompt()`, silently breaking `cd users` terminal output.
+- Taskbar label: `explorer.exe`
+
 ## Boot sequence
 
-BIOS text → driver loading → progress bar → HEEL ASCII animation → `-- WELCOME --` → `[ press any key ]` gate → clear → prompt. On mobile, auto-runs `help` after the gate. Uses `localStorage` is not implemented — boot runs every visit.
+BIOS text → driver loading → progress bar → HEEL ASCII animation → `-- WELCOME --` → `[ press any key ]` gate → clear → prompt. On mobile, auto-runs `help` after the gate. `localStorage` is not used — boot runs every visit. Minimizing the terminal while maximized automatically un-maximizes (restoring desktop icons).
 
 ## Easter egg
 

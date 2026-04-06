@@ -461,50 +461,222 @@ body.dragging {
     background: #ffaa44;
 }
 
-/* ── browser (Firefox-ish) icon for merch ── */
-.browser-icon {
-    width: 30px;
-    height: 30px;
+/* ── globe icon for merch ── */
+.globe-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #7ec8ff, #1a6abf 50%, #09347a);
+    border: 1px solid #062050;
     position: relative;
     margin: 0 auto;
-    margin-top: 4px;
-    border-radius: 50%;
-    background: radial-gradient(circle at 38% 32%, #b8e0ff, #2277dd 42%, #061e6e);
-    box-shadow: inset -1px -2px 3px rgba(0,0,0,0.3);
+    margin-top: 1px;
+    overflow: hidden;
+    box-shadow: inset -2px -2px 4px rgba(0,0,0,0.35);
 }
 
-/* orange flame arc */
-.browser-icon::before {
+/* latitude lines */
+.globe-icon::before {
     content: '';
     position: absolute;
-    inset: -5px;
-    border-radius: 50%;
-    border: 8px solid transparent;
-    border-top-color: #ff7700;
-    border-right-color: #ee5500;
-    transform: rotate(10deg);
+    inset: 0;
+    background: repeating-linear-gradient(
+        to bottom,
+        transparent 0px,
+        transparent 9px,
+        rgba(255,255,255,0.22) 9px,
+        rgba(255,255,255,0.22) 10px
+    );
 }
 
-/* flame tip — small teardrop at leading edge */
-.browser-icon::after {
+/* central longitude ellipse */
+.globe-icon::after {
     content: '';
     position: absolute;
-    width: 10px;
-    height: 10px;
-    top: -5px;
-    right: -1px;
-    background: radial-gradient(circle at 38% 38%, #ffcc44, #ff6600);
-    border-radius: 50% 0 50% 50%;
-    transform: rotate(40deg);
+    width: 22px;
+    height: 36px;
+    top: 0;
+    left: 7px;
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 50%;
 }
 
-.desktop-icon:hover .browser-icon,
-.desktop-icon.active .browser-icon {
-    background: radial-gradient(circle at 38% 32%, #cceeff, #3388ee 42%, #0a2d88);
+.desktop-icon:hover .globe-icon,
+.desktop-icon.active .globe-icon {
+    background: radial-gradient(circle at 35% 30%, #a8daff, #2d7fd4 50%, #0d4594);
 }
 
 .desktop-icon.active span {
     color: #ffff99;
+}
+
+/* ── windows explorer (users folder) ── */
+.explorer-window {
+    width: 340px;
+    display: none;
+    position: fixed;
+    z-index: 25;
+    user-select: none;
+}
+
+.explorer-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 4px;
+    background: #d4d0c8;
+    border-bottom: 1px solid #808080;
+}
+
+.explorer-body {
+    background: #ffffff;
+    padding: 16px 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    min-height: 150px;
+    align-content: flex-start;
+}
+
+.explorer-statusbar {
+    background: #d4d0c8;
+    padding: 2px 6px;
+    font-size: 11px;
+    font-family: 'Tahoma', sans-serif;
+    color: #000;
+    border-top: 1px solid #ffffff;
+}
+
+.explorer-icon {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    padding: 4px;
+    width: 68px;
+    border: 1px solid transparent;
+    user-select: none;
+}
+
+.explorer-icon:hover {
+    background: rgba(49, 106, 197, 0.12);
+    border-color: #316ac5;
+}
+
+.explorer-icon.active {
+    background: #316ac5;
+    border-color: #316ac5;
+}
+
+.expl-folder {
+    width: 36px;
+    height: 29px;
+    background: #d4a832;
+    border: 1px solid #7a5c00;
+    position: relative;
+    margin: 0 auto;
+}
+
+.expl-folder::before {
+    content: '';
+    position: absolute;
+    top: -6px;
+    left: -1px;
+    width: 14px;
+    height: 6px;
+    background: #d4a832;
+    border: 1px solid #7a5c00;
+    border-bottom: none;
+    border-radius: 2px 4px 0 0;
+}
+
+.explorer-icon:hover .expl-folder,
+.explorer-icon.active .expl-folder {
+    background: #f0c84a;
+    border-color: #5a4000;
+}
+
+.explorer-icon:hover .expl-folder::before,
+.explorer-icon.active .expl-folder::before {
+    background: #f0c84a;
+    border-color: #5a4000;
+}
+
+.explorer-icon span {
+    font-size: 11px;
+    font-family: 'Tahoma', sans-serif;
+    color: #000;
+    text-align: center;
+    word-break: break-word;
+    line-height: 1.2;
+}
+
+.explorer-icon.active span {
+    color: #ffffff;
+}
+
+.explorer-window.minimized .explorer-toolbar,
+.explorer-window.minimized .explorer-body,
+.explorer-window.minimized .explorer-statusbar {
+    display: none;
+}
+
+/* text file icon */
+.expl-file-txt {
+    width: 28px;
+    height: 34px;
+    background: #ffffff;
+    border: 1px solid #808080;
+    position: relative;
+    margin: 0 auto;
+}
+
+.expl-file-txt::before {
+    content: '';
+    position: absolute;
+    top: 0; right: 0;
+    width: 9px; height: 9px;
+    background: #d4d0c8;
+    border-left: 1px solid #808080;
+    border-bottom: 1px solid #808080;
+}
+
+.expl-file-txt::after {
+    content: '';
+    position: absolute;
+    top: 13px; left: 4px; right: 4px;
+    height: 1px;
+    background: #aaaaaa;
+    box-shadow: 0 4px 0 #aaaaaa, 0 8px 0 #aaaaaa, 0 12px 0 #aaaaaa;
+}
+
+/* image file icon */
+.expl-file-img {
+    width: 28px;
+    height: 30px;
+    background: #ffffff;
+    border: 1px solid #808080;
+    position: relative;
+    margin: 0 auto;
+    overflow: hidden;
+}
+
+.expl-file-img::before {
+    content: '';
+    position: absolute;
+    inset: 4px 4px 6px 4px;
+    background: linear-gradient(160deg, #c8e4f8 40%, #6699cc);
+    border: 1px solid #aac4d8;
+}
+
+.expl-file-img::after {
+    content: '';
+    position: absolute;
+    bottom: 7px; left: 4px; right: 4px;
+    height: 7px;
+    background: #336699;
+    clip-path: polygon(0% 100%, 30% 20%, 55% 60%, 75% 30%, 100% 70%, 100% 100%);
 }
 
 @media (max-width: 900px) {
