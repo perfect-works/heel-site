@@ -1217,8 +1217,7 @@ body.dragging #vlc-drag-overlay {
 }
 
 /* ── minimized ── */
-.window.minimized .content,
-.window.minimized #jumpscare {
+.window.minimized .content {
     display: none;
 }
 
@@ -1429,10 +1428,33 @@ body {
     cursor: default;
     color: #000000;
     white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .start-item:hover {
     background: #000080;
+    color: #ffffff;
+}
+
+.si-icon {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    width: 16px;
+}
+
+.start-spacer {
+    flex: 1;
+}
+
+.si-shutdown {
+    color: #800000;
+}
+
+.si-shutdown:hover {
+    background: #800000;
     color: #ffffff;
 }
 
@@ -1531,19 +1553,30 @@ body {
 
 #jumpscare {
     display: none;
-    position: absolute;
-    inset: 0;
-    z-index: 10;
-    background: #000;
-}
-
-#jumpscare img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+    position: fixed;
+    width: 680px;
+    height: 480px;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 9999;
+    flex-direction: column;
 }
 
 #jumpscare.active {
+    display: flex;
+}
+
+.jumpscare-body {
+    flex: 1;
+    overflow: hidden;
+    background: #000;
+}
+
+.jumpscare-body img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
     display: block;
 }
 

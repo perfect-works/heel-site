@@ -361,7 +361,7 @@
             }
             lines.push({ t: 'dirlink', label: tc(0, true) + '[<- back]', cmd: 'cd ..' });
             lines.push({ t: 'blank' });
-            lines.push({ t: 'text', v: "click a file or type 'cat <file>' to watch", dim: true });
+            lines.push({ t: 'text', v: "click a file or type './<file>' to watch", dim: true });
 
         } else if (currentDir === 'merch') {
             lines.push({ t: 'text', v: 'C:\\heel\\merch\\' });
@@ -395,7 +395,7 @@
         } else if (getMerchItem(currentDir)) {
             var mitem = getMerchItem(currentDir);
             lines.push({ t: 'text', v: promptPath() + '\\' });
-            lines.push({ t: 'dirlink', label: tc(0, false) + 'photo.jpg', cmd: 'photo.jpg' });
+            lines.push({ t: 'dirlink', label: tc(0, false) + 'photo.jpg', cmd: './photo.jpg' });
             if (mitem.price) {
                 lines.push({ t: 'dirlink', label: tc(0, false) + 'price.txt <span style="opacity:0.55">\u2014 ' + mitem.price + '</span>', cmd: 'cat price.txt' });
             }
@@ -413,10 +413,10 @@
             lines.push({ t: 'dirlink', label: tc(0, false) + 'profile.txt',   cmd: 'cat profile.txt'  });
             if (mem.gear)  lines.push({ t: 'dirlink', label: tc(0, false) + 'gear.txt',  cmd: 'cat gear.txt'  });
             if (mem.data) lines.push({ t: 'dirlink', label: tc(0, false) + 'data.txt', cmd: 'cat data.txt' });
-            lines.push({ t: 'dirlink', label: tc(0, false) + 'photo.jpg', cmd: 'photo.jpg' });
-            lines.push({ t: 'dirlink', label: tc(0, true)  + '[<- back]', cmd: 'cd ..'     });
+            lines.push({ t: 'dirlink', label: tc(0, false) + 'photo.jpg', cmd: './photo.jpg' });
+            lines.push({ t: 'dirlink', label: tc(0, true)  + '[<- back]', cmd: 'cd ..'      });
             lines.push({ t: 'blank' });
-            lines.push({ t: 'text', v: "click a file or type 'cat &lt;file&gt;' to open", dim: true });
+            lines.push({ t: 'text', v: "click a file, 'cat &lt;file.txt&gt;', or './<file>' to open", dim: true });
         }
 
         lines.push({ t: 'blank' });
@@ -432,10 +432,10 @@
         ];
         if (mem.gear)  lines.push({ t: 'dirlink', label: tc(0, false) + 'gear.txt',  cmd: 'cat gear.txt'  });
         if (mem.data) lines.push({ t: 'dirlink', label: tc(0, false) + 'data.txt', cmd: 'cat data.txt' });
-        lines.push({ t: 'dirlink', label: tc(0, false) + 'photo.jpg', cmd: 'photo.jpg' });
-        lines.push({ t: 'dirlink', label: tc(0, true)  + '[<- back]', cmd: 'cd ..'     });
+        lines.push({ t: 'dirlink', label: tc(0, false) + 'photo.jpg', cmd: './photo.jpg' });
+        lines.push({ t: 'dirlink', label: tc(0, true)  + '[<- back]', cmd: 'cd ..'      });
         lines.push({ t: 'blank' });
-        lines.push({ t: 'text', v: "click a file or type 'cat &lt;file&gt;' to open", dim: true });
+        lines.push({ t: 'text', v: "click a file, 'cat &lt;file.txt&gt;', or './<file>' to open", dim: true });
         lines.push({ t: 'blank' });
         return lines;
     }
@@ -460,7 +460,7 @@
         var lines = [
             { t: 'blank' },
             { t: 'text', v: pathLabel },
-            { t: 'dirlink', label: tc(0, false) + 'photo.jpg', cmd: 'photo.jpg' },
+            { t: 'dirlink', label: tc(0, false) + 'photo.jpg', cmd: './photo.jpg' },
         ];
         if (mitem && mitem.photo) {
             lines.push({ t: 'blank' });
@@ -485,7 +485,7 @@
     /* ─── boot sequence ───────────────────────────────────── */
 
     var BOOT_LINES_PRE = [
-        { t: 'text', v: 'WELT BIOS v1.0 &nbsp;&nbsp;&nbsp;(C) HEEL CORPORATION 1998', dim: true },
+        { t: 'text', v: 'WELT BIOS v1.0 &nbsp;&nbsp;&nbsp;(C) HEEL CORPORATION 2023', dim: true },
         { t: 'blank' },
         { t: 'text', v: 'CPU: Intel(R) Pentium(R) II @ 300 MHz' },
         { t: 'text', v: 'MEMORY TEST: 65536K ......... OK' },
@@ -507,8 +507,8 @@
 
     var BOOT_LINES_POST = [
         { t: 'blank' },
-        { t: 'text', v: 'Welt OS [Version 1.0.1998]', dim: true },
-        { t: 'text', v: '(C) Copyright HEEL Corp 1998. All rights reserved.', dim: true },
+        { t: 'text', v: 'Welt OS [Version 1.0.2023]', dim: true },
+        { t: 'text', v: '(C) Copyright HEEL Corp 2023. All rights reserved.', dim: true },
         { t: 'blank' },
     ];
 
@@ -530,8 +530,6 @@
         'help': function () {
             return [
                 { t: 'blank' },
-                { t: 'text', v: '<span style="opacity:0.35">click or type commands</span>' },
-                { t: 'blank' },
                 { t: 'text', v: 'USAGE:&nbsp;&nbsp;&#60;command&#62; [--flag]', dim: true },
                 { t: 'blank' },
                 { t: 'hrow', cmd: 'ls',                     desc: 'list current directory', exec: 'ls'                     },
@@ -543,6 +541,8 @@
                 { t: 'hrow-sub',  flag: '--streaming',      desc: '',                      exec: 'fetch --streaming',      last: false },
                 { t: 'hrow-sub',  flag: '--upcoming-shows', desc: '',                      exec: 'fetch --upcoming-shows', last: true  },
                 { t: 'hrow', cmd: 'clear',                  desc: '',                      exec: 'clear'                  },
+                { t: 'blank' },
+                { t: 'text', v: '<span style="opacity:0.6">click or type commands</span>' },
                 { t: 'blank' },
             ];
         },
@@ -604,6 +604,7 @@
         },
         'cd ../':  function () { return COMMANDS['cd ..'](); },
         'cd back': function () { return COMMANDS['cd ..'](); },
+        'back':    function () { return COMMANDS['cd ..'](); },
 
         'cd /':  function () { currentDir = 'root'; updatePrompt(); cdClear(); return []; },
         'cd \\': function () { currentDir = 'root'; updatePrompt(); cdClear(); return []; },
@@ -1291,7 +1292,7 @@
         }
 
         /* photo commands: photo / photo.jpg / cat photo.jpg / open photo.jpg etc. */
-        var PHOTO_CMDS = ['photo', 'photo.jpg', 'cat photo.jpg', 'cat photo', 'open photo.jpg', 'open photo'];
+        var PHOTO_CMDS = ['photo', 'photo.jpg', './photo.jpg', 'cat photo.jpg', 'cat photo', 'open photo.jpg', 'open photo'];
         if (PHOTO_CMDS.indexOf(lower) !== -1) {
             var photoSrc = null;
             if (MEMBERS[currentDir])        photoSrc = MEMBERS[currentDir].photo;
@@ -1305,7 +1306,7 @@
 
         /* video file commands: filename.mp4 or cat filename.mp4 */
         if (currentDir === 'video') {
-            var vcmd = lower.indexOf('cat ') === 0 ? lower.slice(4).trim() : lower;
+            var vcmd = lower.indexOf('cat ') === 0 ? lower.slice(4).trim() : lower.indexOf('./') === 0 ? lower.slice(2) : lower;
             for (var vci = 0; vci < VIDEOS.length; vci++) {
                 if (VIDEOS[vci].file === vcmd || VIDEOS[vci].id === vcmd) {
                     if (window.innerWidth > 900) {
@@ -1565,14 +1566,31 @@
     /* ─── jumpscare ────────────────────────────────────────── */
     var jumpscare = document.getElementById('jumpscare');
 
-    document.getElementById('close-btn').addEventListener('click', function (e) {
-        e.stopPropagation();
+    function triggerJumpscare() {
         var snd = new Audio('sounds/jumpscare.mp3');
         snd.play().catch(function () {});
         jumpscare.classList.add('active');
         setTimeout(function () {
             jumpscare.classList.remove('active');
         }, 1500);
+    }
+
+    document.getElementById('jumpscare-close').addEventListener('click', function (e) {
+        e.stopPropagation();
+        jumpscare.classList.remove('active');
+    });
+    jumpscare.addEventListener('click', function () {
+        jumpscare.classList.remove('active');
+    });
+
+    document.getElementById('close-btn').addEventListener('click', function (e) {
+        e.stopPropagation();
+        if (window.innerWidth <= 900) {
+            triggerJumpscare();
+        } else {
+            windowEl.style.display = 'none';
+            document.getElementById('task-heel').classList.remove('active');
+        }
     });
 
     /* ─── startup: boot → welcome → clear → prompt ────────── */
@@ -2134,7 +2152,7 @@
                 + '</div>';
         }
         html += '</div>'
-            + '<div class="merch-page-footer">&copy; 1998 HEEL CORP. ALL RIGHTS RESERVED &nbsp;|&nbsp; BEST VIEWED IN INTERNET EXPLORER 5.5 AT 800&times;600</div>'
+            + '<div class="merch-page-footer">&copy; 2023 HEEL CORP. ALL RIGHTS RESERVED &nbsp;|&nbsp; BEST VIEWED IN INTERNET EXPLORER 5.5 AT 800&times;600</div>'
             + '</div>';
         merchIeBody.innerHTML = html;
         merchIeBody.querySelectorAll('.merch-grid-item').forEach(function (el) {
@@ -2162,7 +2180,7 @@
             + '<div class="merch-item-price">' + item.price + '</div>'
             + (item.href ? '<a class="merch-buy-btn" href="' + item.href + '" target="_blank" rel="noopener">BUY NOW</a>' : '')
             + '</div>'
-            + '<div class="merch-page-footer">&copy; 1998 HEEL CORP. ALL RIGHTS RESERVED &nbsp;|&nbsp; BEST VIEWED IN INTERNET EXPLORER 5.5 AT 800&times;600</div>'
+            + '<div class="merch-page-footer">&copy; 2023 HEEL CORP. ALL RIGHTS RESERVED &nbsp;|&nbsp; BEST VIEWED IN INTERNET EXPLORER 5.5 AT 800&times;600</div>'
             + '</div>';
         merchIeBody.innerHTML = html;
         merchIeBody.scrollTop = 0;
@@ -2815,7 +2833,12 @@
 
     // Task button
     document.getElementById('task-heel').addEventListener('click', function () {
-        toggleMinimize();
+        if (windowEl.style.display === 'none') {
+            windowEl.style.display = '';
+            setMinimized(false);
+        } else {
+            toggleMinimize();
+        }
     });
 
     // Start menu
@@ -2840,6 +2863,7 @@
             var cmd = this.dataset.cmd;
             startMenu.classList.remove('open');
             startBtn.classList.remove('open');
+            if (cmd === 'shutdown') { triggerJumpscare(); return; }
             if (windowEl.classList.contains('minimized')) setMinimized(false);
             execute(cmd);
             focusInput();
