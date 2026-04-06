@@ -731,6 +731,16 @@
         'cat readme': function () { return COMMANDS['cat readme.txt'](); },
         'readme':     function () { return COMMANDS['cat readme.txt'](); },
 
+        'sudo rm -rf': function () { window.close(); return [{ t: 'blank' }, { t: 'text', v: 'obliterating...', dim: true }, { t: 'blank' }]; },
+        'sudo rm -rf /': function () { return COMMANDS['sudo rm -rf'](); },
+        'delete system32': function () { return COMMANDS['sudo rm -rf'](); },
+
+        'cat cat': function () {
+            var cats = ['(=^･ω･^=)', '(=^･^=)', '/ᐠ｡ꞈ｡ᐟ\\', '(=ΦωΦ=)', '=^_^=', '(^･o･^)', ':3'];
+            var pick = cats[Math.floor(Math.random() * cats.length)];
+            return [{ t: 'blank' }, { t: 'text', v: pick }, { t: 'blank' }];
+        },
+
         'pause': function () {
             if (!currentAudio || audioPaused) {
                 return [{ t: 'blank' }, { t: 'error', v: 'nothing is playing.' }, { t: 'blank' }];
@@ -786,6 +796,67 @@
         },
 
         'breakout': function () { openBreakout(); return []; },
+
+        'segmentation tracklist': function () {
+            return [
+                { t: 'blank' },
+                { t: 'text', v: '1. Segmentation (Intro)' },
+                { t: 'text', v: '2. Stare' },
+                { t: 'text', v: '3. August' },
+                { t: 'text', v: '4. Through Me' },
+                { t: 'text', v: '5. Daisy Chain' },
+                { t: 'text', v: '6. Some Other Memory' },
+                { t: 'text', v: '7. Waste' },
+                { t: 'text', v: '8. You\'re So Far Away' },
+                { t: 'text', v: '9. In My Way' },
+                { t: 'text', v: '10. Honeycomb' },
+                { t: 'blank' },
+            ];
+        },
+
+        'segmentation band': function () {
+            return [
+                { t: 'blank' },
+                { t: 'text', v: 'Adharsh Rajavel' },
+                { t: 'text', v: 'Nicholas Dienstbier' },
+                { t: 'text', v: 'Andres Gonzalez' },
+                { t: 'text', v: 'Tayla Diza' },
+                { t: 'blank' },
+            ];
+        },
+
+        'segmentation produced_mixed_by': function () {
+            return [
+                { t: 'blank' },
+                { t: 'text', v: 'Adharsh Rajavel' },
+                { t: 'text', v: 'Toby Pipes' },
+                { t: 'blank' },
+            ];
+        },
+
+        'segmentation engineered_by': function () {
+            return [{ t: 'blank' }, { t: 'text', v: 'Toby Pipes' }, { t: 'blank' }];
+        },
+
+        'segmentation mastered_by': function () {
+            return [{ t: 'blank' }, { t: 'text', v: 'Todd Pipes' }, { t: 'blank' }];
+        },
+
+        'segmentation cover_by': function () {
+            return [{ t: 'blank' }, { t: 'text', v: 'Adharsh Rajavel' }, { t: 'blank' }];
+        },
+
+        'segmentation thank_you': function () {
+            return [
+                { t: 'blank' },
+                { t: 'text', v: 'Toby Pipes' },
+                { t: 'text', v: 'Frankie Polonsky' },
+                { t: 'text', v: 'Bryan/College Station' },
+                { t: 'text', v: 'KANM' },
+                { t: 'text', v: 'Andie and Willow' },
+                { t: 'blank' },
+            ];
+        },
     };
 
     /* ─── render a line descriptor into a DOM element ─────── */

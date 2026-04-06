@@ -21,7 +21,7 @@ Three files plus assets:
 ### Assets
 
 - `images/album_front_cover.png` — shown by `fetch --new-releases`
-- `images/album_back_cover.png` — unused
+- `images/album_back_cover.png` — referenced by the `segmentation` commands (tracklist, credits)
 - `images/RussianSleepExperimentGuy.png` — jumpscare image
 - `images/users/<name>/` — member photo (one PNG per member, displayed as `photo.jpg` in-terminal)
 - `sounds/jumpscare.mp3` — jumpscare audio
@@ -87,12 +87,21 @@ The core command dispatcher. Key behaviours:
 | `pause` / `resume` / `stop` | Audio controls |
 | `buy <item>` | Open Square checkout |
 | `clear` | Clear terminal |
+| `segmentation tracklist` | Track listing (1–10) |
+| `segmentation band` | Band member names |
+| `segmentation produced_mixed_by` | Producer / mixer credits |
+| `segmentation engineered_by` | Engineer credit |
+| `segmentation mastered_by` | Mastering credit |
+| `segmentation cover_by` | Cover art credit |
+| `segmentation thank_you` | Thank-you list |
+| `sudo rm -rf` / `delete system32` | Attempts to close the tab |
+| `cat cat` | Prints a random cat face emoticon |
 
 Member file commands (context-sensitive to current member dir):
 - `cat profile.txt` / `profile` — types out bio
 - `cat gear.txt` / `gear` — types out gear list (if member has gear)
 - `cat data.txt` / `data` — types out likes/data (if member has data)
-- `photo.jpg` / `cat photo.jpg` / `open photo` — reveals member photo with scanline animation
+- `./<file>` / `cat photo.jpg` / `open photo` — reveals member photo with scanline animation
 
 Tab completion and arrow-key command history are supported. Typos auto-correct to the closest match (shown with a dim `→` hint).
 
@@ -189,6 +198,20 @@ Four floating Win9x-style windows sit on the desktop alongside the terminal. All
 
 BIOS text → driver loading → progress bar → HEEL ASCII animation → `-- WELCOME --` → `[ press any key ]` gate → clear → prompt. On mobile, auto-runs `help` after the gate. `localStorage` is not used — boot runs every visit. Minimizing the terminal while maximized automatically un-maximizes (restoring desktop icons).
 
-## Easter egg
+## Terminal close behavior
 
-Clicking the `×` title-bar button triggers a jumpscare: white flash, then `RussianSleepExperimentGuy.png` expands from the top-right with `jumpscare.mp3`. Clicking dismisses it.
+- **Desktop**: `×` button hides the terminal window (not jumpscare); `HL-DOS.exe` taskbar button remains and reopens it.
+- **Mobile**: `×` button triggers the jumpscare.
+
+## Jumpscare
+
+`#jumpscare` is a standalone `position: fixed` Win9x-style window (680×480px, centered, `z-index: 9999`), independent of the terminal. Triggered by:
+- Mobile terminal `×` button
+- Start menu → Shut Down...
+
+Plays `sounds/jumpscare.mp3`, auto-dismisses after 1.5s, or click/`×` to dismiss early.
+
+## Easter eggs
+
+- `cat cat` — prints a random cat face emoticon
+- `sudo rm -rf` / `sudo rm -rf /` / `delete system32` — calls `window.close()` (browser may block)
