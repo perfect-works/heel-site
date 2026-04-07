@@ -128,15 +128,15 @@
     var TRACKS = {
         segmentation: [
             { id: 'segmentation',       label: '01 - segmentation',       file: 'sounds/music/segmentation/01_segmentation.mp3'     },
-            { id: 'stare',              label: '02 - stare',              file: 'sounds/music/segmentation/02_stare.mp3'            },
-            { id: 'august',             label: '03 - august',             file: 'sounds/music/segmentation/03_august.mp3'           },
-            { id: 'through me',         label: '04 - through me',         file: 'sounds/music/segmentation/04_through_me.mp3'       },
-            { id: 'daisy chain',        label: '05 - daisy chain',        file: 'sounds/music/segmentation/05_daisy_chain.mp3'      },
-            { id: 'some other memory',  label: '06 - some other memory',  file: 'sounds/music/segmentation/06_some_other_memory.mp3'},
-            { id: 'waste',              label: '07 - waste',              file: 'sounds/music/segmentation/07_waste.mp3'            },
-            { id: "you're so far away", label: "08 - you're so far away", file: 'sounds/music/segmentation/08_youre_so_far_away.mp3'},
-            { id: 'in my way',          label: '09 - in my way',          file: 'sounds/music/segmentation/09_in_my_way.mp3'        },
-            { id: 'honeycomb',          label: '10 - honeycomb',          file: 'sounds/music/segmentation/10_honeycomb.mp3'        },
+            { id: 'stare',              label: '02 - stare',              file: 'sounds/music/segmentation/02_stare.mp3',             lyricsFile: '02_stare.txt'              },
+            { id: 'august',             label: '03 - august',             file: 'sounds/music/segmentation/03_august.mp3',            lyricsFile: '03_august.txt'             },
+            { id: 'through me',         label: '04 - through me',         file: 'sounds/music/segmentation/04_through_me.mp3',        lyricsFile: '04_through_me.txt'         },
+            { id: 'daisy chain',        label: '05 - daisy chain',        file: 'sounds/music/segmentation/05_daisy_chain.mp3',       lyricsFile: '05_daisy_chain.txt'        },
+            { id: 'some other memory',  label: '06 - some other memory',  file: 'sounds/music/segmentation/06_some_other_memory.mp3', lyricsFile: '06_some_other_memory.txt'  },
+            { id: 'waste',              label: '07 - waste',              file: 'sounds/music/segmentation/07_waste.mp3',             lyricsFile: '07_waste.txt'              },
+            { id: "you're so far away", label: "08 - you're so far away", file: 'sounds/music/segmentation/08_youre_so_far_away.mp3', lyricsFile: '08_ysfa.txt'               },
+            { id: 'in my way',          label: '09 - in my way',          file: 'sounds/music/segmentation/09_in_my_way.mp3',         lyricsFile: '09_in_my_way.txt'          },
+            { id: 'honeycomb',          label: '10 - honeycomb',          file: 'sounds/music/segmentation/10_honeycomb.mp3',         lyricsFile: '10_honeycomb.txt'          },
         ],
         unreleased: [],
         sgmt_demos: [],
@@ -605,7 +605,7 @@
     /* ─── command definitions ──────────────────────────────── */
 
     function fetchLyrics(tr) {
-        var lyricsFile = 'sounds/music/segmentation/lyrics/' + tr.id.replace(/\s+/g, '_') + '.txt';
+        var lyricsFile = 'sounds/music/segmentation/lyrics/' + (tr.lyricsFile || tr.id.replace(/\s+/g, '_') + '.txt');
         printLines([{ t: 'blank' }, { t: 'text', v: 'fetching lyrics...', dim: true }]);
         fetch(lyricsFile)
             .then(function (r) {
@@ -615,7 +615,7 @@
             .then(function (text) {
                 var lines = [{ t: 'blank' }, { t: 'text', v: tr.label.toUpperCase(), spaced: true }];
                 text.split('\n').forEach(function (line) {
-                    lines.push(line.trim() === '' ? { t: 'blank' } : { t: 'typewriter', v: line });
+                    lines.push(line.trim() === '' ? { t: 'blank' } : { t: 'typewriter', v: line, charDelay: 5 });
                 });
                 lines.push({ t: 'blank' });
                 printLines(lines);
