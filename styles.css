@@ -838,6 +838,7 @@ body.dragging {
 }
 
 @media (max-width: 900px) {
+    #max-btn { display: none; }
     #desktop-icons { display: none; }
 
     body.mobile-home #desktop-icons {
@@ -881,6 +882,13 @@ body.dragging {
     }
 }
 
+.mobile-merch-folder { display: none; }
+
+@media (max-width: 900px) {
+    body.mobile-home .desktop-icon .mobile-merch-folder { display: block; }
+    body.mobile-home .desktop-icon .globe-icon          { display: none;  }
+}
+
 .shortcut-icon {
     width: 44px;
     height: 44px;
@@ -893,6 +901,9 @@ body.dragging {
     align-items: center;
     justify-content: center;
     margin: 0 auto;
+}
+.shortcut-icon svg {
+    display: block;
 }
 
 .mobile-shortcut span {

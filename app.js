@@ -1733,7 +1733,9 @@
         icon.className = 'desktop-icon';
         icon.dataset.dir = dir;
         var iconDiv = dir === 'merch' ? 'globe-icon' : 'folder-icon';
-        icon.innerHTML = '<div class="' + iconDiv + '"></div><span>' + dir + '</span>';
+        icon.innerHTML = dir === 'merch'
+            ? '<div class="globe-icon"></div><div class="folder-icon mobile-merch-folder"></div><span>' + dir + '</span>'
+            : '<div class="' + iconDiv + '"></div><span>' + dir + '</span>';
         icon.addEventListener('dblclick', function () {
             if (dir === 'music') {
                 openExplorer('music');
@@ -1793,11 +1795,13 @@
 
     /* mobile app shortcut icons */
     (function () {
+        var rssIcon = '<svg width="14" height="14" viewBox="0 0 14 14"><circle cx="3" cy="11" r="1.5" fill="currentColor"/><path d="M2.5 7.5 Q6.5 7.5 6.5 11.5" stroke="currentColor" fill="none" stroke-width="1.4" stroke-linecap="round"/><path d="M2.5 4.5 Q9.5 4.5 9.5 11.5" stroke="currentColor" fill="none" stroke-width="1.4" stroke-linecap="round"/></svg>';
+        var calIcon = '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="3" width="14" height="12" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="1" y="3" width="14" height="4" fill="currentColor" opacity="0.35"/><line x1="5" y1="1" x2="5" y2="5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><line x1="11" y1="1" x2="11" y2="5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>';
         var shortcuts = [
-            { label: 'new releases', cmd: 'fetch --new-releases', icon: '&#9670;' },
-            { label: 'shows',        cmd: 'fetch --upcoming-shows', icon: '&#9654;' },
-            { label: 'stream',       cmd: 'fetch --streaming',      icon: '&#9835;' },
-            { label: 'socials',      cmd: 'fetch --socials',        icon: '@'       },
+            { label: 'new<br>releases', cmd: 'fetch --new-releases',   icon: rssIcon  },
+            { label: 'shows',           cmd: 'fetch --upcoming-shows',  icon: calIcon  },
+            { label: 'stream',          cmd: 'fetch --streaming',       icon: '&#9835;' },
+            { label: 'socials',         cmd: 'fetch --socials',         icon: '@'       },
         ];
         var row = document.createElement('div');
         row.id = 'mobile-shortcuts';
@@ -1819,7 +1823,14 @@
     var windowEl = document.querySelector('.window');
     document.getElementById('min-btn').addEventListener('click', function (e) {
         e.stopPropagation();
-        toggleMinimize();
+        if (window.innerWidth <= 900) {
+            skipToPrompt();
+            windowEl.style.display = 'none';
+            document.getElementById('task-heel').classList.remove('active');
+            document.body.classList.add('mobile-home');
+        } else {
+            toggleMinimize();
+        }
     });
     document.querySelector('.title-bar').addEventListener('click', function () {
         if (windowEl.classList.contains('minimized')) setMinimized(false);
