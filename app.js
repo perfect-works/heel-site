@@ -1,5 +1,23 @@
 (function () {
 
+    /* ─── upcoming shows (Google Sheets CSV) ──────────────── */
+    var SHOWS = [];
+    fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vTPfMXHrmoomviVZrQvEWcSvwWsWLvFh96HAChufRtqNPVpDEc7qFNJJk--T2RQmouUG9OA71rQDH6_/pub?output=csv')
+        .then(function (r) { return r.text(); })
+        .then(function (csv) {
+            var lines = csv.trim().split('\n').slice(1);
+            SHOWS = lines.map(function (line) {
+                var cols = line.split(',');
+                return {
+                    date:  (cols[0] || '').trim(),
+                    city:  (cols[1] || '').trim(),
+                    venue: (cols[2] || '').trim(),
+                    href:  (cols[3] || '').trim()
+                };
+            }).filter(function (s) { return s.date; });
+        })
+        .catch(function () { /* shows stay empty */ });
+
     /* ─── visitor count (GoatCounter) ─────────────────────── */
     var visitorCount = null;
     fetch('https://heel.goatcounter.com/counter/%2F.json')
@@ -87,9 +105,9 @@
         { id: 'obey_tshirt',           label: 'obey_tshirt', href: 'https://heelband.bandcamp.com/merch/obey',                          price: '$20', photo: 'images/merch/obey_shirt.png'    },
         { id: 'segmentation_cd',       label: 'cd',       href: 'https://heelband.bandcamp.com/album/segmentation',                  price: '$13', photo: 'images/merch/cd.png'            },
         { id: 'segmentation_cassette', label: 'cassette', href: 'https://heelband.bandcamp.com/album/segmentation',                  price: '$11', photo: 'images/merch/cassette.png'      },
-        { id: 'bumper_sticker',        label: 'bumper sticker', href: 'https://heelband.bandcamp.com/merch/heaven-or-heel-bumper-sticker', price: '$5',  photo: 'images/merch/bumpersticker.png' },
+        { id: 'bumper',                label: 'bumper sticker', href: 'https://heelband.bandcamp.com/merch/heaven-or-heel-bumper-sticker', price: '$5',  photo: 'images/merch/bumpersticker.png' },
         { id: 'zine',                  label: 'zine',     href: 'https://heelband.bandcamp.com/merch/heel-zine',                       price: '$14', photo: 'images/merch/zine.png', samples: ['images/merch/zine/sample1.png', 'images/merch/zine/sample2.png'] },
-        { id: 'sticker_bundle',        label: 'sticker bundle', href: 'https://heelband.bandcamp.com/merch/heel-sticker-pack',          price: '$6',  photo: 'images/merch/sticker_bundle.png' },
+        { id: 'bundle',                label: 'sticker bundle', href: 'https://heelband.bandcamp.com/merch/heel-sticker-pack',          price: '$6',  photo: 'images/merch/sticker_bundle.png' },
     ];
 
     /* label → id map for short-name cd navigation (e.g. 'cd' → 'segmentation_cd') */
@@ -121,34 +139,23 @@
             { id: 'honeycomb',          label: '10 - honeycomb',          file: 'sounds/music/segmentation/10_honeycomb.mp3'        },
         ],
         unreleased: [],
-        sgmt_demos: [
-            { id: 'my_song_4',            label: 'my_song_4',            file: 'sounds/music/unreleased/segmentation/my_song_4.mp3'            },
-            { id: 'my_song_6',            label: 'my_song_6',            file: 'sounds/music/unreleased/segmentation/my_song_6.mp3'            },
-            { id: 'my_song_7',            label: 'my_song_7',            file: 'sounds/music/unreleased/segmentation/my_song_7.mp3'            },
-            { id: 'my_song_10',           label: 'my_song_10',           file: 'sounds/music/unreleased/segmentation/my_song_10.mp3'           },
-            { id: 'my_song_11',           label: 'my_song_11',           file: 'sounds/music/unreleased/segmentation/my_song_11.mp3'           },
-            { id: 'my_song_12',           label: 'my_song_12',           file: 'sounds/music/unreleased/segmentation/my_song_12.mp3'           },
-            { id: 'my_song_13',           label: 'my_song_13',           file: 'sounds/music/unreleased/segmentation/my_song_13.mp3'           },
-            { id: 'my_song_14',           label: 'my_song_14',           file: 'sounds/music/unreleased/segmentation/my_song_14.mp3'           },
-            { id: 'my_song_15',           label: 'my_song_15',           file: 'sounds/music/unreleased/segmentation/my_song_15.mp3'           },
-            { id: 'my_song_21',           label: 'my_song_21',           file: 'sounds/music/unreleased/segmentation/my_song_21.mp3'           },
-            { id: 'new_recording_629',    label: 'new_recording_629',    file: 'sounds/music/unreleased/segmentation/new_recording_629.mp3'    },
-            { id: 'new_recording_646',    label: 'new_recording_646',    file: 'sounds/music/unreleased/segmentation/new_recording_646.mp3'    },
-            { id: 'new_recording_686',    label: 'new_recording_686',    file: 'sounds/music/unreleased/segmentation/new_recording_686.mp3'    },
-            { id: 'new_recording_704',    label: 'new_recording_704',    file: 'sounds/music/unreleased/segmentation/new_recording_704.mp3'    },
-            { id: 'project_6_-_6_22_24', label: 'project_6_-_6_22_24', file: 'sounds/music/unreleased/segmentation/project_6_-_6_22_24.mp3' },
-            { id: 'untitled_-_6_5_24',   label: 'untitled_-_6_5_24',   file: 'sounds/music/unreleased/segmentation/untitled_-_6_5_24.mp3'   },
-        ],
-        heel2_demos: [
-            { id: 'andres_song', label: 'andres_song', file: 'sounds/music/unreleased/heel2/andres_song.mp3' },
-            { id: 'my_song_3',   label: 'my_song_3',   file: 'sounds/music/unreleased/heel2/my_song_3.mp3'   },
-            { id: 'my_song_5',   label: 'my_song_5',   file: 'sounds/music/unreleased/heel2/my_song_5.mp3'   },
-            { id: 'my_song_8',   label: 'my_song_8',   file: 'sounds/music/unreleased/heel2/my_song_8.mp3'   },
-            { id: 'my_song_9',   label: 'my_song_9',   file: 'sounds/music/unreleased/heel2/my_song_9.mp3'   },
-            { id: 'my_song_16',  label: 'my_song_16',  file: 'sounds/music/unreleased/heel2/my_song_16.mp3'  },
-            { id: 'my_song_17',  label: 'my_song_17',  file: 'sounds/music/unreleased/heel2/my_song_17.mp3'  },
-        ],
+        sgmt_demos: [],
+        heel2_demos: [],
     };
+
+    fetch('sounds/music/manifest.json')
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+            function toTracks(files, dir) {
+                return files.map(function (file) {
+                    var id = file.replace(/\.mp3$/i, '');
+                    return { id: id, label: id, file: 'sounds/music/unreleased/' + dir + '/' + file };
+                });
+            }
+            TRACKS.sgmt_demos  = toTracks(data.sgmt_demos  || [], 'segmentation');
+            TRACKS.heel2_demos = toTracks(data.heel2_demos || [], 'heel2');
+        })
+        .catch(function () { /* manifest unavailable, demo lists stay empty */ });
 
     /* ── photo registry (populated from manifest.json) ── */
     var PHOTOS = [];
@@ -170,6 +177,7 @@
                     dir:  'wallpapers'
                 };
             });
+            wallpapers.unshift({ id: 'blue', file: 'blue.png', src: null, dir: 'wallpapers' });
             PHOTOS = photos.concat(wallpapers);
         })
         .catch(function () { /* manifest unavailable, photo viewer will be empty */ });
@@ -189,8 +197,8 @@
         'wallpapers':         [],
         'users':              ['adharsh', 'tayla', 'nick', 'andres'],
         'music':              ['segmentation', 'unreleased'],
-        'merch':              ['obey_tshirt', 'segmentation', 'stickers', 'zine', 'sticker_bundle', 'bumper_sticker', 'bumper'],
-        'merch/stickers':     ['bumper_sticker', 'sticker_bundle', 'bumper'],
+        'merch':              ['obey_tshirt', 'segmentation', 'stickers', 'zine', 'bumper', 'bundle'],
+        'merch/stickers':     ['bumper', 'bundle'],
         'music/segmentation': [],
         'music/unreleased':   ['sgmt_demos', 'heel2_demos'],
         'sgmt_demos':         [],
@@ -203,7 +211,8 @@
         'obey_tshirt':            [],
         'segmentation_cd':        [],
         'segmentation_cassette':  [],
-        'bumper_sticker':         [],
+        'bumper':                 [],
+        'bundle':                 [],
     };
 
     /* ── parent directory map ── */
@@ -226,8 +235,8 @@
         'obey_tshirt':            'merch',
         'segmentation_cd':        'merch/segmentation',
         'segmentation_cassette':  'merch/segmentation',
-        'bumper_sticker':         'merch/stickers',
-        'sticker_bundle':         'merch/stickers',
+        'bumper':                 'merch/stickers',
+        'bundle':                 'merch/stickers',
         'zine':                   'merch',
         'merch/stickers':         'merch',
     };
@@ -287,6 +296,7 @@
             var mlabel = mitem2.label || currentDir;
             var mpar = DIR_PARENTS[currentDir];
             if (mpar === 'merch/segmentation') return 'C:\\heel\\merch\\segmentation\\' + mlabel;
+            if (mpar === 'merch/stickers')     return 'C:\\heel\\merch\\stickers\\' + currentDir;
             return 'C:\\heel\\merch\\' + mlabel;
         }
         return 'C:\\heel\\users\\' + currentDir;
@@ -432,8 +442,8 @@
             lines.push({ t: 'dirlink', label: tcsub(false)    + '[cd]',           cmd: 'cd cd'           });
             lines.push({ t: 'dirlink', label: tcsub(true)     + '[cassette]',     cmd: 'cd cassette'     });
             lines.push({ t: 'dirlink', label: tc(0, false)    + '[stickers]',     cmd: 'cd stickers'     });
-            lines.push({ t: 'dirlink', label: tcsub(false)    + '[bumper_sticker]', cmd: 'cd bumper'     });
-            lines.push({ t: 'dirlink', label: tcsub(true)     + '[sticker_bundle]', cmd: 'cd sticker_bundle' });
+            lines.push({ t: 'dirlink', label: tcsub(false)    + '[bumper]',  cmd: 'cd bumper'  });
+            lines.push({ t: 'dirlink', label: tcsub(true)     + '[bundle]',  cmd: 'cd bundle'  });
             lines.push({ t: 'dirlink', label: tc(0, false)    + '[zine]',           cmd: 'cd zine'       });
             lines.push({ t: 'dirlink', label: tc(0, true)     + '[<- back]',        cmd: 'cd ..'         });
             lines.push({ t: 'blank' });
@@ -442,8 +452,8 @@
         } else if (currentDir === 'merch/stickers') {
             lines.push({ t: 'text', v: 'C:\\heel\\merch\\' });
             lines.push({ t: 'text', v: tc(0, true) + 'stickers\\' });
-            lines.push({ t: 'dirlink', label: tc(1, false) + '[bumper_sticker]', cmd: 'cd bumper_sticker' });
-            lines.push({ t: 'dirlink', label: tc(1, false) + '[sticker_bundle]', cmd: 'cd sticker_bundle' });
+            lines.push({ t: 'dirlink', label: tc(1, false) + '[bumper]', cmd: 'cd bumper' });
+            lines.push({ t: 'dirlink', label: tc(1, false) + '[bundle]', cmd: 'cd bundle' });
             lines.push({ t: 'dirlink', label: tc(1, true)  + '[<- back]',        cmd: 'cd ..'            });
 
         } else if (currentDir === 'merch/segmentation') {
@@ -519,7 +529,7 @@
         var mlabel2 = mitem && mitem.label ? mitem.label : id;
         var pathLabel;
         if (mpar === 'merch/segmentation') pathLabel = 'C:\\heel\\merch\\segmentation\\' + mlabel2 + '\\';
-        else if (mpar === 'merch/stickers') pathLabel = 'C:\\heel\\merch\\stickers\\' + mlabel2 + '\\';
+        else if (mpar === 'merch/stickers') pathLabel = 'C:\\heel\\merch\\stickers\\' + id + '\\';
         else                                pathLabel = 'C:\\heel\\merch\\' + mlabel2 + '\\';
         var lines = [
             { t: 'blank' },
@@ -594,6 +604,27 @@
 
     /* ─── command definitions ──────────────────────────────── */
 
+    function fetchLyrics(tr) {
+        var lyricsFile = 'sounds/music/segmentation/lyrics/' + tr.id.replace(/\s+/g, '_') + '.txt';
+        printLines([{ t: 'blank' }, { t: 'text', v: 'fetching lyrics...', dim: true }]);
+        fetch(lyricsFile)
+            .then(function (r) {
+                if (!r.ok) throw new Error('not found');
+                return r.text();
+            })
+            .then(function (text) {
+                var lines = [{ t: 'blank' }, { t: 'text', v: tr.label.toUpperCase(), spaced: true }];
+                text.split('\n').forEach(function (line) {
+                    lines.push(line.trim() === '' ? { t: 'blank' } : { t: 'typewriter', v: line });
+                });
+                lines.push({ t: 'blank' });
+                printLines(lines);
+            })
+            .catch(function () {
+                printLines([{ t: 'error', v: 'lyrics not found for this track.' }, { t: 'blank' }]);
+            });
+    }
+
     var COMMANDS = {
 
         'help': function () {
@@ -648,12 +679,20 @@
         },
 
         'fetch --upcoming-shows': function () {
-            return [
-                { t: 'blank' },
-                { t: 'link',   label: 'apr 17', value: 'austin \u2014 pearl st co-op', href: 'https://maps.apple.com/?q=2000+Pearl+St,+Austin,+TX+78705' },
-                { t: 'link',   label: 'apr 18', value: 'houston \u2014 axelrad', href: 'https://maps.apple.com/?q=1517+Alabama+St,+Houston,+TX+77004' },
-                { t: 'blank' },
-            ];
+            var lines = [{ t: 'blank' }];
+            if (SHOWS.length === 0) {
+                lines.push({ t: 'text', v: 'no upcoming shows.', dim: true });
+            } else {
+                SHOWS.forEach(function (s) {
+                    var value = s.city + (s.venue ? ' \u2014 ' + s.venue : '');
+                    lines.push(s.href
+                        ? { t: 'link',   label: s.date.toLowerCase(), value: value, href: s.href }
+                        : { t: 'nolink', label: s.date.toLowerCase(), value: value }
+                    );
+                });
+            }
+            lines.push({ t: 'blank' });
+            return lines;
         },
 
         'ls': function () { return dirListing(); },
@@ -697,14 +736,13 @@
         'cd obey_tshirt':           function () { return navigateTo('obey_tshirt');         },
         'cd segmentation_cd':       function () { return navigateTo('segmentation_cd');     },
         'cd segmentation_cassette': function () { return navigateTo('segmentation_cassette'); },
-        'cd bumper_sticker':        function () { return navigateTo('bumper_sticker');      },
+        'cd bundle':                function () { return navigateTo('bundle');              },
         /* short-name aliases */
         'cd cd':       function () { return navigateTo('cd');       },
         'cd cassette': function () { return navigateTo('cassette'); },
-        'cd bumper':   function () { return navigateTo('bumper');   },
+        'cd bumper':         function () { return navigateTo('bumper');         },
         'cd stickers':       function () { return navigateTo('merch/stickers'); },
         'cd zine':           function () { return navigateTo('zine');           },
-        'cd sticker_bundle': function () { return navigateTo('sticker_bundle'); },
 
         'buy.exe': function () {
             var mitem = getMerchItem(currentDir);
@@ -789,6 +827,7 @@
                 { t: 'hrow', cmd: 'pause',             desc: 'pause playback'       },
                 { t: 'hrow', cmd: 'resume',            desc: 'resume playback'      },
                 { t: 'hrow', cmd: 'stop',              desc: 'stop playback'        },
+                { t: 'hrow', cmd: 'lyrics',            desc: 'show lyrics for current track' },
                 { t: 'blank' },
                 { t: 'text', v: "navigate to a directory and click a track,", dim: true },
                 { t: 'text', v: "or type 'play &lt;track name&gt;'", dim: true },
@@ -840,6 +879,21 @@
             currentTrackLabel = null;
             updateNowPlaying(null);
             return [{ t: 'blank' }, { t: 'text', v: 'stopped.', dim: true }, { t: 'blank' }];
+        },
+
+        'lyrics': function () {
+            if (!currentAudio) {
+                return [{ t: 'blank' }, { t: 'error', v: 'nothing is playing.' }, { t: 'blank' }];
+            }
+            if (playerCurrentAlbum !== 'segmentation') {
+                return [{ t: 'blank' }, { t: 'error', v: 'lyrics not available for this track.' }, { t: 'blank' }];
+            }
+            var tr = playerTrackList[playerTrackIndex];
+            if (!tr) {
+                return [{ t: 'blank' }, { t: 'error', v: 'lyrics not available.' }, { t: 'blank' }];
+            }
+            fetchLyrics(tr);
+            return [];
         },
 
         /* ── command aliases ── */
@@ -1535,6 +1589,14 @@
             printLines(playTrack(lower.slice(5).trim()));
         } else if (lower === 'play') {
             output.appendChild(render({ t: 'error', v: "usage: play &lt;track name&gt;" }));
+        } else if (lower.indexOf('lyrics ') === 0) {
+            var lq = lower.slice(7).trim();
+            var ltr = TRACKS.segmentation.find(function (t) { return t.id === lq || t.label.replace(/^\d+\s*-\s*/, '') === lq; });
+            if (!ltr) {
+                output.appendChild(render({ t: 'error', v: 'track not found: ' + esc(lq) }));
+            } else {
+                fetchLyrics(ltr);
+            }
             output.appendChild(render({ t: 'blank' }));
             scrollBottom();
         } else {
@@ -1708,6 +1770,51 @@
         });
     }
 
+    /* ─── mobile home screen ──────────────────────────────── */
+    function exitMobileHome() {
+        document.body.classList.remove('mobile-home');
+        windowEl = windowEl || document.querySelector('.window');
+        windowEl.style.display = '';
+        document.getElementById('task-heel').classList.add('active');
+        focusInput();
+    }
+
+    /* build video overlay */
+    (function () {
+        var overlay  = document.getElementById('mobile-video-overlay');
+        var inner    = document.getElementById('mobile-video-overlay-inner');
+        VIDEOS.forEach(function (v) {
+            var a = document.createElement('a');
+            a.href        = v.href;
+            a.target      = '_blank';
+            a.rel         = 'noopener';
+            a.textContent = v.file.replace(/\.[^.]+$/, '').replace(/_/g, ' ');
+            inner.appendChild(a);
+        });
+        var closeBtn = document.createElement('button');
+        closeBtn.id          = 'mobile-video-overlay-close';
+        closeBtn.textContent = '[ close ]';
+        closeBtn.addEventListener('click', function () {
+            overlay.classList.remove('active');
+        });
+        inner.appendChild(closeBtn);
+    }());
+
+    /* mobile single-click handlers on desktop icons */
+    desktopIconsEl.querySelectorAll('.desktop-icon').forEach(function (icon) {
+        icon.addEventListener('click', function () {
+            if (window.innerWidth > 900) return; /* desktop handles dblclick */
+            var dir = icon.dataset.dir;
+            if (!dir) { exitMobileHome(); return; } /* terminal icon */
+            if (dir === 'video') {
+                document.getElementById('mobile-video-overlay').classList.add('active');
+                return;
+            }
+            exitMobileHome();
+            execute('cd ' + dir, false, true);
+        });
+    });
+
     /* ─── minimize toggle ─────────────────────────────────── */
     var windowEl = document.querySelector('.window');
     document.getElementById('min-btn').addEventListener('click', function (e) {
@@ -1812,8 +1919,15 @@
 
     document.getElementById('close-btn').addEventListener('click', function (e) {
         e.stopPropagation();
-        windowEl.style.display = 'none';
-        document.getElementById('task-heel').classList.remove('active');
+        if (window.innerWidth <= 900) {
+            skipToPrompt();
+            windowEl.style.display = 'none';
+            document.getElementById('task-heel').classList.remove('active');
+            document.body.classList.add('mobile-home');
+        } else {
+            windowEl.style.display = 'none';
+            document.getElementById('task-heel').classList.remove('active');
+        }
     });
 
     /* ─── startup: boot → welcome → clear → prompt ────────── */
@@ -2023,8 +2137,8 @@
             playerLcdTrack.textContent = '-- no track --';
         }
         playerPlayBtn.innerHTML = (currentAudio && !audioPaused)
-            ? '<svg width="8" height="9" viewBox="0 0 8 9" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;margin:auto"><rect x="0" y="0" width="2.5" height="9" fill="#000"/><rect x="5" y="0" width="2.5" height="9" fill="#000"/></svg>'
-            : '<svg width="8" height="9" viewBox="0 0 8 9" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;margin:auto"><polygon points="0,0 8,4.5 0,9" fill="#000"/></svg>';
+            ? '<svg width="6" height="7" viewBox="0 0 8 9" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;margin:0 auto 2px"><rect x="0" y="0" width="2.5" height="9" fill="#000"/><rect x="5" y="0" width="2.5" height="9" fill="#000"/></svg>'
+            : '<svg width="6" height="7" viewBox="0 0 8 9" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;margin:0 auto 2px"><polygon points="0,0 8,4.5 0,9" fill="#000"/></svg>';
         playerHighlightCurrent();
     }
 
@@ -4162,6 +4276,10 @@
 
     // Task button
     document.getElementById('task-heel').addEventListener('click', function () {
+        if (document.body.classList.contains('mobile-home')) {
+            exitMobileHome();
+            return;
+        }
         if (windowEl.style.display === 'none') {
             windowEl.style.display = '';
             setMinimized(false);

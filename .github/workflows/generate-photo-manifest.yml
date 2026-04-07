@@ -1,9 +1,10 @@
-name: Generate photo manifest
+name: Generate manifests
 
 on:
   push:
     paths:
       - 'images/photo/**'
+      - 'sounds/music/unreleased/**'
 
 jobs:
   manifest:
@@ -13,27 +14,36 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Generate manifest.json
+      - name: Generate manifests
         run: |
           node -e "
             const fs = require('fs');
             const path = require('path');
+
             const IMAGE_EXTS = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
-            function listImages(dir) {
+            function listFiles(dir, exts) {
               return fs.readdirSync(dir)
-                .filter(f => IMAGE_EXTS.includes(path.extname(f).toLowerCase()))
+                .filter(f => exts.includes(path.extname(f).toLowerCase()))
                 .sort();
             }
-            const photos = listImages('images/photo');
-            const wallpapers = listImages('images/photo/wallpapers');
+
+            // photo manifest
+            const photos = listFiles('images/photo', IMAGE_EXTS);
+            const wallpapers = listFiles('images/photo/wallpapers', IMAGE_EXTS);
             fs.writeFileSync('images/photo/manifest.json', JSON.stringify({ photos, wallpapers }, null, 2) + '\n');
             console.log('photos:', photos.length, '| wallpapers:', wallpapers.length);
+
+            // music manifest
+            const sgmt_demos = listFiles('sounds/music/unreleased/segmentation', ['.mp3']);
+            const heel2_demos = listFiles('sounds/music/unreleased/heel2', ['.mp3']);
+            fs.writeFileSync('sounds/music/manifest.json', JSON.stringify({ sgmt_demos, heel2_demos }, null, 2) + '\n');
+            console.log('sgmt_demos:', sgmt_demos.length, '| heel2_demos:', heel2_demos.length);
           "
 
-      - name: Commit manifest
+      - name: Commit manifests
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email 'github-actions[bot]@users.noreply.github.com'
-          git add images/photo/manifest.json
-          git diff --staged --quiet || git commit -m "chore: update photo manifest"
+          git add images/photo/manifest.json sounds/music/manifest.json
+          git diff --staged --quiet || git commit -m "chore: update manifests"
           git push

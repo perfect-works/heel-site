@@ -374,10 +374,12 @@ body.dragging {
     line-height: 1.2;
 }
 
-.desktop-icon:hover .folder-icon,
 .desktop-icon.active .folder-icon {
     background: #f0c84a;
     border-color: #5a4000;
+}
+@media (hover: hover) {
+    .desktop-icon:hover .folder-icon { background: #f0c84a; border-color: #5a4000; }
 }
 
 .app-icon {
@@ -415,9 +417,11 @@ body.dragging {
     font-family: sans-serif;
 }
 
-.desktop-icon:hover .app-icon,
 .desktop-icon.active .app-icon {
     background: radial-gradient(circle at 38% 32%, #ffffff, #d4d4d4 40%, #a8a8a8);
+}
+@media (hover: hover) {
+    .desktop-icon:hover .app-icon { background: radial-gradient(circle at 38% 32%, #ffffff, #d4d4d4 40%, #a8a8a8); }
 }
 
 .vlc-icon {
@@ -466,7 +470,6 @@ body.dragging {
     border-radius: 1px;
 }
 
-.desktop-icon:hover .vlc-icon::before,
 .desktop-icon.active .vlc-icon::before {
     background: linear-gradient(
         to top,
@@ -482,10 +485,12 @@ body.dragging {
         #ffaa44 100%
     );
 }
-
-.desktop-icon:hover .vlc-icon::after,
 .desktop-icon.active .vlc-icon::after {
     background: #ffaa44;
+}
+@media (hover: hover) {
+    .desktop-icon:hover .vlc-icon::before { background: linear-gradient(to top, #ffaa44 0%, #ffaa44 18%, #ffffff 18%, #ffffff 27%, #ffaa44 27%, #ffaa44 47%, #ffffff 47%, #ffffff 56%, #ffaa44 56%, #ffaa44 100%); }
+    .desktop-icon:hover .vlc-icon::after  { background: #ffaa44; }
 }
 
 /* ── globe icon for merch ── */
@@ -528,13 +533,25 @@ body.dragging {
     border-radius: 50%;
 }
 
-.desktop-icon:hover .globe-icon,
 .desktop-icon.active .globe-icon {
     background: radial-gradient(circle at 35% 30%, #a8daff, #2d7fd4 50%, #0d4594);
+}
+@media (hover: hover) {
+    .desktop-icon:hover .globe-icon { background: radial-gradient(circle at 35% 30%, #a8daff, #2d7fd4 50%, #0d4594); }
 }
 
 .desktop-icon.active span {
     color: #ffff99;
+}
+
+@media (hover: none) {
+    .desktop-icon:active span {
+        color: #ffff99;
+    }
+    .desktop-icon:active .folder-icon {
+        background: #f0c84a;
+        border-color: #5a4000;
+    }
 }
 
 .term-icon {
@@ -554,9 +571,11 @@ body.dragging {
     box-sizing: border-box;
 }
 
-.desktop-icon:hover .term-icon,
 .desktop-icon.active .term-icon {
     border-color: #33ff33;
+}
+@media (hover: hover) {
+    .desktop-icon:hover .term-icon { border-color: #33ff33; }
 }
 
 #desktop-icon-terminal span {
@@ -588,6 +607,8 @@ body.dragging {
     flex-wrap: wrap;
     gap: 8px;
     min-height: 150px;
+    max-height: 420px;
+    overflow-y: auto;
     align-content: flex-start;
 }
 
@@ -818,6 +839,80 @@ body.dragging {
 
 @media (max-width: 900px) {
     #desktop-icons { display: none; }
+
+    body.mobile-home #desktop-icons {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: flex-start;
+        gap: 24px;
+        position: fixed;
+        left: 0; right: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        padding: 0 24px;
+    }
+
+    body.mobile-home .desktop-icon {
+        width: 72px;
+    }
+
+    body.mobile-home .desktop-icon span {
+        font-size: 0.8em;
+    }
+}
+
+#mobile-video-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 9000;
+    background: rgba(0,0,0,0.85);
+    align-items: center;
+    justify-content: center;
+}
+#mobile-video-overlay.active {
+    display: flex;
+}
+#mobile-video-overlay-inner {
+    background: #000;
+    border: 2px solid #33ff33;
+    padding: 20px 24px;
+    max-width: 320px;
+    width: 90%;
+    font-family: 'Courier New', monospace;
+    color: #33ff33;
+}
+#mobile-video-overlay-inner h3 {
+    margin: 0 0 14px;
+    font-size: 0.8em;
+    letter-spacing: 2px;
+    opacity: 0.6;
+}
+#mobile-video-overlay-inner a {
+    display: block;
+    color: #33ff33;
+    text-decoration: none;
+    padding: 8px 0;
+    border-bottom: 1px solid #1a661a;
+    font-size: 0.85em;
+}
+#mobile-video-overlay-inner a:last-of-type {
+    border-bottom: none;
+}
+#mobile-video-overlay-close {
+    display: block;
+    margin-top: 16px;
+    text-align: center;
+    color: #33ff33;
+    opacity: 0.5;
+    font-size: 0.75em;
+    cursor: pointer;
+    background: none;
+    border: none;
+    font-family: 'Courier New', monospace;
+    width: 100%;
 }
 
 /* ── media player ── */
@@ -911,8 +1006,8 @@ body.dragging {
 }
 
 .player-btn-main {
-    width: 52px;
-    font-size: 0.85em;
+    width: 46px;
+    font-size: 0.78em;
 }
 
 .player-tabs {
@@ -1094,8 +1189,8 @@ body.dragging #vlc-drag-overlay {
 }
 
 .vlc-btn-main {
-    width: 46px;
-    font-size: 0.82em;
+    width: 40px;
+    font-size: 0.65em;
     color: #ff7b00;
 }
 
@@ -1613,6 +1708,32 @@ body {
     border-left: 6px solid transparent;
     border-right: 6px solid transparent;
     border-top: 7px solid #c0c0c0;
+}
+
+#tray-mail-btn {
+    background: none;
+    border: none;
+    padding: 2px 4px;
+    margin-right: 2px;
+    cursor: pointer;
+    color: #000000;
+    display: inline-flex;
+    align-items: center;
+    vertical-align: middle;
+    border-radius: 0;
+    text-decoration: none;
+}
+#tray-mail-btn svg * {
+    stroke: #000000;
+    fill: none;
+}
+#tray-mail-btn:hover {
+    background: #c0c0c0;
+    border-top: 1px solid #ffffff;
+    border-left: 1px solid #ffffff;
+    border-bottom: 1px solid #808080;
+    border-right: 1px solid #808080;
+    padding: 1px 3px;
 }
 
 #tray-rss-btn {
