@@ -68,7 +68,7 @@
         },
         'nick': { 
             instrument: 'bass',
-            profile: '22 years old. round rock born and raised. fan of long walks in urban and non-urban areas, posting instagram story collages, and the lesser known rage game pogostuck. loverboy.',
+            profile: '22 years old. round rock born and raised. fan of long walks in urban and non-urban areas, posting instagram story collages, and the lesser known rage game pogostuck.',
             photo: 'images/users/nick/nicholas_dienstbier.png',  
             photoName: 'nicholas_dienstbier.png'
         },
@@ -152,8 +152,14 @@
 
     /* ── photo registry ── */
     var PHOTOS = [
+        { id: 'aura',                    file: 'aura.jpg',                    src: 'images/photo/aura.jpg'                    },
+        { id: 'bear',                    file: 'bear.jpg',                    src: 'images/photo/bear.jpg'                    },
+        { id: 'early_days',              file: 'early_days.jpg',              src: 'images/photo/early_days.jpg'              },
+        { id: 'grayscale',               file: 'grayscale.jpg',               src: 'images/photo/grayscale.jpg'               },
         { id: 'honeycomb',               file: 'honeycomb.jpg',               src: 'images/photo/honeycomb.jpg'               },
+        { id: 'launch_show_poster',      file: 'launch_show_poster.jpg',      src: 'images/photo/launch_show_poster.jpg'      },
         { id: 'pain_faces',              file: 'pain_faces.png',              src: 'images/photo/pain_faces.png'              },
+        { id: 'pink_guitar',             file: 'pink_guitar.jpg',             src: 'images/photo/pink_guitar.jpg'             },
         { id: 'poster',                  file: 'poster.png',                  src: 'images/photo/poster.png'                  },
         { id: 'prediction',              file: 'prediction.jpg',              src: 'images/photo/prediction.jpg'              },
         { id: 'segmentation_back_cover', file: 'segmentation_back_cover.png', src: 'images/photo/segmentation_back_cover.png' },
@@ -161,9 +167,10 @@
         { id: 'through_me',              file: 'through_me.jpg',              src: 'images/photo/through_me.jpg'              },
         { id: 'who',                     file: 'who.jpg',                     src: 'images/photo/who.jpg'                     },
         { id: 'blue',          file: 'blue.png',          src: null,                                       dir: 'wallpapers' },
-        { id: 'heel',          file: 'heel.png',          src: 'images/photo/wallpapers/heel.png',         dir: 'wallpapers' },
         { id: 'chouchou',      file: 'chouchou.jpg',      src: 'images/photo/wallpapers/chouchou.jpg',     dir: 'wallpapers' },
+        { id: 'heel',          file: 'heel.png',          src: 'images/photo/wallpapers/heel.png',         dir: 'wallpapers' },
         { id: 'mountain',      file: 'mountain.jpg',      src: 'images/photo/wallpapers/mountain.jpg',     dir: 'wallpapers' },
+        { id: 'white',         file: 'white.jpg',         src: 'images/photo/wallpapers/white.jpg',        dir: 'wallpapers' },
     ];
 
     /* ── video registry ── */
@@ -2369,7 +2376,7 @@
 
     function renderMerchGrid() {
         merchBrowserView = 'grid';
-        merchAddress.textContent = 'http://www.heelband.com/store/';
+        merchAddress.value = 'http://www.heelband.com/store/';
         merchBackBtn.disabled = true;
         merchFwdBtn.disabled  = true;
         merchHomeBtn.disabled = true;
@@ -2402,7 +2409,7 @@
         merchBrowserIdx  = idx;
         var item = MERCH[idx];
         /* NOTE: Square checkout URLs are set in the MERCH array near the top of this script — update them there */
-        merchAddress.textContent = 'http://www.heelband.com/store/' + (item.label || item.id) + '.html';
+        merchAddress.value = 'http://www.heelband.com/store/' + (item.label || item.id) + '.html';
         merchBackBtn.disabled = (idx === 0);
         merchFwdBtn.disabled  = (idx === MERCH.length - 1);
         merchHomeBtn.disabled = false;
@@ -2469,6 +2476,369 @@
         merchWindowEl.classList.remove('minimized');
         if (merchTaskBtn) { merchTaskBtn.remove(); merchTaskBtn = null; }
     });
+
+    /* ── merch address bar game ── */
+    (function () {
+        var titleEl = document.querySelector('#merch-title-bar .title-bar-text');
+
+        function renderDinoGame() {
+            merchIeBody.innerHTML = '';
+            if (titleEl) titleEl.textContent = 'Cannot find server \u2014 Internet Explorer';
+
+            var W = merchIeBody.offsetWidth  || 680;
+            var H = merchIeBody.offsetHeight || 390;
+
+            var canvas = document.createElement('canvas');
+            canvas.width  = W;
+            canvas.height = H;
+            canvas.style.cssText = 'display:block;cursor:pointer;';
+            merchIeBody.appendChild(canvas);
+
+            var ctx = canvas.getContext('2d');
+
+            var GRAVITY  = 4200;
+            var JUMP_VEL = -800;
+            var BASE_SPD = 140;
+            var RAMP     = 28;
+            var GROUND_Y = H - 48;
+            var PW = 34, PH = 38;
+            var PX = 70;
+
+            /* clouds — each: { x, y, w, h } */
+            var clouds = [];
+            for (var ci = 0; ci < 5; ci++) {
+                clouds.push({
+                    x: Math.random() * W,
+                    y: 18 + Math.random() * (GROUND_Y * 0.35),
+                    w: 48 + Math.random() * 60,
+                    h: 16 + Math.random() * 14
+                });
+            }
+
+            /* buildings — city silhouette, slow parallax */
+            var buildings = [];
+            (function () {
+                var bx = 0;
+                while (bx < W * 1.8) {
+                    var bw = 28 + Math.floor(Math.random() * 62);
+                    var bh = 45 + Math.floor(Math.random() * (GROUND_Y * 0.72));
+                    buildings.push({ x: bx, w: bw, h: bh });
+                    bx += bw + Math.floor(Math.random() * 6);
+                }
+            }());
+
+            var s = {
+                py: GROUND_Y, pvy: 0, onGround: true,
+                obs: [], speed: BASE_SPD, score: 0,
+                started: false, over: false,
+                spawnT: 1.5, lastTs: null, raf: null
+            };
+
+            function reset() {
+                s.py = GROUND_Y; s.pvy = 0; s.onGround = true;
+                s.obs = []; s.speed = BASE_SPD; s.score = 0;
+                s.started = false; s.over = false; s.spawnT = 1.5; s.lastTs = null;
+                if (titleEl) titleEl.textContent = 'Cannot find server \u2014 Internet Explorer';
+            }
+
+            function jump() {
+                if (s.over) { reset(); return; }
+                if (!s.started) s.started = true;
+                if (s.onGround) { s.pvy = JUMP_VEL; s.onGround = false; }
+            }
+
+            function update(dt) {
+                if (!s.started || s.over) return;
+                s.score += dt;
+                s.speed = BASE_SPD + s.score * RAMP;
+
+                /* buildings at 8% speed */
+                var bldgSpd = s.speed * 0.08;
+                var maxBX = 0;
+                for (var bi = 0; bi < buildings.length; bi++) {
+                    buildings[bi].x -= bldgSpd * dt;
+                    if (buildings[bi].x + buildings[bi].w > maxBX) maxBX = buildings[bi].x + buildings[bi].w;
+                }
+                for (var bi2 = 0; bi2 < buildings.length; bi2++) {
+                    if (buildings[bi2].x + buildings[bi2].w < 0) {
+                        buildings[bi2].x = maxBX + Math.floor(Math.random() * 6);
+                        buildings[bi2].w = 28 + Math.floor(Math.random() * 62);
+                        buildings[bi2].h = 45 + Math.floor(Math.random() * (GROUND_Y * 0.72));
+                        maxBX = buildings[bi2].x + buildings[bi2].w;
+                    }
+                }
+
+                /* clouds scroll at 25% of obstacle speed */
+                var cloudSpd = s.speed * 0.25;
+                for (var ci = 0; ci < clouds.length; ci++) {
+                    clouds[ci].x -= cloudSpd * dt;
+                    if (clouds[ci].x + clouds[ci].w < 0) {
+                        clouds[ci].x = W + Math.random() * 80;
+                        clouds[ci].y = 18 + Math.random() * (GROUND_Y * 0.35);
+                        clouds[ci].w = 48 + Math.random() * 60;
+                        clouds[ci].h = 16 + Math.random() * 14;
+                    }
+                }
+
+                s.pvy += GRAVITY * dt;
+                s.py  += s.pvy * dt;
+                if (s.py >= GROUND_Y) { s.py = GROUND_Y; s.pvy = 0; s.onGround = true; }
+
+                s.spawnT -= dt;
+                if (s.spawnT <= 0) {
+                    var r = Math.random(), type, h, w;
+                    if (r < 0.33) {
+                        type = 'puddle';
+                        w = 36 + Math.floor(Math.random() * 32);
+                        h = 8  + Math.floor(Math.random() * 6);
+                    } else if (r < 0.66) {
+                        type = 'hydrant';
+                        w = 18;
+                        h = 28 + Math.floor(Math.random() * 8);
+                    } else {
+                        type = 'trashcan';
+                        w = 20;
+                        h = 32 + Math.floor(Math.random() * 10);
+                    }
+                    s.obs.push({ x: W + 10, w: w, h: h, type: type });
+                    s.spawnT = 0.8 + Math.random() * 0.9;
+                }
+
+                for (var i = s.obs.length - 1; i >= 0; i--) {
+                    var o = s.obs[i];
+                    o.x -= s.speed * dt;
+                    if (o.x + o.w < 0) { s.obs.splice(i, 1); continue; }
+                    var m = 5, oy = GROUND_Y - o.h;
+                    if (PX + PW - m > o.x + m && PX + m < o.x + o.w - m &&
+                        s.py - PH + m < oy + o.h && s.py - m > oy) {
+                        s.over = true;
+                        if (titleEl) titleEl.textContent = 'GAME OVER \u2014 Score: ' + Math.floor(s.score * 10) + ' \u2014 Internet Explorer';
+                    }
+                }
+            }
+
+            function drawCloud(c) {
+                ctx.fillStyle = '#e8e8e8';
+                ctx.beginPath();
+                ctx.ellipse(c.x + c.w * 0.5, c.y + c.h * 0.6, c.w * 0.5, c.h * 0.4, 0, 0, Math.PI * 2);
+                ctx.ellipse(c.x + c.w * 0.3, c.y + c.h * 0.55, c.w * 0.28, c.h * 0.45, 0, 0, Math.PI * 2);
+                ctx.ellipse(c.x + c.w * 0.7, c.y + c.h * 0.5, c.w * 0.24, c.h * 0.38, 0, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            function drawPlayer() {
+                var bx = PX, by = s.py - PH;
+                var col = s.over ? '#888' : '#2a2a2a';
+
+                ctx.save();
+                ctx.translate(bx, by);
+
+                /* ── boot silhouette ── */
+                ctx.beginPath();
+                ctx.moveTo(4, 0);      // shaft top-left
+                ctx.lineTo(17, 0);     // shaft top-right
+                ctx.lineTo(17, 20);    // shaft base
+                ctx.lineTo(30, 26);    // vamp slopes forward
+                ctx.lineTo(34, 32);    // toe tip
+                ctx.lineTo(34, 38);    // toe front-bottom (ground)
+                ctx.lineTo(20, 38);    // toe sole back
+                ctx.lineTo(15, 32);    // notch peak (triangle tip)
+                ctx.lineTo(10, 38);    // notch back to ground
+                ctx.lineTo(4,  38);    // heel back — flush with shaft, no jut
+                ctx.lineTo(4,  0);     // back up shaft
+                ctx.closePath();
+                ctx.fillStyle = col;
+                ctx.fill();
+
+                /* ── shaft shine ── */
+                ctx.fillStyle = s.over ? '#aaa' : '#484848';
+                ctx.fillRect(5, 2, 2, 18);
+
+                /* ── buckle strap ── */
+                ctx.fillStyle = s.over ? '#555' : '#222';
+                ctx.fillRect(5, 12, 11, 3);
+                ctx.strokeStyle = s.over ? '#888' : '#c0c0c0';
+                ctx.lineWidth = 1;
+                ctx.strokeRect(5, 11, 5, 5);
+                ctx.fillStyle = s.over ? '#888' : '#c0c0c0';
+                ctx.fillRect(8, 13, 1, 1);
+
+                ctx.restore();
+            }
+
+            function draw() {
+                ctx.fillStyle = '#fff';
+                ctx.fillRect(0, 0, W, H);
+
+/* buildings — flat gray silhouettes */
+                ctx.fillStyle = '#d0d0d0';
+                for (var bi = 0; bi < buildings.length; bi++) {
+                    var b = buildings[bi];
+                    ctx.fillRect(b.x, GROUND_Y - b.h, b.w, b.h);
+                }
+
+                /* clouds */
+                for (var ci = 0; ci < clouds.length; ci++) drawCloud(clouds[ci]);
+
+                /* sidewalk */
+                ctx.fillStyle = '#909090';
+                ctx.fillRect(0, GROUND_Y, W, 1);
+                ctx.fillStyle = '#b4b4b4';
+                ctx.fillRect(0, GROUND_Y + 1, W, H - GROUND_Y - 1);
+
+                for (var i = 0; i < s.obs.length; i++) {
+                    var o = s.obs[i];
+                    ctx.save();
+                    if (o.type === 'puddle') {
+                        var cx = o.x + o.w / 2, cy = GROUND_Y - 2;
+                        ctx.beginPath();
+                        ctx.ellipse(cx, cy, o.w / 2, o.h / 2, 0, 0, Math.PI * 2);
+                        ctx.fillStyle = 'rgba(40,80,160,0.55)';
+                        ctx.fill();
+                        ctx.beginPath();
+                        ctx.ellipse(cx - o.w * 0.15, cy - o.h * 0.15, o.w * 0.2, o.h * 0.18, -0.4, 0, Math.PI * 2);
+                        ctx.fillStyle = 'rgba(180,210,255,0.5)';
+                        ctx.fill();
+
+                    } else if (o.type === 'hydrant') {
+                        ctx.translate(o.x, GROUND_Y);
+                        var hw = o.w, hh = o.h;
+                        /* base flange */
+                        ctx.fillStyle = '#bb1a00';
+                        ctx.fillRect(-2, -hh * 0.14, hw + 4, hh * 0.14);
+                        /* body */
+                        ctx.fillRect(0, -hh * 0.78, hw, hh * 0.64);
+                        /* dome */
+                        ctx.beginPath();
+                        ctx.arc(hw / 2, -hh * 0.78, hw / 2, Math.PI, 0);
+                        ctx.fill();
+                        /* cap */
+                        ctx.fillStyle = '#881200';
+                        ctx.fillRect(hw * 0.2, -hh, hw * 0.6, hh * 0.12);
+                        ctx.fillRect(hw * 0.3, -hh * 1.08, hw * 0.4, hh * 0.09);
+                        /* side nozzles */
+                        ctx.fillStyle = '#bb1a00';
+                        ctx.fillRect(-hw * 0.28, -hh * 0.55, hw * 0.28, hh * 0.13);
+                        ctx.fillRect(hw,          -hh * 0.55, hw * 0.28, hh * 0.13);
+                        /* highlight */
+                        ctx.fillStyle = '#dd3322';
+                        ctx.fillRect(hw * 0.18, -hh * 0.76, hw * 0.18, hh * 0.48);
+
+                    } else {
+                        /* trash can */
+                        ctx.translate(o.x, GROUND_Y);
+                        var tw = o.w, th = o.h;
+                        /* body — slightly tapered */
+                        ctx.beginPath();
+                        ctx.moveTo(tw * 0.08, 0);
+                        ctx.lineTo(0,         -th * 0.82);
+                        ctx.lineTo(tw * 0.06,  -th * 0.92);
+                        ctx.lineTo(tw * 0.94,  -th * 0.92);
+                        ctx.lineTo(tw,         -th * 0.82);
+                        ctx.lineTo(tw * 0.92,  0);
+                        ctx.closePath();
+                        ctx.fillStyle = '#484848';
+                        ctx.fill();
+                        /* ridges */
+                        ctx.strokeStyle = '#585858';
+                        ctx.lineWidth = 1;
+                        for (var ri = 1; ri < 4; ri++) {
+                            ctx.beginPath();
+                            ctx.moveTo(tw * 0.08, -th * 0.22 * ri);
+                            ctx.lineTo(tw * 0.92, -th * 0.22 * ri);
+                            ctx.stroke();
+                        }
+                        /* lid */
+                        ctx.fillStyle = '#363636';
+                        ctx.fillRect(-tw * 0.06, -th * 0.92, tw * 1.12, th * 0.07);
+                        /* handle arc */
+                        ctx.strokeStyle = '#282828';
+                        ctx.lineWidth = 2;
+                        ctx.beginPath();
+                        ctx.arc(tw / 2, -th * 0.92, tw * 0.28, Math.PI, 0);
+                        ctx.stroke();
+                        /* highlight */
+                        ctx.fillStyle = '#606060';
+                        ctx.fillRect(tw * 0.12, -th * 0.88, tw * 0.12, th * 0.72);
+                    }
+                    ctx.restore();
+                }
+
+                drawPlayer();
+
+                ctx.fillStyle = '#000';
+                ctx.font = '12px "Courier New"';
+                ctx.textAlign = 'right';
+                ctx.fillText('SCORE ' + Math.floor(s.score * 10), W - 12, 20);
+
+                function dialog(lines) {
+                    var bw = 310, bh = 18 + lines.length * 20 + 12;
+                    var bx = W / 2 - bw / 2, by = H / 2 - bh / 2 - 10;
+                    ctx.fillStyle = '#c0c0c0';
+                    ctx.fillRect(bx, by, bw, bh);
+                    ctx.strokeStyle = '#fff'; ctx.lineWidth = 1;
+                    ctx.strokeRect(bx, by, bw, bh);
+                    ctx.strokeStyle = '#808080';
+                    ctx.strokeRect(bx + 1, by + 1, bw, bh);
+                    ctx.textAlign = 'center';
+                    for (var li = 0; li < lines.length; li++) {
+                        ctx.fillStyle = '#000';
+                        ctx.font = li === 0 ? 'bold 13px "Courier New"' : '12px "Courier New"';
+                        ctx.fillText(lines[li], W / 2, by + 18 + li * 20);
+                    }
+                }
+
+                if (!s.started && !s.over) {
+                    dialog(['404 — Page Not Found', 'PRESS SPACE OR CLICK TO START']);
+                }
+                if (s.over) {
+                    dialog([
+                        'GAME OVER',
+                        'SCORE: ' + Math.floor(s.score * 10),
+                        'PRESS SPACE OR CLICK TO RESTART'
+                    ]);
+                }
+            }
+
+            function loop(ts) {
+                if (s.lastTs !== null) {
+                    var dt = Math.min((ts - s.lastTs) / 1000, 0.05);
+                    update(dt);
+                }
+                s.lastTs = ts;
+                draw();
+                s.raf = requestAnimationFrame(loop);
+            }
+
+            function onKey(e) {
+                if (e.code === 'Space' || e.code === 'ArrowUp') { e.preventDefault(); jump(); }
+            }
+            document.addEventListener('keydown', onKey);
+            canvas.addEventListener('click', jump);
+            canvas.addEventListener('touchstart', function (e) { e.preventDefault(); jump(); }, { passive: false });
+
+            var mo = new MutationObserver(function () {
+                if (!merchIeBody.contains(canvas)) {
+                    cancelAnimationFrame(s.raf);
+                    document.removeEventListener('keydown', onKey);
+                    if (titleEl) titleEl.textContent = 'HEEL Online Store \u2014 Internet Explorer';
+                    mo.disconnect();
+                }
+            });
+            mo.observe(merchIeBody, { childList: true });
+
+            s.raf = requestAnimationFrame(loop);
+        }
+
+        merchAddress.addEventListener('keydown', function (e) {
+            if (e.key !== 'Enter') return;
+            e.preventDefault();
+            var val = merchAddress.value.trim();
+            var hasTld = /\.[a-zA-Z]{2,}/.test(val.replace(/^https?:\/\//i, '').split('/')[0]);
+            if (!hasTld) { renderDinoGame(); }
+            merchAddress.blur();
+        });
+    }());
 
     /* merch window dragging */
     var merchDragging = false, merchDragOffX = 0, merchDragOffY = 0;

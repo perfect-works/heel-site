@@ -1180,9 +1180,10 @@ body.dragging #vlc-drag-overlay {
     font-size: 0.68em;
     font-family: 'Courier New', monospace;
     color: #000080;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    outline: none;
+    box-shadow: none;
+    -webkit-appearance: none;
+    appearance: none;
 }
 
 .merch-ie-body {
