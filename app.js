@@ -1920,6 +1920,7 @@
     document.getElementById('close-btn').addEventListener('click', function (e) {
         e.stopPropagation();
         if (window.innerWidth <= 900) {
+            skipToPrompt();
             windowEl.style.display = 'none';
             document.getElementById('task-heel').classList.remove('active');
             document.body.classList.add('mobile-home');

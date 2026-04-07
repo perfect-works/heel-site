@@ -374,10 +374,12 @@ body.dragging {
     line-height: 1.2;
 }
 
-.desktop-icon:hover .folder-icon,
 .desktop-icon.active .folder-icon {
     background: #f0c84a;
     border-color: #5a4000;
+}
+@media (hover: hover) {
+    .desktop-icon:hover .folder-icon { background: #f0c84a; border-color: #5a4000; }
 }
 
 .app-icon {
@@ -415,9 +417,11 @@ body.dragging {
     font-family: sans-serif;
 }
 
-.desktop-icon:hover .app-icon,
 .desktop-icon.active .app-icon {
     background: radial-gradient(circle at 38% 32%, #ffffff, #d4d4d4 40%, #a8a8a8);
+}
+@media (hover: hover) {
+    .desktop-icon:hover .app-icon { background: radial-gradient(circle at 38% 32%, #ffffff, #d4d4d4 40%, #a8a8a8); }
 }
 
 .vlc-icon {
@@ -466,7 +470,6 @@ body.dragging {
     border-radius: 1px;
 }
 
-.desktop-icon:hover .vlc-icon::before,
 .desktop-icon.active .vlc-icon::before {
     background: linear-gradient(
         to top,
@@ -482,10 +485,12 @@ body.dragging {
         #ffaa44 100%
     );
 }
-
-.desktop-icon:hover .vlc-icon::after,
 .desktop-icon.active .vlc-icon::after {
     background: #ffaa44;
+}
+@media (hover: hover) {
+    .desktop-icon:hover .vlc-icon::before { background: linear-gradient(to top, #ffaa44 0%, #ffaa44 18%, #ffffff 18%, #ffffff 27%, #ffaa44 27%, #ffaa44 47%, #ffffff 47%, #ffffff 56%, #ffaa44 56%, #ffaa44 100%); }
+    .desktop-icon:hover .vlc-icon::after  { background: #ffaa44; }
 }
 
 /* ── globe icon for merch ── */
@@ -528,13 +533,25 @@ body.dragging {
     border-radius: 50%;
 }
 
-.desktop-icon:hover .globe-icon,
 .desktop-icon.active .globe-icon {
     background: radial-gradient(circle at 35% 30%, #a8daff, #2d7fd4 50%, #0d4594);
+}
+@media (hover: hover) {
+    .desktop-icon:hover .globe-icon { background: radial-gradient(circle at 35% 30%, #a8daff, #2d7fd4 50%, #0d4594); }
 }
 
 .desktop-icon.active span {
     color: #ffff99;
+}
+
+@media (hover: none) {
+    .desktop-icon:active span {
+        color: #ffff99;
+    }
+    .desktop-icon:active .folder-icon {
+        background: #f0c84a;
+        border-color: #5a4000;
+    }
 }
 
 .term-icon {
@@ -554,9 +571,11 @@ body.dragging {
     box-sizing: border-box;
 }
 
-.desktop-icon:hover .term-icon,
 .desktop-icon.active .term-icon {
     border-color: #33ff33;
+}
+@media (hover: hover) {
+    .desktop-icon:hover .term-icon { border-color: #33ff33; }
 }
 
 #desktop-icon-terminal span {
