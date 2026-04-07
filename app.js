@@ -615,7 +615,7 @@
             .then(function (text) {
                 var lines = [{ t: 'blank' }, { t: 'text', v: tr.label.toUpperCase(), spaced: true }];
                 text.split('\n').forEach(function (line) {
-                    lines.push(line.trim() === '' ? { t: 'blank' } : { t: 'typewriter', v: line, charDelay: 5 });
+                    lines.push(line.trim() === '' ? { t: 'blank' } : { t: 'typewriter', v: line, charDelay: 22 });
                 });
                 lines.push({ t: 'blank' });
                 printLines(lines);
@@ -885,12 +885,14 @@
             if (!currentAudio) {
                 return [{ t: 'blank' }, { t: 'error', v: 'nothing is playing.' }, { t: 'blank' }];
             }
-            if (playerCurrentAlbum !== 'segmentation') {
-                return [{ t: 'blank' }, { t: 'error', v: 'lyrics not available for this track.' }, { t: 'blank' }];
+            // try weltamp track first, then fall back to terminal-played track by label
+            var tr = (playerTrackList && playerTrackList[playerTrackIndex]) || null;
+            if (!tr && currentTrackLabel) {
+                var lbl = currentTrackLabel.toLowerCase();
+                tr = TRACKS.segmentation.find(function (t) { return t.label.toLowerCase() === lbl; }) || null;
             }
-            var tr = playerTrackList[playerTrackIndex];
-            if (!tr) {
-                return [{ t: 'blank' }, { t: 'error', v: 'lyrics not available.' }, { t: 'blank' }];
+            if (!tr || !tr.lyricsFile) {
+                return [{ t: 'blank' }, { t: 'error', v: 'lyrics not available for this track.' }, { t: 'blank' }];
             }
             fetchLyrics(tr);
             return [];
