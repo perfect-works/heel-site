@@ -271,16 +271,19 @@
         if (currentDir === 'merch/segmentation') return 'C:\\heel\\merch\\segmentation';
         if (currentDir === 'merch/stickers')    return 'C:\\heel\\merch\\stickers';
         if (getMerchItem(currentDir)) {
+            var mitem2 = getMerchItem(currentDir);
+            var mlabel = mitem2.label || currentDir;
             var mpar = DIR_PARENTS[currentDir];
-            if (mpar === 'merch/segmentation') return 'C:\\heel\\merch\\segmentation\\' + currentDir;
-            return 'C:\\heel\\merch\\' + currentDir;
+            if (mpar === 'merch/segmentation') return 'C:\\heel\\merch\\segmentation\\' + mlabel;
+            return 'C:\\heel\\merch\\' + mlabel;
         }
         return 'C:\\heel\\users\\' + currentDir;
     }
     function promptHTML() {
         var path = promptPath();
-        if (window.innerWidth <= 500 && path.length > 18) {
-            path = '\u2026' + path.slice(path.length - 17);
+        var limit = window.innerWidth <= 500 ? 18 : 38;
+        if (path.length > limit) {
+            path = '\u2026' + path.slice(path.length - (limit - 1));
         }
         return 'PS&nbsp;' + path + '&gt;&nbsp;';
     }
