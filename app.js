@@ -121,34 +121,23 @@
             { id: 'honeycomb',          label: '10 - honeycomb',          file: 'sounds/music/segmentation/10_honeycomb.mp3'        },
         ],
         unreleased: [],
-        sgmt_demos: [
-            { id: 'my_song_4',            label: 'my_song_4',            file: 'sounds/music/unreleased/segmentation/my_song_4.mp3'            },
-            { id: 'my_song_6',            label: 'my_song_6',            file: 'sounds/music/unreleased/segmentation/my_song_6.mp3'            },
-            { id: 'my_song_7',            label: 'my_song_7',            file: 'sounds/music/unreleased/segmentation/my_song_7.mp3'            },
-            { id: 'my_song_10',           label: 'my_song_10',           file: 'sounds/music/unreleased/segmentation/my_song_10.mp3'           },
-            { id: 'my_song_11',           label: 'my_song_11',           file: 'sounds/music/unreleased/segmentation/my_song_11.mp3'           },
-            { id: 'my_song_12',           label: 'my_song_12',           file: 'sounds/music/unreleased/segmentation/my_song_12.mp3'           },
-            { id: 'my_song_13',           label: 'my_song_13',           file: 'sounds/music/unreleased/segmentation/my_song_13.mp3'           },
-            { id: 'my_song_14',           label: 'my_song_14',           file: 'sounds/music/unreleased/segmentation/my_song_14.mp3'           },
-            { id: 'my_song_15',           label: 'my_song_15',           file: 'sounds/music/unreleased/segmentation/my_song_15.mp3'           },
-            { id: 'my_song_21',           label: 'my_song_21',           file: 'sounds/music/unreleased/segmentation/my_song_21.mp3'           },
-            { id: 'new_recording_629',    label: 'new_recording_629',    file: 'sounds/music/unreleased/segmentation/new_recording_629.mp3'    },
-            { id: 'new_recording_646',    label: 'new_recording_646',    file: 'sounds/music/unreleased/segmentation/new_recording_646.mp3'    },
-            { id: 'new_recording_686',    label: 'new_recording_686',    file: 'sounds/music/unreleased/segmentation/new_recording_686.mp3'    },
-            { id: 'new_recording_704',    label: 'new_recording_704',    file: 'sounds/music/unreleased/segmentation/new_recording_704.mp3'    },
-            { id: 'project_6_-_6_22_24', label: 'project_6_-_6_22_24', file: 'sounds/music/unreleased/segmentation/project_6_-_6_22_24.mp3' },
-            { id: 'untitled_-_6_5_24',   label: 'untitled_-_6_5_24',   file: 'sounds/music/unreleased/segmentation/untitled_-_6_5_24.mp3'   },
-        ],
-        heel2_demos: [
-            { id: 'andres_song', label: 'andres_song', file: 'sounds/music/unreleased/heel2/andres_song.mp3' },
-            { id: 'my_song_3',   label: 'my_song_3',   file: 'sounds/music/unreleased/heel2/my_song_3.mp3'   },
-            { id: 'my_song_5',   label: 'my_song_5',   file: 'sounds/music/unreleased/heel2/my_song_5.mp3'   },
-            { id: 'my_song_8',   label: 'my_song_8',   file: 'sounds/music/unreleased/heel2/my_song_8.mp3'   },
-            { id: 'my_song_9',   label: 'my_song_9',   file: 'sounds/music/unreleased/heel2/my_song_9.mp3'   },
-            { id: 'my_song_16',  label: 'my_song_16',  file: 'sounds/music/unreleased/heel2/my_song_16.mp3'  },
-            { id: 'my_song_17',  label: 'my_song_17',  file: 'sounds/music/unreleased/heel2/my_song_17.mp3'  },
-        ],
+        sgmt_demos: [],
+        heel2_demos: [],
     };
+
+    fetch('sounds/music/manifest.json')
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+            function toTracks(files, dir) {
+                return files.map(function (file) {
+                    var id = file.replace(/\.mp3$/i, '');
+                    return { id: id, label: id, file: 'sounds/music/unreleased/' + dir + '/' + file };
+                });
+            }
+            TRACKS.sgmt_demos  = toTracks(data.sgmt_demos  || [], 'segmentation');
+            TRACKS.heel2_demos = toTracks(data.heel2_demos || [], 'heel2');
+        })
+        .catch(function () { /* manifest unavailable, demo lists stay empty */ });
 
     /* ── photo registry (populated from manifest.json) ── */
     var PHOTOS = [];
