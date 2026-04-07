@@ -3210,11 +3210,11 @@
         var natW = photoImgEl.naturalWidth;
         var natH = photoImgEl.naturalHeight;
         if (!natW || !natH) return;
-        var maxW = Math.floor(window.innerWidth  * 0.88) - 12;
-        var maxH = Math.floor(window.innerHeight * 0.88) - 110;
+        var maxW = 460;
+        var maxH = 380;
         var scale = Math.min(1, maxW / natW, maxH / natH);
-        var dispW = Math.max(280, Math.round(natW * scale));
-        var dispH = Math.max(180, Math.round(natH * scale));
+        var dispW = Math.max(240, Math.round(natW * scale));
+        var dispH = Math.max(160, Math.round(natH * scale));
         photoDisplayEl.style.width  = dispW + 'px';
         photoDisplayEl.style.height = dispH + 'px';
         photoWindowEl.style.width   = (dispW + 12) + 'px';
@@ -3241,8 +3241,7 @@
         photoPrevBtn.disabled = photoIndex === 0;
         photoNextBtn.disabled = photoIndex === photoSet.length - 1;
         if (photoDownloadEl) {
-            photoDownloadEl.href     = p.src;
-            photoDownloadEl.download = p.file;
+            photoDownloadEl.href = p.src;
         }
         if (photoImgEl.complete && photoImgEl.naturalWidth) photoResize();
     }
@@ -3308,6 +3307,7 @@
 
     photoPrevBtn.addEventListener('click', function () { photoShow(photoIndex - 1); });
     photoNextBtn.addEventListener('click', function () { photoShow(photoIndex + 1); });
+    photoWindowEl.addEventListener('mousedown', function () { vlcBringToFront('photo'); });
 
     document.getElementById('photo-min-btn').addEventListener('click', function () {
         var min = photoWindowEl.classList.contains('minimized');
