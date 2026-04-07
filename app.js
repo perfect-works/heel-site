@@ -516,10 +516,11 @@
     function merchItemLines(id) {
         var mitem = getMerchItem(id);
         var mpar  = DIR_PARENTS[id] || 'merch';
+        var mlabel2 = mitem && mitem.label ? mitem.label : id;
         var pathLabel;
-        if (mpar === 'merch/segmentation') pathLabel = 'C:\\heel\\merch\\segmentation\\' + id + '\\';
-        else if (mpar === 'merch/stickers') pathLabel = 'C:\\heel\\merch\\stickers\\' + id + '\\';
-        else                                pathLabel = 'C:\\heel\\merch\\' + id + '\\';
+        if (mpar === 'merch/segmentation') pathLabel = 'C:\\heel\\merch\\segmentation\\' + mlabel2 + '\\';
+        else if (mpar === 'merch/stickers') pathLabel = 'C:\\heel\\merch\\stickers\\' + mlabel2 + '\\';
+        else                                pathLabel = 'C:\\heel\\merch\\' + mlabel2 + '\\';
         var lines = [
             { t: 'blank' },
             { t: 'text', v: pathLabel },
