@@ -2614,9 +2614,9 @@
             var base = dot >= 0 ? p.file.slice(0, dot) : p.file;
             var ext  = dot >= 0 ? p.file.slice(dot)    : '';
             icon.innerHTML = '<div class="expl-file-img"></div><span>' + base.replace(/_/g, '_<wbr>') + '<span style="white-space:nowrap">' + ext + '</span></span>';
-            icon.addEventListener('dblclick', (function (file) {
-                return function () { ensureTerminalVisible(); typeAndExecute('./' + file, false); };
-            }(p.file)));
+            icon.addEventListener('dblclick', (function (file, ii) {
+                return function () { ensureTerminalVisible(); openPhotoViewer(ii); typeAndExecute('./' + file, false); };
+            }(p.file, idx)));
             explorerBodyEl.appendChild(icon);
         });
         explorerBackBtn.disabled = true;
