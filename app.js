@@ -561,7 +561,7 @@
         { t: 'driver', label: 'REVERB.DRV',     driverDelay: 550, maxDots: 4 },
         { t: 'driver', label: 'FEEDBACK.VXD',   driverDelay: 600, maxDots: 4 },
         { t: 'blank' },
-        { t: 'detect', v: 'VISITOR COUNT', detectDelay: 900, maxDots: 7, result: function () { return '[' + (visitorCount || '---') + ']'; } },
+        { t: 'detect', v: 'VISITOR COUNT', detectDelay: 900, maxDots: function () { return (visitorCount || '---').length + 2; }, result: function () { return '[' + (visitorCount || '---') + ']'; } },
         { t: 'blank' },
         { t: 'text', v: 'AUTOEXEC.BAT: HL-DOS.exe' },
         { t: 'blank' },
@@ -1158,7 +1158,7 @@
                     output.appendChild(el);
                     scrollBottom();
                     var dots = 0;
-                    var maxDots    = line.maxDots    || 6;
+                    var maxDots    = typeof line.maxDots === 'function' ? line.maxDots() : (line.maxDots || 6);
                     var dotInterval = (line.detectDelay || 1200) / (maxDots + 1);
                     var iv = setInterval(function () {
                         dots++;
