@@ -3611,6 +3611,41 @@
     updateClock();
     setInterval(updateClock, 30000);
 
+    /* ── tray RSS popup ── */
+    (function () {
+        var btn   = document.getElementById('tray-rss-btn');
+        var popup = document.getElementById('rss-popup');
+        var closeBtn = document.getElementById('rss-popup-close');
+
+        function openPopup() {
+            var r = btn.getBoundingClientRect();
+            var popupW = 180;
+            var left = r.left + r.width / 2 - popupW / 2;
+            left = Math.max(4, Math.min(left, window.innerWidth - popupW - 4));
+            popup.style.left = left + 'px';
+            popup.classList.add('visible');
+            btn.classList.add('active');
+        }
+        function closePopup() {
+            popup.classList.remove('visible');
+            btn.classList.remove('active');
+        }
+
+        btn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            if (popup.classList.contains('visible')) { closePopup(); } else { openPopup(); }
+        });
+        closeBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            closePopup();
+        });
+        document.addEventListener('click', function (e) {
+            if (popup.classList.contains('visible') && !popup.contains(e.target)) {
+                closePopup();
+            }
+        });
+    }());
+
     // Task button
     document.getElementById('task-heel').addEventListener('click', function () {
         if (windowEl.style.display === 'none') {

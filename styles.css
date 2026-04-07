@@ -1488,7 +1488,7 @@ body {
     background: none;
     border: none;
     padding: 2px 4px;
-    margin-left: 6px;
+    margin-right: 2px;
     cursor: pointer;
     color: #000000;
     display: flex;
@@ -1516,7 +1516,6 @@ body {
     display: none;
     position: fixed;
     bottom: 42px;
-    right: 8px;
     width: 180px;
     background: #c0c0c0;
     border-top: 2px solid #ffffff;
@@ -1555,7 +1554,8 @@ body {
 }
 
 #rss-popup-title {
-    font-size: 0.65em;
+    font-family: Arial, sans-serif;
+    font-size: 0.7em;
     font-weight: bold;
     color: #000000;
     margin-bottom: 8px;
@@ -1584,7 +1584,7 @@ body {
 #rss-popup-notch {
     position: absolute;
     bottom: -8px;
-    right: 14px;
+    left: 50%;
     width: 0;
     height: 0;
     border-left: 7px solid transparent;
@@ -1596,6 +1596,7 @@ body {
     position: absolute;
     top: -10px;
     left: -6px;
+    transform: none;
     width: 0;
     height: 0;
     border-left: 6px solid transparent;
