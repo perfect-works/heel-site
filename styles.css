@@ -1723,28 +1723,19 @@ body {
         align-items: center;
     }
     .hist-btn {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: #c0c0c0;
-        border-top: 1px solid #ffffff;
-        border-left: 1px solid #ffffff;
-        border-bottom: 1px solid #808080;
-        border-right: 1px solid #808080;
-        color: #000000;
-        font-size: 0.6em;
-        width: 22px;
-        height: 22px;
-        flex-shrink: 0;
-        margin-left: 3px;
+        display: inline;
+        background: none;
+        border: none;
+        color: #33ff33;
+        font-family: 'Courier New', monospace;
+        font-size: 0.85em;
+        margin-left: 4px;
         cursor: pointer;
         padding: 0;
+        opacity: 0.7;
     }
     .hist-btn:active {
-        border-top: 1px solid #808080;
-        border-left: 1px solid #808080;
-        border-bottom: 1px solid #ffffff;
-        border-right: 1px solid #ffffff;
+        opacity: 1;
     }
     .prompt-prefix {
         white-space: nowrap;
