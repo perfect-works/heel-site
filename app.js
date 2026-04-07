@@ -3616,6 +3616,10 @@
         var histUp   = document.getElementById('hist-up');
         var histDown = document.getElementById('hist-down');
         if (!histUp) return;
+        if (window.innerWidth <= 500) {
+            histUp.style.display   = 'inline';
+            histDown.style.display = 'inline';
+        }
         histUp.addEventListener('click', function () {
             if (historyPos < cmdHistory.length - 1) {
                 historyPos++;
