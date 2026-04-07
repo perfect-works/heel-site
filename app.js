@@ -1,5 +1,23 @@
 (function () {
 
+    /* ─── upcoming shows (Google Sheets CSV) ──────────────── */
+    var SHOWS = [];
+    fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vTPfMXHrmoomviVZrQvEWcSvwWsWLvFh96HAChufRtqNPVpDEc7qFNJJk--T2RQmouUG9OA71rQDH6_/pub?output=csv')
+        .then(function (r) { return r.text(); })
+        .then(function (csv) {
+            var lines = csv.trim().split('\n').slice(1);
+            SHOWS = lines.map(function (line) {
+                var cols = line.split(',');
+                return {
+                    date:  (cols[0] || '').trim(),
+                    city:  (cols[1] || '').trim(),
+                    venue: (cols[2] || '').trim(),
+                    href:  (cols[3] || '').trim()
+                };
+            }).filter(function (s) { return s.date; });
+        })
+        .catch(function () { /* shows stay empty */ });
+
     /* ─── visitor count (GoatCounter) ─────────────────────── */
     var visitorCount = null;
     fetch('https://heel.goatcounter.com/counter/%2F.json')
@@ -637,12 +655,20 @@
         },
 
         'fetch --upcoming-shows': function () {
-            return [
-                { t: 'blank' },
-                { t: 'link',   label: 'apr 17', value: 'austin \u2014 pearl st co-op', href: 'https://maps.apple.com/?q=2000+Pearl+St,+Austin,+TX+78705' },
-                { t: 'link',   label: 'apr 18', value: 'houston \u2014 axelrad', href: 'https://maps.apple.com/?q=1517+Alabama+St,+Houston,+TX+77004' },
-                { t: 'blank' },
-            ];
+            var lines = [{ t: 'blank' }];
+            if (SHOWS.length === 0) {
+                lines.push({ t: 'text', v: 'no upcoming shows.', dim: true });
+            } else {
+                SHOWS.forEach(function (s) {
+                    var value = s.city + (s.venue ? ' \u2014 ' + s.venue : '');
+                    lines.push(s.href
+                        ? { t: 'link',   label: s.date.toLowerCase(), value: value, href: s.href }
+                        : { t: 'nolink', label: s.date.toLowerCase(), value: value }
+                    );
+                });
+            }
+            lines.push({ t: 'blank' });
+            return lines;
         },
 
         'ls': function () { return dirListing(); },
