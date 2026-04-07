@@ -911,8 +911,8 @@ body.dragging {
 }
 
 .player-btn-main {
-    width: 52px;
-    font-size: 0.85em;
+    width: 46px;
+    font-size: 0.78em;
 }
 
 .player-tabs {
@@ -1094,8 +1094,8 @@ body.dragging #vlc-drag-overlay {
 }
 
 .vlc-btn-main {
-    width: 46px;
-    font-size: 0.82em;
+    width: 40px;
+    font-size: 0.65em;
     color: #ff7b00;
 }
 

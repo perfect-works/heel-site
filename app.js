@@ -604,6 +604,27 @@
 
     /* ─── command definitions ──────────────────────────────── */
 
+    function fetchLyrics(tr) {
+        var lyricsFile = 'sounds/music/segmentation/lyrics/' + tr.id.replace(/\s+/g, '_') + '.txt';
+        printLines([{ t: 'blank' }, { t: 'text', v: 'fetching lyrics...', dim: true }]);
+        fetch(lyricsFile)
+            .then(function (r) {
+                if (!r.ok) throw new Error('not found');
+                return r.text();
+            })
+            .then(function (text) {
+                var lines = [{ t: 'blank' }, { t: 'text', v: tr.label.toUpperCase(), spaced: true }];
+                text.split('\n').forEach(function (line) {
+                    lines.push(line.trim() === '' ? { t: 'blank' } : { t: 'typewriter', v: line });
+                });
+                lines.push({ t: 'blank' });
+                printLines(lines);
+            })
+            .catch(function () {
+                printLines([{ t: 'error', v: 'lyrics not found for this track.' }, { t: 'blank' }]);
+            });
+    }
+
     var COMMANDS = {
 
         'help': function () {
@@ -806,6 +827,7 @@
                 { t: 'hrow', cmd: 'pause',             desc: 'pause playback'       },
                 { t: 'hrow', cmd: 'resume',            desc: 'resume playback'      },
                 { t: 'hrow', cmd: 'stop',              desc: 'stop playback'        },
+                { t: 'hrow', cmd: 'lyrics',            desc: 'show lyrics for current track' },
                 { t: 'blank' },
                 { t: 'text', v: "navigate to a directory and click a track,", dim: true },
                 { t: 'text', v: "or type 'play &lt;track name&gt;'", dim: true },
@@ -857,6 +879,21 @@
             currentTrackLabel = null;
             updateNowPlaying(null);
             return [{ t: 'blank' }, { t: 'text', v: 'stopped.', dim: true }, { t: 'blank' }];
+        },
+
+        'lyrics': function () {
+            if (!currentAudio) {
+                return [{ t: 'blank' }, { t: 'error', v: 'nothing is playing.' }, { t: 'blank' }];
+            }
+            if (playerCurrentAlbum !== 'segmentation') {
+                return [{ t: 'blank' }, { t: 'error', v: 'lyrics not available for this track.' }, { t: 'blank' }];
+            }
+            var tr = playerTrackList[playerTrackIndex];
+            if (!tr) {
+                return [{ t: 'blank' }, { t: 'error', v: 'lyrics not available.' }, { t: 'blank' }];
+            }
+            fetchLyrics(tr);
+            return [];
         },
 
         /* ── command aliases ── */
@@ -1552,6 +1589,14 @@
             printLines(playTrack(lower.slice(5).trim()));
         } else if (lower === 'play') {
             output.appendChild(render({ t: 'error', v: "usage: play &lt;track name&gt;" }));
+        } else if (lower.indexOf('lyrics ') === 0) {
+            var lq = lower.slice(7).trim();
+            var ltr = TRACKS.segmentation.find(function (t) { return t.id === lq || t.label.replace(/^\d+\s*-\s*/, '') === lq; });
+            if (!ltr) {
+                output.appendChild(render({ t: 'error', v: 'track not found: ' + esc(lq) }));
+            } else {
+                fetchLyrics(ltr);
+            }
             output.appendChild(render({ t: 'blank' }));
             scrollBottom();
         } else {
@@ -2040,8 +2085,8 @@
             playerLcdTrack.textContent = '-- no track --';
         }
         playerPlayBtn.innerHTML = (currentAudio && !audioPaused)
-            ? '<svg width="8" height="9" viewBox="0 0 8 9" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;margin:auto"><rect x="0" y="0" width="2.5" height="9" fill="#000"/><rect x="5" y="0" width="2.5" height="9" fill="#000"/></svg>'
-            : '<svg width="8" height="9" viewBox="0 0 8 9" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;margin:auto"><polygon points="0,0 8,4.5 0,9" fill="#000"/></svg>';
+            ? '<svg width="6" height="7" viewBox="0 0 8 9" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;margin:0 auto 2px"><rect x="0" y="0" width="2.5" height="9" fill="#000"/><rect x="5" y="0" width="2.5" height="9" fill="#000"/></svg>'
+            : '<svg width="6" height="7" viewBox="0 0 8 9" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;margin:0 auto 2px"><polygon points="0,0 8,4.5 0,9" fill="#000"/></svg>';
         playerHighlightCurrent();
     }
 
