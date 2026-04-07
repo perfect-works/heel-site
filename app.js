@@ -640,8 +640,8 @@
         'fetch --upcoming-shows': function () {
             return [
                 { t: 'blank' },
-                { t: 'nolink', label: 'apr 17', value: 'austin \u2014 pearl st co-op' },
-                { t: 'nolink', label: 'apr 18', value: 'houston \u2014 axelrad'       },
+                { t: 'link',   label: 'apr 17', value: 'austin \u2014 pearl st co-op', href: 'https://maps.apple.com/?q=2000+Pearl+St,+Austin,+TX+78705' },
+                { t: 'link',   label: 'apr 18', value: 'houston \u2014 axelrad', href: 'https://maps.apple.com/?q=1517+Alabama+St,+Houston,+TX+77004' },
                 { t: 'blank' },
             ];
         },
