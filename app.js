@@ -295,6 +295,7 @@
             var mlabel = mitem2.label || currentDir;
             var mpar = DIR_PARENTS[currentDir];
             if (mpar === 'merch/segmentation') return 'C:\\heel\\merch\\segmentation\\' + mlabel;
+            if (mpar === 'merch/stickers')     return 'C:\\heel\\merch\\stickers\\' + currentDir;
             return 'C:\\heel\\merch\\' + mlabel;
         }
         return 'C:\\heel\\users\\' + currentDir;
