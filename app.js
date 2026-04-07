@@ -82,12 +82,10 @@
 
     /* ── merch registry ── */
     var MERCH = [
-        { id: 'obey_tshirt',           label: 'obey_tshirt', href: 'https://square.link/u/Fdrsrntv', price: '$20', photo: 'images/merch/obey_shirt.png'    },
-        { id: 'segmentation_cd',       label: 'cd',       href: 'https://square.link/u/PI2TUnAo', price: '$13', photo: 'images/merch/cd.jpg'            },
-        { id: 'segmentation_cassette', label: 'cassette', href: 'https://square.link/u/XfokA7sz', price: '$11', photo: 'images/merch/cassette.jpg'      },
-        { id: 'bumper_sticker',        label: 'bumper',   href: 'https://square.link/u/3hpALQsN', price: '$5',  photo: 'images/merch/bumpersticker.png' },
-        { id: 'logo_sticker',          label: 'logo',     href: 'https://square.link/u/VWqXQGUy', price: '$1',  photo: 'images/merch/logo_sticker.png'  },
-        { id: 'obey_sticker',          label: 'obey',     href: 'https://square.link/u/VWqXQGUy', price: '$1',  photo: 'images/merch/obey_sticker.png'  },
+        { id: 'obey_tshirt',           label: 'obey_tshirt', href: 'https://heelband.bandcamp.com/merch/obey',                          price: '$20', photo: 'images/merch/obey_shirt.png'    },
+        { id: 'segmentation_cd',       label: 'cd',       href: 'https://heelband.bandcamp.com/album/segmentation',                  price: '$13', photo: 'images/merch/cd.jpg'            },
+        { id: 'segmentation_cassette', label: 'cassette', href: 'https://heelband.bandcamp.com/album/segmentation',                  price: '$11', photo: 'images/merch/cassette.jpg'      },
+        { id: 'bumper_sticker',        label: 'bumper',   href: 'https://heelband.bandcamp.com/merch/heaven-or-heel-bumper-sticker', price: '$5',  photo: 'images/merch/bumpersticker.png' },
     ];
 
     /* label → id map for short-name cd navigation (e.g. 'cd' → 'segmentation_cd') */
@@ -161,13 +159,12 @@
         'root':               ['users', 'music', 'video', 'merch'],
         'users':              ['adharsh', 'tayla', 'nick', 'andres'],
         'music':              ['segmentation', 'unreleased'],
-        'merch':              ['obey_tshirt', 'segmentation', 'stickers'],
+        'merch':              ['obey_tshirt', 'segmentation', 'bumper_sticker', 'bumper'],
         'music/segmentation': [],
         'music/unreleased':   ['sgmt_demos', 'heel2_demos'],
         'sgmt_demos':         [],
         'heel2_demos':        [],
         'merch/segmentation': ['segmentation_cd', 'segmentation_cassette', 'cd', 'cassette'],
-        'merch/stickers':     ['bumper_sticker', 'logo_sticker', 'obey_sticker', 'bumper', 'logo', 'obey'],
         'adharsh':            [],
         'tayla':              [],
         'nick':               [],
@@ -176,8 +173,6 @@
         'segmentation_cd':        [],
         'segmentation_cassette':  [],
         'bumper_sticker':         [],
-        'logo_sticker':           [],
-        'obey_sticker':           [],
     };
 
     /* ── parent directory map ── */
@@ -195,13 +190,10 @@
         'nick':               'users',
         'andres':             'users',
         'merch/segmentation': 'merch',
-        'merch/stickers':     'merch',
         'obey_tshirt':            'merch',
         'segmentation_cd':        'merch/segmentation',
         'segmentation_cassette':  'merch/segmentation',
-        'bumper_sticker':         'merch/stickers',
-        'logo_sticker':           'merch/stickers',
-        'obey_sticker':           'merch/stickers',
+        'bumper_sticker':         'merch',
     };
 
     /* load YouTube IFrame API */
@@ -251,11 +243,9 @@
         if (currentDir === 'video')             return 'C:\\heel\\video';
         if (currentDir === 'merch')              return 'C:\\heel\\merch';
         if (currentDir === 'merch/segmentation') return 'C:\\heel\\merch\\segmentation';
-        if (currentDir === 'merch/stickers')     return 'C:\\heel\\merch\\stickers';
         if (getMerchItem(currentDir)) {
             var mpar = DIR_PARENTS[currentDir];
             if (mpar === 'merch/segmentation') return 'C:\\heel\\merch\\segmentation\\' + currentDir;
-            if (mpar === 'merch/stickers')     return 'C:\\heel\\merch\\stickers\\' + currentDir;
             return 'C:\\heel\\merch\\' + currentDir;
         }
         return 'C:\\heel\\users\\' + currentDir;
@@ -373,10 +363,7 @@
             lines.push({ t: 'dirlink', label: tc(0, false)    + '[segmentation]', cmd: 'cd segmentation' });
             lines.push({ t: 'dirlink', label: tcsub(false)    + '[cd]',           cmd: 'cd cd'           });
             lines.push({ t: 'dirlink', label: tcsub(true)     + '[cassette]',     cmd: 'cd cassette'     });
-            lines.push({ t: 'dirlink', label: tc(0, false)    + '[stickers]',     cmd: 'cd stickers'     });
-            lines.push({ t: 'dirlink', label: tcsub(false)    + '[bumper]',       cmd: 'cd bumper'       });
-            lines.push({ t: 'dirlink', label: tcsub(false)    + '[logo]',         cmd: 'cd logo'         });
-            lines.push({ t: 'dirlink', label: tcsub(true)     + '[obey]',         cmd: 'cd obey'         });
+            lines.push({ t: 'dirlink', label: tc(0, false)    + '[bumper_sticker]', cmd: 'cd bumper'     });
             lines.push({ t: 'dirlink', label: tc(0, true)     + '[<- back]',      cmd: 'cd ..'           });
             lines.push({ t: 'blank' });
             lines.push({ t: 'text', v: "click an item or type 'cd &lt;item&gt;' to view", dim: true });
@@ -387,14 +374,6 @@
             lines.push({ t: 'dirlink', label: tc(1, false) + '[cd]',       cmd: 'cd cd'       });
             lines.push({ t: 'dirlink', label: tc(1, false) + '[cassette]', cmd: 'cd cassette' });
             lines.push({ t: 'dirlink', label: tc(1, true)  + '[<- back]',  cmd: 'cd ..'       });
-
-        } else if (currentDir === 'merch/stickers') {
-            lines.push({ t: 'text', v: 'C:\\heel\\merch\\' });
-            lines.push({ t: 'text', v: tc(0, true) + 'stickers\\' });
-            lines.push({ t: 'dirlink', label: tc(1, false) + '[bumper]', cmd: 'cd bumper' });
-            lines.push({ t: 'dirlink', label: tc(1, false) + '[logo]',   cmd: 'cd logo'   });
-            lines.push({ t: 'dirlink', label: tc(1, false) + '[obey]',   cmd: 'cd obey'   });
-            lines.push({ t: 'dirlink', label: tc(1, true)  + '[<- back]', cmd: 'cd ..'    });
 
         } else if (getMerchItem(currentDir)) {
             var mitem = getMerchItem(currentDir);
@@ -459,7 +438,6 @@
         var mpar  = DIR_PARENTS[id] || 'merch';
         var pathLabel;
         if (mpar === 'merch/segmentation') pathLabel = 'C:\\heel\\merch\\segmentation\\' + id + '\\';
-        else if (mpar === 'merch/stickers') pathLabel = 'C:\\heel\\merch\\stickers\\' + id + '\\';
         else                                pathLabel = 'C:\\heel\\merch\\' + id + '\\';
         var lines = [
             { t: 'blank' },
@@ -631,14 +609,10 @@
         'cd segmentation_cd':       function () { return navigateTo('segmentation_cd');     },
         'cd segmentation_cassette': function () { return navigateTo('segmentation_cassette'); },
         'cd bumper_sticker':        function () { return navigateTo('bumper_sticker');      },
-        'cd logo_sticker':          function () { return navigateTo('logo_sticker');        },
-        'cd obey_sticker':          function () { return navigateTo('obey_sticker');        },
         /* short-name aliases */
         'cd cd':       function () { return navigateTo('cd');       },
         'cd cassette': function () { return navigateTo('cassette'); },
         'cd bumper':   function () { return navigateTo('bumper');   },
-        'cd logo':     function () { return navigateTo('logo');     },
-        'cd obey':     function () { return navigateTo('obey');     },
 
         'buy.exe': function () {
             var mitem = getMerchItem(currentDir);
@@ -664,9 +638,6 @@
         'cd segmentation': function () {
             if (currentDir === 'merch') return navigateTo('merch/segmentation');
             return navigateTo('music/segmentation');
-        },
-        'cd stickers': function () {
-            return navigateTo('merch/stickers');
         },
         'cd unreleased': function () {
             currentDir = 'music/unreleased'; updatePrompt();
@@ -1404,7 +1375,7 @@
         }
 
         /* merch folder shortcut: typing a folder name cds into it */
-        var isMerchContext = currentDir === 'merch' || currentDir === 'merch/segmentation' || currentDir === 'merch/stickers';
+        var isMerchContext = currentDir === 'merch' || currentDir === 'merch/segmentation';
         if (isMerchContext) {
             var children = DIR_CHILDREN[currentDir] || [];
             if (children.indexOf(lower) !== -1) {
