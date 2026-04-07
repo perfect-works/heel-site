@@ -498,16 +498,6 @@
         cdClear();
         if (MEMBERS[dir])      return memberLines(dir);
         if (getMerchItem(dir)) {
-            var mitem = getMerchItem(dir);
-            if (mitem && mitem.photo && window.innerWidth > 900) {
-                var set = [{ src: mitem.photo, file: 'photo.jpg' }];
-                if (mitem.samples) {
-                    mitem.samples.forEach(function (s) {
-                        set.push({ src: s, file: s.split('/').pop() });
-                    });
-                }
-                openPhotoViewerWithSet(set, 0);
-            }
             return merchItemLines(dir);
         }
         return dir === 'root' ? [] : dirListing();
@@ -1437,7 +1427,7 @@
         }
 
         /* photo commands: photo / photo.jpg / cat photo.jpg / open photo.jpg etc. */
-        var PHOTO_CMDS = ['photo', 'photo.jpg', './photo.jpg', './ photo.jpg', 'cat photo.jpg', 'cat photo', 'open photo.jpg', 'open photo'];
+        var PHOTO_CMDS = ['photo', 'photo.jpg', './photo', './photo.jpg', './ photo.jpg', 'cat photo.jpg', 'cat photo', 'open photo.jpg', 'open photo'];
         if (PHOTO_CMDS.indexOf(lower) !== -1) {
             var photoSrc = null;
             if (MEMBERS[currentDir])        photoSrc = MEMBERS[currentDir].photo;
