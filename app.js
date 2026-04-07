@@ -26,6 +26,8 @@
     var currentDir       = 'root';
     var currentAudio       = null;
     var audioPaused        = false;
+    var masterVolume       = 1;
+    var masterMuted        = false;
     var nowPlayingInterval = null;
     var printGeneration    = 0;
     var tabCycle = { partial: null, matches: [], index: -1 };
@@ -1981,6 +1983,8 @@
         var tr = playerTrackList[i];
         if (currentAudio) { currentAudio.pause(); }
         currentAudio = new Audio(tr.file);
+        currentAudio.volume = masterVolume;
+        currentAudio.muted  = masterMuted;
         audioPaused  = false;
         currentTrackLabel = tr.label;
         playerTrackIndex  = i;
@@ -2820,6 +2824,8 @@
         }
         if (currentAudio) { currentAudio.pause(); }
         currentAudio = new Audio(found.file);
+        currentAudio.volume = masterVolume;
+        currentAudio.muted  = masterMuted;
         audioPaused  = false;
         currentTrackLabel = found.label;
         currentAudio.play().catch(function () {});
@@ -3657,6 +3663,63 @@
                 input.value = '';
             }
             input.focus();
+        });
+    }());
+
+    /* ── tray volume popup ── */
+    (function () {
+        var btn      = document.getElementById('tray-vol-btn');
+        var popup    = document.getElementById('vol-popup');
+        var slider   = document.getElementById('vol-slider');
+        var pct      = document.getElementById('vol-pct');
+        var icon     = document.getElementById('tray-vol-icon');
+
+        var SVG_ON   = '<polygon points="1,5 5,5 8,2 8,12 5,9 1,9" fill="currentColor"/><path d="M9.5 4.5 Q12 7 9.5 9.5" stroke="currentColor" fill="none" stroke-width="1.3" stroke-linecap="round"/>';
+        var SVG_MUTE = '<polygon points="1,5 5,5 8,2 8,12 5,9 1,9" fill="currentColor"/><line x1="10" y1="4.5" x2="13" y2="9.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><line x1="13" y1="4.5" x2="10" y2="9.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>';
+
+        function updateIcon() {
+            icon.innerHTML = (masterMuted || masterVolume === 0) ? SVG_MUTE : SVG_ON;
+        }
+
+        function openPopup() {
+            var r = btn.getBoundingClientRect();
+            var popupW = 120;
+            var left = r.left + r.width / 2 - popupW / 2;
+            left = Math.max(4, Math.min(left, window.innerWidth - popupW - 4));
+            popup.style.left = left + 'px';
+            popup.style.display = 'block';
+            btn.classList.add('active');
+        }
+        function closePopup() {
+            popup.style.display = 'none';
+            btn.classList.remove('active');
+        }
+
+        btn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            if (popup.style.display === 'block') { closePopup(); return; }
+            openPopup();
+        });
+        btn.addEventListener('dblclick', function (e) {
+            e.stopPropagation();
+            masterMuted = !masterMuted;
+            if (currentAudio) currentAudio.muted = masterMuted;
+            updateIcon();
+        });
+        slider.addEventListener('input', function () {
+            masterVolume = this.value / 100;
+            masterMuted  = masterVolume === 0;
+            pct.textContent = this.value + '%';
+            if (currentAudio) {
+                currentAudio.volume = masterVolume;
+                currentAudio.muted  = masterMuted;
+            }
+            updateIcon();
+        });
+        document.addEventListener('click', function (e) {
+            if (popup.style.display === 'block' && !popup.contains(e.target) && e.target !== btn) {
+                closePopup();
+            }
         });
     }());
 

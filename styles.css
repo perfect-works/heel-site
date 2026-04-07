@@ -1488,6 +1488,81 @@ body {
     color: #000000;
 }
 
+#tray-vol-btn {
+    background: none;
+    border: none;
+    padding: 2px 4px;
+    margin-right: 2px;
+    cursor: pointer;
+    color: #000000;
+    display: flex;
+    align-items: center;
+    border-radius: 0;
+}
+#tray-vol-btn:hover {
+    background: #c0c0c0;
+    border-top: 1px solid #ffffff;
+    border-left: 1px solid #ffffff;
+    border-bottom: 1px solid #808080;
+    border-right: 1px solid #808080;
+    padding: 1px 3px;
+}
+#tray-vol-btn.active {
+    background: #c0c0c0;
+    border-top: 1px solid #808080;
+    border-left: 1px solid #808080;
+    border-bottom: 1px solid #ffffff;
+    border-right: 1px solid #ffffff;
+    padding: 1px 3px;
+}
+
+#vol-popup {
+    position: fixed;
+    bottom: 42px;
+    width: 120px;
+    background: #c0c0c0;
+    border-top: 2px solid #ffffff;
+    border-left: 2px solid #ffffff;
+    border-bottom: 2px solid #808080;
+    border-right: 2px solid #808080;
+    box-shadow: 2px 2px 0 #000000;
+    padding: 10px 10px 14px 10px;
+    z-index: 10000;
+    font-family: 'Courier New', monospace;
+    text-align: center;
+}
+#vol-pct {
+    font-size: 0.65em;
+    color: #000;
+    margin-bottom: 6px;
+}
+#vol-slider {
+    width: 100%;
+    accent-color: #000080;
+    cursor: pointer;
+}
+#vol-popup-notch {
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-left: 7px solid transparent;
+    border-right: 7px solid transparent;
+    border-top: 8px solid #808080;
+}
+#vol-popup-notch::after {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: -6px;
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 7px solid #c0c0c0;
+}
+
 #tray-rss-btn {
     background: none;
     border: none;
