@@ -1809,7 +1809,7 @@
             { label: 'new',     cmd: 'fetch --new-releases',   icon: rssIcon  },
             { label: 'shows',   cmd: 'fetch --upcoming-shows',  icon: calIcon  },
             { label: 'stream',  cmd: 'fetch --streaming',       icon: '&#9835;' },
-            { label: 'socials', cmd: 'fetch --socials',         icon: '@'       },
+            { label: 'socials', cmd: 'fetch --socials',         icon: '<svg width="20" height="20" viewBox="0 0 20 20"><text x="10" y="15" text-anchor="middle" font-size="15" fill="currentColor" font-family="Arial, sans-serif">@</text></svg>' },
         ];
         var row = document.createElement('div');
         row.id = 'mobile-shortcuts';

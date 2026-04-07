@@ -880,6 +880,7 @@ body.dragging {
         right: 0;
         bottom: 36px; /* above taskbar */
         padding: 10px 8px;
+        border-top: 1px solid rgba(255, 255, 255, 0.18);
     }
 }
 
