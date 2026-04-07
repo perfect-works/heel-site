@@ -3192,17 +3192,33 @@
     });
 
 /* ─── photo viewer ───────────────────────────────────── */
-    var photoWindowEl  = document.getElementById('photo-window');
-    var photoImgEl     = document.getElementById('photo-img');
-    var photoEmptyEl   = document.getElementById('photo-empty');
-    var photoCounterEl = document.getElementById('photo-counter');
-    var photoTitleEl   = document.getElementById('photo-title-text');
-    var photoPrevBtn   = document.getElementById('photo-prev');
-    var photoNextBtn   = document.getElementById('photo-next');
+    var photoWindowEl   = document.getElementById('photo-window');
+    var photoImgEl      = document.getElementById('photo-img');
+    var photoEmptyEl    = document.getElementById('photo-empty');
+    var photoDisplayEl  = document.getElementById('photo-display');
+    var photoCounterEl  = document.getElementById('photo-counter');
+    var photoTitleEl    = document.getElementById('photo-title-text');
+    var photoPrevBtn    = document.getElementById('photo-prev');
+    var photoNextBtn    = document.getElementById('photo-next');
+    var photoDownloadEl = document.getElementById('photo-download');
     var photoOpen      = false;
     var photoTaskBtn   = null;
     var photoIndex     = 0;
     var photoSet       = [];
+
+    function photoResize() {
+        var natW = photoImgEl.naturalWidth;
+        var natH = photoImgEl.naturalHeight;
+        if (!natW || !natH) return;
+        var maxW = Math.floor(window.innerWidth  * 0.88) - 12;
+        var maxH = Math.floor(window.innerHeight * 0.88) - 110;
+        var scale = Math.min(1, maxW / natW, maxH / natH);
+        var dispW = Math.max(280, Math.round(natW * scale));
+        var dispH = Math.max(180, Math.round(natH * scale));
+        photoDisplayEl.style.width  = dispW + 'px';
+        photoDisplayEl.style.height = dispH + 'px';
+        photoWindowEl.style.width   = (dispW + 12) + 'px';
+    }
 
     function photoShow(index) {
         if (photoSet.length === 0) {
@@ -3216,6 +3232,7 @@
         }
         photoIndex = Math.max(0, Math.min(index, photoSet.length - 1));
         var p = photoSet[photoIndex];
+        photoImgEl.onload = photoResize;
         photoImgEl.src             = p.src;
         photoImgEl.style.display   = 'block';
         photoEmptyEl.style.display = 'none';
@@ -3223,6 +3240,11 @@
         photoTitleEl.textContent   = p.file + ' - Photo Viewer';
         photoPrevBtn.disabled = photoIndex === 0;
         photoNextBtn.disabled = photoIndex === photoSet.length - 1;
+        if (photoDownloadEl) {
+            photoDownloadEl.href     = p.src;
+            photoDownloadEl.download = p.file;
+        }
+        if (photoImgEl.complete && photoImgEl.naturalWidth) photoResize();
     }
 
     function openPhotoViewer(globalIndex) {
