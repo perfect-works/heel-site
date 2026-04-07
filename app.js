@@ -598,7 +598,7 @@
                 { t: 'hrow', cmd: 'ls',                     desc: 'list current directory', exec: 'ls'                     },
                 { t: 'hrow', cmd: 'cd &lt;dir&gt;',         desc: 'open a folder',         exec: 'cd'                     },
                 { t: 'hrow', cmd: 'play &lt;track&gt;',     desc: '',                      exec: 'cd music'               },
-                { t: 'hrow-parent', cmd: 'fetch'                                                                           },
+                { t: 'hrow-parent', cmd: 'fetch <span style="opacity:0.45">--&lt;flag&gt;</span>'                        },
                 { t: 'hrow-sub',  flag: '--new-releases',   desc: '',                      exec: 'fetch --new-releases',   last: false },
                 { t: 'hrow-sub',  flag: '--socials',        desc: '',                      exec: 'fetch --socials',        last: false },
                 { t: 'hrow-sub',  flag: '--streaming',      desc: '',                      exec: 'fetch --streaming',      last: false },
