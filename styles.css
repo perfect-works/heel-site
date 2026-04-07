@@ -1528,7 +1528,6 @@ body {
     font-family: 'Courier New', monospace;
     text-align: center;
 }
-#rss-popup.visible { display: block; }
 
 #rss-popup-close {
     position: absolute;
