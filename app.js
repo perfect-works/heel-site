@@ -150,28 +150,29 @@
         ],
     };
 
-    /* ── photo registry ── */
-    var PHOTOS = [
-        { id: 'aura',                    file: 'aura.jpg',                    src: 'images/photo/aura.jpg'                    },
-        { id: 'bear',                    file: 'bear.jpg',                    src: 'images/photo/bear.jpg'                    },
-        { id: 'early_days',              file: 'early_days.jpg',              src: 'images/photo/early_days.jpg'              },
-        { id: 'grayscale',     file: 'grayscale.jpg',     src: 'images/photo/wallpapers/grayscale.jpg',    dir: 'wallpapers' },
-        { id: 'honeycomb',               file: 'honeycomb.jpg',               src: 'images/photo/honeycomb.jpg'               },
-        { id: 'launch_show_poster',      file: 'launch_show_poster.jpg',      src: 'images/photo/launch_show_poster.jpg'      },
-        { id: 'pain_faces',              file: 'pain_faces.png',              src: 'images/photo/pain_faces.png'              },
-        { id: 'pink_guitar',             file: 'pink_guitar.jpg',             src: 'images/photo/pink_guitar.jpg'             },
-        { id: 'poster',                  file: 'poster.png',                  src: 'images/photo/poster.png'                  },
-        { id: 'prediction',              file: 'prediction.jpg',              src: 'images/photo/prediction.jpg'              },
-        { id: 'segmentation_back_cover', file: 'segmentation_back_cover.png', src: 'images/photo/segmentation_back_cover.png' },
-        { id: 'segmentation_front_cover',file: 'segmentation_front_cover.png',src: 'images/photo/segmentation_front_cover.png'},
-        { id: 'through_me',              file: 'through_me.jpg',              src: 'images/photo/through_me.jpg'              },
-        { id: 'who',                     file: 'who.jpg',                     src: 'images/photo/who.jpg'                     },
-        { id: 'blue',          file: 'blue.png',          src: null,                                       dir: 'wallpapers' },
-        { id: 'chouchou',      file: 'chouchou.jpg',      src: 'images/photo/wallpapers/chouchou.jpg',     dir: 'wallpapers' },
-        { id: 'heel',          file: 'heel.png',          src: 'images/photo/wallpapers/heel.png',         dir: 'wallpapers' },
-        { id: 'mountain',      file: 'mountain.jpg',      src: 'images/photo/wallpapers/mountain.jpg',     dir: 'wallpapers' },
-        { id: 'white',         file: 'white.jpg',         src: 'images/photo/wallpapers/white.jpg',        dir: 'wallpapers' },
-    ];
+    /* ── photo registry (populated from manifest.json) ── */
+    var PHOTOS = [];
+    fetch('images/photo/manifest.json')
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+            var photos = (data.photos || []).map(function (file) {
+                return {
+                    id:  file.replace(/\.[^.]+$/, '').replace(/[^a-z0-9]/gi, '_'),
+                    file: file,
+                    src:  'images/photo/' + file
+                };
+            });
+            var wallpapers = (data.wallpapers || []).map(function (file) {
+                return {
+                    id:  file.replace(/\.[^.]+$/, '').replace(/[^a-z0-9]/gi, '_'),
+                    file: file,
+                    src:  'images/photo/wallpapers/' + file,
+                    dir:  'wallpapers'
+                };
+            });
+            PHOTOS = photos.concat(wallpapers);
+        })
+        .catch(function () { /* manifest unavailable, photo viewer will be empty */ });
 
     /* ── video registry ── */
     var VIDEOS = [
