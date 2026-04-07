@@ -85,8 +85,8 @@
     /* ── merch registry ── */
     var MERCH = [
         { id: 'obey_tshirt',           label: 'obey_tshirt', href: 'https://heelband.bandcamp.com/merch/obey',                          price: '$20', photo: 'images/merch/obey_shirt.png'    },
-        { id: 'segmentation_cd',       label: 'cd',       href: 'https://heelband.bandcamp.com/album/segmentation',                  price: '$13', photo: 'images/merch/cd.jpg'            },
-        { id: 'segmentation_cassette', label: 'cassette', href: 'https://heelband.bandcamp.com/album/segmentation',                  price: '$11', photo: 'images/merch/cassette.jpg'      },
+        { id: 'segmentation_cd',       label: 'cd',       href: 'https://heelband.bandcamp.com/album/segmentation',                  price: '$13', photo: 'images/merch/cd.png'            },
+        { id: 'segmentation_cassette', label: 'cassette', href: 'https://heelband.bandcamp.com/album/segmentation',                  price: '$11', photo: 'images/merch/cassette.png'      },
         { id: 'bumper_sticker',        label: 'bumper sticker', href: 'https://heelband.bandcamp.com/merch/heaven-or-heel-bumper-sticker', price: '$5',  photo: 'images/merch/bumpersticker.png' },
         { id: 'zine',                  label: 'zine',     href: 'https://heelband.bandcamp.com/merch/heel-zine',                       price: '$14', photo: 'images/merch/zine.png', samples: ['images/merch/zine/sample1.png', 'images/merch/zine/sample2.png'] },
         { id: 'sticker_bundle',        label: 'sticker bundle', href: 'https://heelband.bandcamp.com/merch/heel-sticker-pack',          price: '$6',  photo: 'images/merch/sticker_bundle.png' },
@@ -568,7 +568,7 @@
 
     var BOOT_LINES_POST = [
         { t: 'blank' },
-        { t: 'text', v: 'Welt OS [Version 1.0.2023]', dim: true },
+        { t: 'text', v: 'Solaris OS [Version 1.0.2023]', dim: true },
         { t: 'text', v: '(C) Copyright HEEL Corp 2023. All rights reserved.', dim: true },
         { t: 'blank' },
     ];
@@ -2014,7 +2014,9 @@
         } else {
             playerLcdTrack.textContent = '-- no track --';
         }
-        playerPlayBtn.innerHTML = (currentAudio && !audioPaused) ? '&#9646;&#9646;' : '&#9654;';
+        playerPlayBtn.innerHTML = (currentAudio && !audioPaused)
+            ? '<svg width="8" height="9" viewBox="0 0 8 9" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;margin:auto"><rect x="0" y="0" width="2.5" height="9" fill="#000"/><rect x="5" y="0" width="2.5" height="9" fill="#000"/></svg>'
+            : '<svg width="8" height="9" viewBox="0 0 8 9" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;margin:auto"><polygon points="0,0 8,4.5 0,9" fill="#000"/></svg>';
         playerHighlightCurrent();
     }
 
@@ -2522,7 +2524,7 @@
             explorerBodyEl.appendChild(icon);
         });
         explorerAddressEl.textContent = 'C:\\heel\\users\\';
-        explorerTitleEl.textContent   = 'users - Welt Explorer';
+        explorerTitleEl.textContent   = 'users - File Explorer';
         explorerStatusEl.textContent  = MEMBER_NAMES.length + ' objects';
         explorerBackBtn.disabled = true;
     }
@@ -2548,7 +2550,7 @@
             explorerBodyEl.appendChild(icon);
         });
         explorerAddressEl.textContent = 'C:\\heel\\users\\' + name + '\\';
-        explorerTitleEl.textContent   = name + ' - Welt Explorer';
+        explorerTitleEl.textContent   = name + ' - File Explorer';
         explorerStatusEl.textContent  = files.length + ' objects';
         explorerBackBtn.disabled = false;
     }
@@ -2615,7 +2617,7 @@
         });
         explorerBackBtn.disabled = true;
         explorerAddressEl.textContent = 'C:\\heel\\photo\\';
-        explorerTitleEl.textContent   = 'photo - Welt Explorer';
+        explorerTitleEl.textContent   = 'photo - File Explorer';
     }
 
     function explorerRenderWallpapers() {
@@ -2634,7 +2636,7 @@
         });
         explorerBackBtn.disabled = false;
         explorerAddressEl.textContent = 'C:\\heel\\photo\\wallpapers\\';
-        explorerTitleEl.textContent   = 'wallpapers - Welt Explorer';
+        explorerTitleEl.textContent   = 'wallpapers - File Explorer';
     }
 
     function explorerRenderVideo() {
@@ -2654,7 +2656,7 @@
         });
         explorerBackBtn.disabled = true;
         explorerAddressEl.textContent = 'C:\\heel\\video\\';
-        explorerTitleEl.textContent   = 'video - Welt Explorer';
+        explorerTitleEl.textContent   = 'video - File Explorer';
     }
 
     function explorerRenderMusic() {
@@ -2670,7 +2672,7 @@
         });
         explorerBackBtn.disabled = true;
         explorerAddressEl.textContent = 'C:\\heel\\music\\';
-        explorerTitleEl.textContent   = 'music - Welt Explorer';
+        explorerTitleEl.textContent   = 'music - File Explorer';
     }
 
     function explorerRenderMusicUnreleased() {
@@ -2686,7 +2688,7 @@
         });
         explorerBackBtn.disabled = false;
         explorerAddressEl.textContent = 'C:\\heel\\music\\unreleased\\';
-        explorerTitleEl.textContent   = 'unreleased - Welt Explorer';
+        explorerTitleEl.textContent   = 'unreleased - File Explorer';
     }
 
     function explorerRenderTrackList(key, addressPath, title) {
@@ -2707,7 +2709,7 @@
         });
         explorerBackBtn.disabled = false;
         explorerAddressEl.textContent = addressPath;
-        explorerTitleEl.textContent   = title + ' - Welt Explorer';
+        explorerTitleEl.textContent   = title + ' - File Explorer';
     }
 
     function openExplorer(dir) {
@@ -3695,7 +3697,7 @@
 
         function openPopup() {
             var r = btn.getBoundingClientRect();
-            var popupW = 120;
+            var popupW = 46;
             var left = r.left + r.width / 2 - popupW / 2;
             left = Math.max(4, Math.min(left, window.innerWidth - popupW - 4));
             popup.style.left = left + 'px';

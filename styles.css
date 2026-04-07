@@ -1519,32 +1519,83 @@ body {
 #vol-popup {
     position: fixed;
     bottom: 42px;
-    width: 120px;
+    width: 46px;
     background: #c0c0c0;
     border-top: 2px solid #ffffff;
     border-left: 2px solid #ffffff;
     border-bottom: 2px solid #808080;
     border-right: 2px solid #808080;
     box-shadow: 2px 2px 0 #000000;
-    padding: 10px 10px 14px 10px;
+    padding: 10px 8px 14px 8px;
     z-index: 10000;
     font-family: 'Courier New', monospace;
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
 }
 #vol-pct {
-    font-size: 0.65em;
+    font-size: 0.6em;
     color: #000;
-    margin-bottom: 6px;
 }
 #vol-slider {
-    width: 100%;
-    accent-color: #000080;
+    writing-mode: vertical-lr;
+    direction: rtl;
+    -webkit-appearance: slider-vertical;
+    appearance: slider-vertical;
+    width: 22px;
+    height: 100px;
+    cursor: pointer;
+    margin: 0;
+    padding: 0;
+    background: transparent;
+}
+#vol-slider::-webkit-slider-runnable-track {
+    width: 4px;
+    background: linear-gradient(to bottom, #000080, #1084d0);
+    border-top: 1px solid #404040;
+    border-left: 1px solid #404040;
+    border-bottom: 1px solid #dfdfdf;
+    border-right: 1px solid #dfdfdf;
+}
+#vol-slider::-moz-range-track {
+    width: 4px;
+    background: linear-gradient(to bottom, #000080, #1084d0);
+    border-top: 1px solid #404040;
+    border-left: 1px solid #404040;
+    border-bottom: 1px solid #dfdfdf;
+    border-right: 1px solid #dfdfdf;
+}
+#vol-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 11px;
+    background: #c0c0c0;
+    border-top: 1px solid #ffffff;
+    border-left: 1px solid #ffffff;
+    border-bottom: 1px solid #808080;
+    border-right: 1px solid #808080;
+    border-radius: 0;
+    cursor: pointer;
+}
+#vol-slider::-moz-range-thumb {
+    width: 20px;
+    height: 11px;
+    background: #c0c0c0;
+    border-top: 1px solid #ffffff;
+    border-left: 1px solid #ffffff;
+    border-bottom: 1px solid #808080;
+    border-right: 1px solid #808080;
+    border-radius: 0;
     cursor: pointer;
 }
 #vol-popup-notch {
     position: absolute;
     bottom: -8px;
     left: 50%;
+    transform: translateX(-50%);
     width: 0;
     height: 0;
     border-left: 7px solid transparent;
