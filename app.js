@@ -2721,21 +2721,19 @@
 
                 s.spawnT -= dt;
                 if (s.spawnT <= 0) {
-                    var r = Math.random(), type, h, w;
-                    if (r < 0.33) {
-                        type = 'puddle';
-                        w = 36 + Math.floor(Math.random() * 32);
-                        h = 8  + Math.floor(Math.random() * 6);
-                    } else if (r < 0.66) {
-                        type = 'hydrant';
-                        w = 18;
-                        h = 28 + Math.floor(Math.random() * 8);
-                    } else {
-                        type = 'trashcan';
-                        w = 20;
-                        h = 32 + Math.floor(Math.random() * 10);
-                    }
-                    s.obs.push({ x: W + 10, w: w, h: h, type: type });
+                    var variant = Math.floor(Math.random() * 4);
+
+                    var w = 18 + Math.floor(Math.random() * 6);
+                    var h = 34 + Math.floor(Math.random() * 6);
+
+                    s.obs.push({ 
+                        x: W + 10, 
+                        w: w, 
+                        h: h, 
+                        type: 'person',
+                        variant: variant
+                    });
+
                     s.spawnT = 0.8 + Math.random() * 0.9;
                 }
 
@@ -2801,6 +2799,82 @@
                 ctx.restore();
             }
 
+            function drawPerson(o) {
+                var x = o.x;
+                var y = GROUND_Y;
+
+                ctx.save();
+                ctx.translate(x, y);
+
+                var skin, hair, shirt;
+
+                // 4 variants
+                if (o.variant === 0) {
+                    // harsh
+                    skin = '#5e452f';
+                    hair = '#111';
+                    shirt = '#161616';
+                } else if (o.variant === 1) {
+                    // nick
+                    skin = '#e0d3bf';
+                    hair = '#c58150';
+                    shirt = '#aeaeae';
+                } else if (o.variant === 2) {
+                    // andres
+                    skin = '#ddc39c';
+                    hair = '#5a3a1b';
+                    shirt = '#27512c';
+                } else {
+                    // tayla
+                    skin = '#d4a879';
+                    hair = '#c46896';
+                    shirt = '#f1f1f1';
+                }
+
+                var h = o.h;
+
+                // BODY
+                ctx.fillStyle = shirt;
+                ctx.fillRect(4, -h * 0.6, 10, h * 0.4);
+
+                // LEGS
+                ctx.fillStyle = '#222';
+                ctx.fillRect(4, -h * 0.2, 4, h * 0.2);
+                ctx.fillRect(10, -h * 0.2, 4, h * 0.2);
+
+                // HEAD
+                ctx.fillStyle = skin;
+                ctx.beginPath();
+                ctx.arc(9, -h * 0.75, 6, 0, Math.PI * 2);
+                ctx.fill();
+
+                // HAIR
+                ctx.fillStyle = hair;
+                ctx.fillRect(3, -h * 0.9, 12, 5);
+
+
+                // LONG HAIR variants (andres, nick variants)
+                if (o.variant === 1 || o.variant === 2) {
+                    ctx.fillRect(3, -h * 0.75, 3, 10);
+                    ctx.fillRect(12, -h * 0.75, 3, 10);
+                }
+
+                // BRAIDS (tayla variant)
+                if (o.variant === 3) {
+                    // pink braids
+                    ctx.fillStyle = '#c46896';
+                    ctx.fillRect(2, -h * 0.7, 3, 10);
+                    ctx.fillRect(13, -h * 0.7, 3, 10);
+
+                    // blue tips
+                    ctx.fillStyle = '#212d72';
+                    ctx.fillRect(2, -h * 0.6, 3, 4);
+                    ctx.fillRect(13, -h * 0.6, 3, 4);
+                }
+
+                ctx.restore();
+            }
+
             function draw() {
                 ctx.fillStyle = '#fff';
                 ctx.fillRect(0, 0, W, H);
@@ -2823,80 +2897,7 @@
 
                 for (var i = 0; i < s.obs.length; i++) {
                     var o = s.obs[i];
-                    ctx.save();
-                    if (o.type === 'puddle') {
-                        var cx = o.x + o.w / 2, cy = GROUND_Y - 2;
-                        ctx.beginPath();
-                        ctx.ellipse(cx, cy, o.w / 2, o.h / 2, 0, 0, Math.PI * 2);
-                        ctx.fillStyle = 'rgba(40,80,160,0.55)';
-                        ctx.fill();
-                        ctx.beginPath();
-                        ctx.ellipse(cx - o.w * 0.15, cy - o.h * 0.15, o.w * 0.2, o.h * 0.18, -0.4, 0, Math.PI * 2);
-                        ctx.fillStyle = 'rgba(180,210,255,0.5)';
-                        ctx.fill();
-
-                    } else if (o.type === 'hydrant') {
-                        ctx.translate(o.x, GROUND_Y);
-                        var hw = o.w, hh = o.h;
-                        /* base flange */
-                        ctx.fillStyle = '#bb1a00';
-                        ctx.fillRect(-2, -hh * 0.14, hw + 4, hh * 0.14);
-                        /* body */
-                        ctx.fillRect(0, -hh * 0.78, hw, hh * 0.64);
-                        /* dome */
-                        ctx.beginPath();
-                        ctx.arc(hw / 2, -hh * 0.78, hw / 2, Math.PI, 0);
-                        ctx.fill();
-                        /* cap */
-                        ctx.fillStyle = '#881200';
-                        ctx.fillRect(hw * 0.2, -hh, hw * 0.6, hh * 0.12);
-                        ctx.fillRect(hw * 0.3, -hh * 1.08, hw * 0.4, hh * 0.09);
-                        /* side nozzles */
-                        ctx.fillStyle = '#bb1a00';
-                        ctx.fillRect(-hw * 0.28, -hh * 0.55, hw * 0.28, hh * 0.13);
-                        ctx.fillRect(hw,          -hh * 0.55, hw * 0.28, hh * 0.13);
-                        /* highlight */
-                        ctx.fillStyle = '#dd3322';
-                        ctx.fillRect(hw * 0.18, -hh * 0.76, hw * 0.18, hh * 0.48);
-
-                    } else {
-                        /* trash can */
-                        ctx.translate(o.x, GROUND_Y);
-                        var tw = o.w, th = o.h;
-                        /* body — slightly tapered */
-                        ctx.beginPath();
-                        ctx.moveTo(tw * 0.08, 0);
-                        ctx.lineTo(0,         -th * 0.82);
-                        ctx.lineTo(tw * 0.06,  -th * 0.92);
-                        ctx.lineTo(tw * 0.94,  -th * 0.92);
-                        ctx.lineTo(tw,         -th * 0.82);
-                        ctx.lineTo(tw * 0.92,  0);
-                        ctx.closePath();
-                        ctx.fillStyle = '#484848';
-                        ctx.fill();
-                        /* ridges */
-                        ctx.strokeStyle = '#585858';
-                        ctx.lineWidth = 1;
-                        for (var ri = 1; ri < 4; ri++) {
-                            ctx.beginPath();
-                            ctx.moveTo(tw * 0.08, -th * 0.22 * ri);
-                            ctx.lineTo(tw * 0.92, -th * 0.22 * ri);
-                            ctx.stroke();
-                        }
-                        /* lid */
-                        ctx.fillStyle = '#363636';
-                        ctx.fillRect(-tw * 0.06, -th * 0.92, tw * 1.12, th * 0.07);
-                        /* handle arc */
-                        ctx.strokeStyle = '#282828';
-                        ctx.lineWidth = 2;
-                        ctx.beginPath();
-                        ctx.arc(tw / 2, -th * 0.92, tw * 0.28, Math.PI, 0);
-                        ctx.stroke();
-                        /* highlight */
-                        ctx.fillStyle = '#606060';
-                        ctx.fillRect(tw * 0.12, -th * 0.88, tw * 0.12, th * 0.72);
-                    }
-                    ctx.restore();
+                    drawPerson(o);
                 }
 
                 drawPlayer();
