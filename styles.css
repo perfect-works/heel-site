@@ -533,9 +533,35 @@ body.dragging {
     color: #ffff99;
 }
 
+.term-icon {
+    width: 32px;
+    height: 32px;
+    background: #000;
+    border: 1px solid #555;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    font-weight: bold;
+    color: #33ff33;
+    line-height: 1;
+    box-sizing: border-box;
+}
+
+.desktop-icon:hover .term-icon,
+.desktop-icon.active .term-icon {
+    border-color: #33ff33;
+}
+
+#desktop-icon-terminal span {
+    white-space: nowrap;
+}
+
 /* ── windows explorer (users folder) ── */
 .explorer-window {
-    width: 340px;
+    width: 420px;
     display: none;
     position: fixed;
     z-index: 25;
@@ -577,7 +603,7 @@ body.dragging {
     gap: 4px;
     cursor: pointer;
     padding: 4px;
-    width: 68px;
+    width: 82px;
     border: 1px solid transparent;
     user-select: none;
 }
@@ -631,8 +657,11 @@ body.dragging {
     font-family: 'Tahoma', sans-serif;
     color: #000;
     text-align: center;
-    word-break: break-word;
-    line-height: 1.2;
+    word-break: break-all;
+    text-wrap: balance;
+    line-height: 1.3;
+    overflow: hidden;
+    max-height: 2.8em;
 }
 
 .explorer-icon.active span {
@@ -700,6 +729,87 @@ body.dragging {
     height: 7px;
     background: #336699;
     clip-path: polygon(0% 100%, 30% 20%, 55% 60%, 75% 30%, 100% 70%, 100% 100%);
+}
+
+/* video file icon — mini cone */
+.expl-file-vid {
+    width: 26px;
+    height: 36px;
+    position: relative;
+    margin: 0 auto;
+    margin-top: 2px;
+}
+
+.expl-file-vid::before {
+    content: '';
+    position: absolute;
+    bottom: 6px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 22px;
+    height: 28px;
+    background: linear-gradient(
+        to top,
+        #ff7b00 0%, #ff7b00 18%,
+        #ffffff 18%, #ffffff 27%,
+        #ff7b00 27%, #ff7b00 47%,
+        #ffffff 47%, #ffffff 56%,
+        #ff7b00 56%, #ff7b00 100%
+    );
+    clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
+}
+
+.expl-file-vid::after {
+    content: '';
+    position: absolute;
+    bottom: 2px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 29px;
+    height: 5px;
+    background: #ff7b00;
+    border-radius: 1px;
+}
+
+/* audio file icon — mini disc */
+.expl-file-aud {
+    width: 28px;
+    height: 28px;
+    background: radial-gradient(circle at 38% 32%, #f8f8f8, #c0c0c0 40%, #909090);
+    border-radius: 50%;
+    position: relative;
+    margin: 0 auto;
+    margin-top: 2px;
+    box-shadow: inset 0 0 0 1px #606060;
+}
+
+.expl-file-aud::before {
+    content: '';
+    position: absolute;
+    width: 7px;
+    height: 7px;
+    background: #008080;
+    border-radius: 50%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 0 1px #707070;
+}
+
+.expl-file-aud::after {
+    content: '♪';
+    position: absolute;
+    bottom: -4px;
+    right: -5px;
+    font-size: 28px;
+    color: #303030;
+    line-height: 1;
+    font-family: sans-serif;
+}
+
+.explorer-icon:has(.expl-file-aud) span {
+    word-break: normal;
+    overflow-wrap: anywhere;
 }
 
 @media (max-width: 900px) {
@@ -1659,6 +1769,91 @@ body {
 
 .mine-cell.mine-explode {
     background: #ff0000;
+}
+
+/* ── photo viewer window ── */
+.photo-window {
+    position: fixed;
+    display: none;
+    user-select: none;
+    width: 480px;
+}
+
+.photo-window.minimized .photo-body {
+    display: none;
+}
+
+.photo-body {
+    padding: 4px;
+    background: #c0c0c0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.photo-display {
+    width: 100%;
+    height: 320px;
+    background: #000;
+    border-top: 2px solid #404040;
+    border-left: 2px solid #404040;
+    border-right: 2px solid #dfdfdf;
+    border-bottom: 2px solid #dfdfdf;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+.photo-display img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    display: block;
+}
+
+#photo-empty {
+    color: #555;
+    font-family: 'Courier New', monospace;
+    font-size: 0.8em;
+}
+
+.photo-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 3px 4px;
+}
+
+.photo-btn {
+    background: #c0c0c0;
+    border-top: 1px solid #ffffff;
+    border-left: 1px solid #ffffff;
+    border-right: 1px solid #808080;
+    border-bottom: 1px solid #808080;
+    font-family: 'Courier New', monospace;
+    font-size: 0.7em;
+    padding: 3px 12px;
+    cursor: default;
+    color: #000;
+}
+
+.photo-btn:active {
+    border-top: 1px solid #808080;
+    border-left: 1px solid #808080;
+    border-right: 1px solid #ffffff;
+    border-bottom: 1px solid #ffffff;
+}
+
+.photo-btn:disabled {
+    color: #808080;
+}
+
+.photo-counter {
+    font-family: 'Courier New', monospace;
+    font-size: 0.75em;
+    color: #000;
 }
 
 .start-sep {

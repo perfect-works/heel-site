@@ -181,6 +181,27 @@
     <canvas id="game-canvas" width="480" height="360"></canvas>
 </div>
 
+<div id="photo-window" class="window photo-window" style="display:none">
+    <div class="title-bar" id="photo-title-bar">
+        <span class="title-bar-text" id="photo-title-text">Photo Viewer</span>
+        <div class="title-bar-controls">
+            <span class="wbtn" id="photo-min-btn">_</span>
+            <span class="wbtn" id="photo-close-btn">&#215;</span>
+        </div>
+    </div>
+    <div class="photo-body">
+        <div class="photo-display" id="photo-display">
+            <img id="photo-img" src="" alt="" style="display:none">
+            <div id="photo-empty">no photos loaded</div>
+        </div>
+        <div class="photo-controls">
+            <button class="photo-btn" id="photo-prev">&#9664;&#9664;</button>
+            <span class="photo-counter" id="photo-counter">&#8212; / &#8212;</span>
+            <button class="photo-btn" id="photo-next">&#9654;&#9654;</button>
+        </div>
+    </div>
+</div>
+
 <div id="mine-window" class="window mine-window" style="display:none">
     <div class="title-bar" id="mine-title-bar">
         <span class="title-bar-text">Minesweeper</span>

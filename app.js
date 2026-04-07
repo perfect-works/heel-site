@@ -2,7 +2,7 @@
 
     /* ─── visitor count (GoatCounter) ─────────────────────── */
     var visitorCount = null;
-    fetch('https://heel.goatcounter.com/counter/%2Fheel-site%2F.json')
+    fetch('https://heel.goatcounter.com/counter/%2F.json')
         .then(function (r) { return r.json(); })
         .then(function (data) {
             visitorCount = data.count || null;
@@ -85,7 +85,9 @@
         { id: 'obey_tshirt',           label: 'obey_tshirt', href: 'https://heelband.bandcamp.com/merch/obey',                          price: '$20', photo: 'images/merch/obey_shirt.png'    },
         { id: 'segmentation_cd',       label: 'cd',       href: 'https://heelband.bandcamp.com/album/segmentation',                  price: '$13', photo: 'images/merch/cd.jpg'            },
         { id: 'segmentation_cassette', label: 'cassette', href: 'https://heelband.bandcamp.com/album/segmentation',                  price: '$11', photo: 'images/merch/cassette.jpg'      },
-        { id: 'bumper_sticker',        label: 'bumper',   href: 'https://heelband.bandcamp.com/merch/heaven-or-heel-bumper-sticker', price: '$5',  photo: 'images/merch/bumpersticker.png' },
+        { id: 'bumper_sticker',        label: 'bumper sticker', href: 'https://heelband.bandcamp.com/merch/heaven-or-heel-bumper-sticker', price: '$5',  photo: 'images/merch/bumpersticker.png' },
+        { id: 'zine',                  label: 'zine',     href: 'https://heelband.bandcamp.com/merch/heel-zine',                       price: '$14', photo: 'images/merch/zine.png', samples: ['images/merch/zine/sample1.png', 'images/merch/zine/sample2.png'] },
+        { id: 'sticker_bundle',        label: 'sticker bundle', href: 'https://heelband.bandcamp.com/merch/heel-sticker-pack',          price: '$6',  photo: 'images/merch/sticker_bundle.png' },
     ];
 
     /* label → id map for short-name cd navigation (e.g. 'cd' → 'segmentation_cd') */
@@ -146,20 +148,37 @@
         ],
     };
 
+    /* ── photo registry ── */
+    var PHOTOS = [
+        { id: 'honeycomb',               file: 'honeycomb.jpg',               src: 'images/photo/honeycomb.jpg'               },
+        { id: 'pain_faces',              file: 'pain_faces.png',              src: 'images/photo/pain_faces.png'              },
+        { id: 'poster',                  file: 'poster.png',                  src: 'images/photo/poster.png'                  },
+        { id: 'segmentation_back_cover', file: 'segmentation_back_cover.png', src: 'images/photo/segmentation_back_cover.png' },
+        { id: 'segmentation_front_cover',file: 'segmentation_front_cover.png',src: 'images/photo/segmentation_front_cover.png'},
+        { id: 'through_me',              file: 'through_me.jpg',              src: 'images/photo/through_me.jpg'              },
+        { id: 'blue',          file: 'blue.png',          src: null,                                       dir: 'wallpapers' },
+        { id: 'heel',          file: 'heel.png',          src: 'images/photo/wallpapers/heel.png',         dir: 'wallpapers' },
+        { id: 'chouchou',      file: 'chouchou.jpg',      src: 'images/photo/wallpapers/chouchou.jpg',     dir: 'wallpapers' },
+        { id: 'mountain',      file: 'mountain.jpg',      src: 'images/photo/wallpapers/mountain.jpg',     dir: 'wallpapers' },
+    ];
+
     /* ── video registry ── */
     var VIDEOS = [
-        { id: 'launch_show',           file: 'launch_show.mp4',           href: 'https://www.youtube.com/watch?v=0BCGjLoA6uc' },
-        { id: 'honeycomb_vis',         file: 'honeycomb_vis.mp4',         href: 'https://www.youtube.com/watch?v=JAfxkuAhK0c' },
-        { id: 'through_me_vis',        file: 'through_me_vis.mp4',        href: 'https://youtu.be/v5sKosUJGIw'                 },
-        { id: 'youre_so_far_away_vis', file: 'youre_so_far_away_vis.mp4', href: 'https://www.youtube.com/watch?v=Jyj_q3xwDWA' },
+        { id: 'launch_show',           file: 'launch_show.avi',           href: 'https://www.youtube.com/watch?v=0BCGjLoA6uc' },
+        { id: 'honeycomb_vis',         file: 'honeycomb_vis.avi',         href: 'https://www.youtube.com/watch?v=JAfxkuAhK0c' },
+        { id: 'through_me_vis',        file: 'through_me_vis.avi',        href: 'https://youtu.be/v5sKosUJGIw'                 },
+        { id: 'youre_so_far_away_vis', file: 'youre_so_far_away_vis.avi', href: 'https://www.youtube.com/watch?v=Jyj_q3xwDWA' },
     ];
 
     /* ── valid children per directory ── */
     var DIR_CHILDREN = {
-        'root':               ['users', 'music', 'video', 'merch'],
+        'root':               ['users', 'photo', 'video', 'music', 'merch'],
+        'photo':              ['wallpapers'],
+        'wallpapers':         [],
         'users':              ['adharsh', 'tayla', 'nick', 'andres'],
         'music':              ['segmentation', 'unreleased'],
-        'merch':              ['obey_tshirt', 'segmentation', 'bumper_sticker', 'bumper'],
+        'merch':              ['obey_tshirt', 'segmentation', 'stickers', 'zine', 'sticker_bundle', 'bumper_sticker', 'bumper'],
+        'merch/stickers':     ['bumper_sticker', 'sticker_bundle', 'bumper'],
         'music/segmentation': [],
         'music/unreleased':   ['sgmt_demos', 'heel2_demos'],
         'sgmt_demos':         [],
@@ -178,8 +197,10 @@
     /* ── parent directory map ── */
     var DIR_PARENTS = {
         'users':              'root',
+        'video':              'root',
+        'photo':              'root',
+        'wallpapers':         'photo',
         'music':              'root',
-        'video':             'root',
         'merch':              'root',
         'music/segmentation':  'music',
         'music/unreleased':    'music',
@@ -193,7 +214,10 @@
         'obey_tshirt':            'merch',
         'segmentation_cd':        'merch/segmentation',
         'segmentation_cassette':  'merch/segmentation',
-        'bumper_sticker':         'merch',
+        'bumper_sticker':         'merch/stickers',
+        'sticker_bundle':         'merch/stickers',
+        'zine':                   'merch',
+        'merch/stickers':         'merch',
     };
 
     /* load YouTube IFrame API */
@@ -241,8 +265,11 @@
         if (currentDir === 'sgmt_demos')  return 'C:\\heel\\music\\unreleased\\sgmt_demos';
         if (currentDir === 'heel2_demos') return 'C:\\heel\\music\\unreleased\\heel2_demos';
         if (currentDir === 'video')             return 'C:\\heel\\video';
+        if (currentDir === 'photo')             return 'C:\\heel\\photo';
+        if (currentDir === 'wallpapers')        return 'C:\\heel\\photo\\wallpapers';
         if (currentDir === 'merch')              return 'C:\\heel\\merch';
         if (currentDir === 'merch/segmentation') return 'C:\\heel\\merch\\segmentation';
+        if (currentDir === 'merch/stickers')    return 'C:\\heel\\merch\\stickers';
         if (getMerchItem(currentDir)) {
             var mpar = DIR_PARENTS[currentDir];
             if (mpar === 'merch/segmentation') return 'C:\\heel\\merch\\segmentation\\' + currentDir;
@@ -278,10 +305,11 @@
 
         if (currentDir === 'root') {
             lines.push({ t: 'text', v: 'C:\\heel\\' });
-            lines.push({ t: 'dirlink', label: tc(0, false) + '[users]',   cmd: 'cd users'      });
-            lines.push({ t: 'dirlink', label: tc(0, false) + '[merch]',   cmd: 'cd merch'      });
-            lines.push({ t: 'dirlink', label: tc(0, false) + '[music]',   cmd: 'cd music'      });
-            lines.push({ t: 'dirlink', label: tc(0, true)  + '[video]',  cmd: 'cd video'     });
+            lines.push({ t: 'dirlink', label: tc(0, false) + '[users]',    cmd: 'cd users'      });
+            lines.push({ t: 'dirlink', label: tc(0, false) + '[photo]',    cmd: 'cd photo'      });
+            lines.push({ t: 'dirlink', label: tc(0, false) + '[video]',    cmd: 'cd video'      });
+            lines.push({ t: 'dirlink', label: tc(0, false) + '[music]',    cmd: 'cd music'      });
+            lines.push({ t: 'dirlink', label: tc(0, false) + '[merch]',    cmd: 'cd merch'      });
             lines.push({ t: 'dirlink', label: tc(0, true)  + 'about.txt', cmd: 'cat about.txt' });
             lines.push({ t: 'blank' });
             lines.push({ t: 'text', v: "click a folder or type 'cd &lt;dir&gt;'", dim: true });
@@ -349,13 +377,38 @@
             lines.push({ t: 'dirlink', label: tc(1, true) + '[<- back]', cmd: 'cd ..' });
 
         } else if (currentDir === 'video') {
-            lines.push({ t: 'text', v: 'C:\\heel\\video\\' });
+            lines.push({ t: 'text', v: 'C:\\heel\\' });
+            lines.push({ t: 'text', v: tc(0, true) + 'video\\' });
             for (var vi = 0; vi < VIDEOS.length; vi++) {
-                lines.push({ t: 'link', label: tc(0, false) + VIDEOS[vi].file, href: VIDEOS[vi].href, vlcId: extractYouTubeId(VIDEOS[vi].href), vlcTitle: VIDEOS[vi].id });
+                lines.push({ t: 'link', label: tc(1, false) + VIDEOS[vi].file, href: VIDEOS[vi].href, vlcId: extractYouTubeId(VIDEOS[vi].href), vlcTitle: VIDEOS[vi].id });
             }
-            lines.push({ t: 'dirlink', label: tc(0, true) + '[<- back]', cmd: 'cd ..' });
+            lines.push({ t: 'dirlink', label: tc(1, true) + '[<- back]', cmd: 'cd ..' });
             lines.push({ t: 'blank' });
             lines.push({ t: 'text', v: "click a file or type './&lt;file&gt;' to open", dim: true });
+
+        } else if (currentDir === 'photo') {
+            var rootPhotos = PHOTOS.filter(function (p) { return !p.dir; });
+            lines.push({ t: 'text', v: 'C:\\heel\\' });
+            lines.push({ t: 'text', v: tc(0, true) + 'photo\\' });
+            lines.push({ t: 'dirlink', label: tc(1, false) + '[wallpapers]', cmd: 'cd wallpapers' });
+            for (var pi = 0; pi < rootPhotos.length; pi++) {
+                lines.push({ t: 'dirlink', label: tc(1, false) + rootPhotos[pi].file, cmd: './' + rootPhotos[pi].file });
+            }
+            lines.push({ t: 'dirlink', label: tc(1, true) + '[<- back]', cmd: 'cd ..' });
+            lines.push({ t: 'blank' });
+            lines.push({ t: 'text', v: "click a file or type './&lt;file&gt;' to open", dim: true });
+
+        } else if (currentDir === 'wallpapers') {
+            var wpPhotos = PHOTOS.filter(function (p) { return p.dir === 'wallpapers'; });
+            lines.push({ t: 'text', v: 'C:\\heel\\photo\\' });
+            lines.push({ t: 'text', v: tc(0, true) + 'wallpapers\\' });
+            for (var wi = 0; wi < wpPhotos.length; wi++) {
+                lines.push({ t: 'dirlink', label: tc(1, false) + wpPhotos[wi].file, cmd: './' + wpPhotos[wi].file });
+            }
+            if (!wpPhotos.length) lines.push({ t: 'text', v: tc(1, false) + '(empty)', dim: true });
+            lines.push({ t: 'dirlink', label: tc(1, true) + '[<- back]', cmd: 'cd ..' });
+            lines.push({ t: 'blank' });
+            lines.push({ t: 'text', v: "type './&lt;file&gt;' to set wallpaper", dim: true });
 
         } else if (currentDir === 'merch') {
             lines.push({ t: 'text', v: 'C:\\heel\\merch\\' });
@@ -363,10 +416,20 @@
             lines.push({ t: 'dirlink', label: tc(0, false)    + '[segmentation]', cmd: 'cd segmentation' });
             lines.push({ t: 'dirlink', label: tcsub(false)    + '[cd]',           cmd: 'cd cd'           });
             lines.push({ t: 'dirlink', label: tcsub(true)     + '[cassette]',     cmd: 'cd cassette'     });
-            lines.push({ t: 'dirlink', label: tc(0, false)    + '[bumper_sticker]', cmd: 'cd bumper'     });
-            lines.push({ t: 'dirlink', label: tc(0, true)     + '[<- back]',      cmd: 'cd ..'           });
+            lines.push({ t: 'dirlink', label: tc(0, false)    + '[stickers]',     cmd: 'cd stickers'     });
+            lines.push({ t: 'dirlink', label: tcsub(false)    + '[bumper_sticker]', cmd: 'cd bumper'     });
+            lines.push({ t: 'dirlink', label: tcsub(true)     + '[sticker_bundle]', cmd: 'cd sticker_bundle' });
+            lines.push({ t: 'dirlink', label: tc(0, false)    + '[zine]',           cmd: 'cd zine'       });
+            lines.push({ t: 'dirlink', label: tc(0, true)     + '[<- back]',        cmd: 'cd ..'         });
             lines.push({ t: 'blank' });
             lines.push({ t: 'text', v: "click an item or type 'cd &lt;item&gt;' to view", dim: true });
+
+        } else if (currentDir === 'merch/stickers') {
+            lines.push({ t: 'text', v: 'C:\\heel\\merch\\' });
+            lines.push({ t: 'text', v: tc(0, true) + 'stickers\\' });
+            lines.push({ t: 'dirlink', label: tc(1, false) + '[bumper_sticker]', cmd: 'cd bumper_sticker' });
+            lines.push({ t: 'dirlink', label: tc(1, false) + '[sticker_bundle]', cmd: 'cd sticker_bundle' });
+            lines.push({ t: 'dirlink', label: tc(1, true)  + '[<- back]',        cmd: 'cd ..'            });
 
         } else if (currentDir === 'merch/segmentation') {
             lines.push({ t: 'text', v: 'C:\\heel\\merch\\' });
@@ -428,8 +491,20 @@
         currentDir = dir;
         updatePrompt();
         cdClear();
-        if (MEMBERS[dir])        return memberLines(dir);
-        if (getMerchItem(dir))   return merchItemLines(dir);
+        if (MEMBERS[dir])      return memberLines(dir);
+        if (getMerchItem(dir)) {
+            var mitem = getMerchItem(dir);
+            if (mitem && mitem.photo && window.innerWidth > 900) {
+                var set = [{ src: mitem.photo, file: 'photo.jpg' }];
+                if (mitem.samples) {
+                    mitem.samples.forEach(function (s) {
+                        set.push({ src: s, file: s.split('/').pop() });
+                    });
+                }
+                openPhotoViewerWithSet(set, 0);
+            }
+            return merchItemLines(dir);
+        }
         return dir === 'root' ? [] : dirListing();
     }
 
@@ -438,18 +513,24 @@
         var mpar  = DIR_PARENTS[id] || 'merch';
         var pathLabel;
         if (mpar === 'merch/segmentation') pathLabel = 'C:\\heel\\merch\\segmentation\\' + id + '\\';
+        else if (mpar === 'merch/stickers') pathLabel = 'C:\\heel\\merch\\stickers\\' + id + '\\';
         else                                pathLabel = 'C:\\heel\\merch\\' + id + '\\';
         var lines = [
             { t: 'blank' },
             { t: 'text', v: pathLabel },
             { t: 'dirlink', label: tc(0, false) + 'photo.jpg', cmd: './photo.jpg' },
         ];
-        if (mitem && mitem.photo) {
+        if (mitem && mitem.samples) {
+            mitem.samples.forEach(function (s) {
+                var fname = s.split('/').pop();
+                lines.push({ t: 'dirlink', label: tc(0, false) + fname, cmd: './' + fname });
+            });
+        }
+        if (mitem && mitem.photo && window.innerWidth <= 900) {
             lines.push({ t: 'blank' });
             lines.push({ t: 'img-reveal', src: mitem.photo, width: '80%' });
         }
         if (mitem && mitem.price) {
-            lines.push({ t: 'blank' });
             lines.push({ t: 'dirlink', label: tc(0, false) + 'price.txt <span style="opacity:0.55">\u2014 ' + mitem.price + '</span>', cmd: 'cat price.txt' });
         }
         if (mitem && mitem.href) {
@@ -604,6 +685,8 @@
         'cd andres':  function () { currentDir = 'andres';  updatePrompt(); cdClear(); return memberLines('andres'); },
 
         'cd video':              function () { return navigateTo('video');               },
+        'cd photo':              function () { return navigateTo('photo');               },
+        'cd wallpapers':         function () { return navigateTo('wallpapers');          },
         'cd merch':               function () { return navigateTo('merch');                },
         'cd obey_tshirt':           function () { return navigateTo('obey_tshirt');         },
         'cd segmentation_cd':       function () { return navigateTo('segmentation_cd');     },
@@ -613,6 +696,9 @@
         'cd cd':       function () { return navigateTo('cd');       },
         'cd cassette': function () { return navigateTo('cassette'); },
         'cd bumper':   function () { return navigateTo('bumper');   },
+        'cd stickers':       function () { return navigateTo('merch/stickers'); },
+        'cd zine':           function () { return navigateTo('zine');           },
+        'cd sticker_bundle': function () { return navigateTo('sticker_bundle'); },
 
         'buy.exe': function () {
             var mitem = getMerchItem(currentDir);
@@ -1345,21 +1431,49 @@
         }
 
         /* photo commands: photo / photo.jpg / cat photo.jpg / open photo.jpg etc. */
-        var PHOTO_CMDS = ['photo', 'photo.jpg', './photo.jpg', 'cat photo.jpg', 'cat photo', 'open photo.jpg', 'open photo'];
+        var PHOTO_CMDS = ['photo', 'photo.jpg', './photo.jpg', './ photo.jpg', 'cat photo.jpg', 'cat photo', 'open photo.jpg', 'open photo'];
         if (PHOTO_CMDS.indexOf(lower) !== -1) {
             var photoSrc = null;
             if (MEMBERS[currentDir])        photoSrc = MEMBERS[currentDir].photo;
             else if (getMerchItem(currentDir)) photoSrc = getMerchItem(currentDir).photo;
             if (photoSrc) {
                 var isMerch = !!getMerchItem(currentDir);
-                printLines([{ t: 'blank' }, { t: 'img-reveal', src: photoSrc, width: isMerch ? '80%' : '170px', pixelated: !isMerch }, { t: 'blank' }]);
+                if (isMerch && window.innerWidth > 900) {
+                    var mitemSet = getMerchItem(currentDir);
+                    var pSet = [{ src: mitemSet.photo, file: 'photo.jpg' }];
+                    if (mitemSet.samples) mitemSet.samples.forEach(function (s) { pSet.push({ src: s, file: s.split('/').pop() }); });
+                    openPhotoViewerWithSet(pSet, 0);
+                    printLines([{ t: 'blank' }, { t: 'text', v: 'opening photo.jpg...', dim: true }, { t: 'blank' }]);
+                } else {
+                    printLines([{ t: 'blank' }, { t: 'img-reveal', src: photoSrc, width: isMerch ? '80%' : '170px', pixelated: !isMerch }, { t: 'blank' }]);
+                }
                 return;
             }
         }
 
-        /* video file commands: filename.mp4 or cat filename.mp4 */
+        /* merch sample file commands: ./sample1.png etc. */
+        var curMerchItem = getMerchItem(currentDir);
+        if (curMerchItem && curMerchItem.samples) {
+            var scmd = lower.indexOf('./') === 0 ? lower.slice(2).trim() : lower;
+            for (var sci = 0; sci < curMerchItem.samples.length; sci++) {
+                var sfname = curMerchItem.samples[sci].split('/').pop();
+                if (scmd === sfname || scmd === sfname.replace(/\.[^.]+$/, '')) {
+                    if (window.innerWidth > 900) {
+                        var sSet = [{ src: curMerchItem.photo, file: 'photo.jpg' }];
+                        curMerchItem.samples.forEach(function (s) { sSet.push({ src: s, file: s.split('/').pop() }); });
+                        openPhotoViewerWithSet(sSet, sci + 1);
+                        printLines([{ t: 'blank' }, { t: 'text', v: 'opening ' + sfname + '...', dim: true }, { t: 'blank' }]);
+                    } else {
+                        printLines([{ t: 'blank' }, { t: 'img-reveal', src: curMerchItem.samples[sci], width: '80%' }, { t: 'blank' }]);
+                    }
+                    return;
+                }
+            }
+        }
+
+        /* video file commands: filename.avi or cat filename.avi */
         if (currentDir === 'video') {
-            var vcmd = lower.indexOf('cat ') === 0 ? lower.slice(4).trim() : lower.indexOf('./') === 0 ? lower.slice(2) : lower;
+            var vcmd = lower.indexOf('cat ') === 0 ? lower.slice(4).trim() : lower.indexOf('./') === 0 ? lower.slice(2).trim() : lower;
             for (var vci = 0; vci < VIDEOS.length; vci++) {
                 if (VIDEOS[vci].file === vcmd || VIDEOS[vci].id === vcmd) {
                     if (window.innerWidth > 900) {
@@ -1374,8 +1488,29 @@
             }
         }
 
+        /* photo file commands: filename.jpg or ./filename.jpg */
+        if (currentDir === 'photo' || currentDir === 'wallpapers') {
+            var pcmd = lower.indexOf('cat ') === 0 ? lower.slice(4).trim() : lower.indexOf('./') === 0 ? lower.slice(2).trim() : lower;
+            for (var pci = 0; pci < PHOTOS.length; pci++) {
+                if (PHOTOS[pci].file === pcmd || PHOTOS[pci].id === pcmd) {
+                    if (currentDir === 'wallpapers' && window.innerWidth > 900) {
+                        setWallpaper(PHOTOS[pci].src);
+                        printLines([{ t: 'blank' }, { t: 'text', v: 'wallpaper updated.', dim: true }, { t: 'blank' }]);
+                    } else if (currentDir === 'wallpapers') {
+                        printLines([{ t: 'blank' }, { t: 'error', v: 'wallpaper not supported on mobile.' }, { t: 'blank' }]);
+                    } else if (window.innerWidth > 900) {
+                        openPhotoViewer(pci);
+                        printLines([{ t: 'blank' }, { t: 'text', v: 'opening ' + PHOTOS[pci].file + '...', dim: true }, { t: 'blank' }]);
+                    } else {
+                        printLines([{ t: 'blank' }, { t: 'img-reveal', src: PHOTOS[pci].src, width: '100%' }, { t: 'blank' }]);
+                    }
+                    return;
+                }
+            }
+        }
+
         /* merch folder shortcut: typing a folder name cds into it */
-        var isMerchContext = currentDir === 'merch' || currentDir === 'merch/segmentation';
+        var isMerchContext = currentDir === 'merch' || currentDir === 'merch/segmentation' || currentDir === 'merch/stickers';
         if (isMerchContext) {
             var children = DIR_CHILDREN[currentDir] || [];
             if (children.indexOf(lower) !== -1) {
@@ -1397,9 +1532,9 @@
             output.appendChild(render({ t: 'blank' }));
             scrollBottom();
         } else {
-            /* fuzzy match — auto-run closest command */
+            /* fuzzy match — auto-run closest command (skip for short inputs to avoid false matches on cd/ls) */
             var keys = Object.keys(COMMANDS);
-            var best = null, bestDist = 3;
+            var best = null, bestDist = lower.length <= 2 ? 1 : 3;
             for (var ki = 0; ki < keys.length; ki++) {
                 var d = levenshtein(lower, keys[ki]);
                 if (d < bestDist) { bestDist = d; best = keys[ki]; }
@@ -1513,21 +1648,31 @@
     terminal.addEventListener('click', function () { focusInput(); });
 
     /* ─── desktop icons ───────────────────────────────────── */
-    var desktopDirs = ['users', 'merch', 'music', 'video'];
+    (function () {
+        var termIcon = document.createElement('div');
+        termIcon.className = 'desktop-icon';
+        termIcon.id = 'desktop-icon-terminal';
+        termIcon.innerHTML = '<div class="term-icon">&gt;_</div><span>terminal</span>';
+        termIcon.addEventListener('dblclick', function () {
+            ensureTerminalVisible();
+        });
+        desktopIconsEl.appendChild(termIcon);
+    }());
+
+    var desktopDirs = ['users', 'photo', 'video', 'music', 'merch'];
     desktopDirs.forEach(function (dir) {
         var icon = document.createElement('div');
         icon.className = 'desktop-icon';
         icon.dataset.dir = dir;
-        var iconDiv = dir === 'music' ? 'app-icon' : dir === 'video' ? 'vlc-icon' : dir === 'merch' ? 'globe-icon' : 'folder-icon';
+        var iconDiv = dir === 'merch' ? 'globe-icon' : 'folder-icon';
         icon.innerHTML = '<div class="' + iconDiv + '"></div><span>' + dir + '</span>';
         icon.addEventListener('dblclick', function () {
             if (dir === 'music') {
-                openPlayer();
+                openExplorer('music');
                 return;
             }
             if (dir === 'video') {
-                openVlc(null, null);
-                execute('cd video', false, true);
+                openExplorer('video');
                 return;
             }
             if (dir === 'merch') {
@@ -1536,6 +1681,10 @@
             }
             if (dir === 'users') {
                 openExplorer();
+                return;
+            }
+            if (dir === 'photo') {
+                openExplorer('photo');
                 return;
             }
             skipToPrompt();
@@ -1619,6 +1768,25 @@
     /* ─── jumpscare ────────────────────────────────────────── */
     var jumpscare = document.getElementById('jumpscare');
 
+    function setWallpaper(src) {
+        if (src) {
+            document.body.style.backgroundImage    = 'url(' + src + ')';
+            document.body.style.backgroundSize     = 'cover';
+            document.body.style.backgroundPosition = 'center';
+            localStorage.setItem('hl_wallpaper', src);
+        } else {
+            document.body.style.backgroundImage    = '';
+            document.body.style.backgroundSize     = '';
+            document.body.style.backgroundPosition = '';
+            localStorage.removeItem('hl_wallpaper');
+        }
+    }
+
+    (function () {
+        var saved = localStorage.getItem('hl_wallpaper');
+        if (saved) setWallpaper(saved);
+    }());
+
     function triggerJumpscare() {
         var snd = new Audio('sounds/jumpscare.mp3');
         snd.play().catch(function () {});
@@ -1638,12 +1806,8 @@
 
     document.getElementById('close-btn').addEventListener('click', function (e) {
         e.stopPropagation();
-        if (window.innerWidth <= 900) {
-            triggerJumpscare();
-        } else {
-            windowEl.style.display = 'none';
-            document.getElementById('task-heel').classList.remove('active');
-        }
+        windowEl.style.display = 'none';
+        document.getElementById('task-heel').classList.remove('active');
     });
 
     /* ─── startup: boot → welcome → clear → prompt ────────── */
@@ -1854,7 +2018,7 @@
         playerHighlightCurrent();
     }
 
-    function openPlayer() {
+    function openPlayer(trackId) {
         skipToPrompt();
         var initialLeft = Math.min(window.innerWidth - 310, Math.max(window.innerWidth / 2 + 340, 20));
         var initialTop  = 60;
@@ -1863,7 +2027,22 @@
         playerWindowEl.style.display = 'block';
         vlcBringToFront('player');
         playerMinimized = false;
+        if (trackId) {
+            var isDemos = TRACKS.sgmt_demos.concat(TRACKS.heel2_demos).some(function (t) { return t.id === trackId; });
+            var album = isDemos ? 'demos' : 'segmentation';
+            playerCurrentAlbum = album;
+            document.getElementById('player-tabs').querySelectorAll('.player-tab').forEach(function (t) {
+                t.classList.toggle('active', t.dataset.album === album);
+            });
+        }
         playerBuildPlaylist();
+        if (trackId) {
+            var idx = playerTrackList.findIndex(function (t) { return t.id === trackId; });
+            if (idx !== -1) {
+                var item = playerPlaylist.querySelectorAll('.player-track-item')[idx];
+                if (item) item.scrollIntoView({ block: 'nearest' });
+            }
+        }
         if (playerUpdateIv) clearInterval(playerUpdateIv);
         playerUpdateIv = setInterval(playerTick, 500);
         playerTick();
@@ -2257,7 +2436,7 @@
         if (!merchTaskBtn) {
             merchTaskBtn = document.createElement('button');
             merchTaskBtn.className = 'task-btn active';
-            merchTaskBtn.textContent = 'internet.exe';
+            merchTaskBtn.textContent = 'iexplore.exe';
             merchTaskBtn.addEventListener('click', function () {
                 merchMinimized = !merchMinimized;
                 merchWindowEl.classList.toggle('minimized', merchMinimized);
@@ -2384,6 +2563,11 @@
     document.getElementById('explorer-close-btn').addEventListener('click', function () {
         explorerWindowEl.style.display = 'none';
         if (explorerTaskBtn) { explorerTaskBtn.remove(); explorerTaskBtn = null; }
+        var musicDirs = ['music', 'music/segmentation', 'music/unreleased', 'sgmt_demos', 'heel2_demos'];
+        if (currentDir === 'video' || currentDir === 'photo' || currentDir === 'wallpapers' || musicDirs.indexOf(currentDir) !== -1) {
+            currentDir = 'root';
+            updatePrompt();
+        }
     });
 
     document.getElementById('explorer-title-bar').addEventListener('mousedown', function (e) {
@@ -2406,7 +2590,125 @@
         document.body.classList.remove('dragging');
     });
 
-    function openExplorer() {
+    function explorerRenderPhoto() {
+        explorerBodyEl.innerHTML = '';
+        var folderIcon = document.createElement('div');
+        folderIcon.className = 'explorer-icon';
+        folderIcon.innerHTML = '<div class="folder-icon"></div><span>wallpapers</span>';
+        folderIcon.addEventListener('dblclick', function () { ensureTerminalVisible(); execute('cd wallpapers', false, true); });
+        explorerBodyEl.appendChild(folderIcon);
+        PHOTOS.filter(function (p) { return !p.dir; }).forEach(function (p, i) {
+            var idx = PHOTOS.indexOf(p);
+            var icon = document.createElement('div');
+            icon.className = 'explorer-icon';
+            var dot  = p.file.lastIndexOf('.');
+            var base = dot >= 0 ? p.file.slice(0, dot) : p.file;
+            var ext  = dot >= 0 ? p.file.slice(dot)    : '';
+            icon.innerHTML = '<div class="expl-file-img"></div><span>' + base + '<span style="white-space:nowrap">' + ext + '</span></span>';
+            icon.addEventListener('dblclick', (function (ii) {
+                return function () { ensureTerminalVisible(); openPhotoViewer(ii); };
+            }(idx)));
+            explorerBodyEl.appendChild(icon);
+        });
+        explorerBackBtn.disabled = true;
+        explorerAddressEl.textContent = 'C:\\heel\\photo\\';
+        explorerTitleEl.textContent   = 'photo - Welt Explorer';
+    }
+
+    function explorerRenderWallpapers() {
+        explorerBodyEl.innerHTML = '';
+        PHOTOS.filter(function (p) { return p.dir === 'wallpapers'; }).forEach(function (p) {
+            var icon = document.createElement('div');
+            icon.className = 'explorer-icon';
+            var dot  = p.file.lastIndexOf('.');
+            var base = dot >= 0 ? p.file.slice(0, dot) : p.file;
+            var ext  = dot >= 0 ? p.file.slice(dot)    : '';
+            icon.innerHTML = '<div class="expl-file-img"></div><span>' + base + '<span style="white-space:nowrap">' + ext + '</span></span>';
+            icon.addEventListener('dblclick', (function (src) {
+                return function () { if (window.innerWidth > 900) setWallpaper(src); };
+            }(p.src)));
+            explorerBodyEl.appendChild(icon);
+        });
+        explorerBackBtn.disabled = false;
+        explorerAddressEl.textContent = 'C:\\heel\\photo\\wallpapers\\';
+        explorerTitleEl.textContent   = 'wallpapers - Welt Explorer';
+    }
+
+    function explorerRenderVideo() {
+        explorerBodyEl.innerHTML = '';
+        VIDEOS.forEach(function (v) {
+            var icon = document.createElement('div');
+            icon.className = 'explorer-icon';
+            icon.innerHTML = '<div class="expl-file-vid"></div><span>' + v.file + '</span>';
+            icon.addEventListener('dblclick', (function (file) {
+                return function () {
+                    ensureTerminalVisible();
+                    vlcBringToFront('terminal');
+                    execute('./' + file);
+                };
+            }(v.file)));
+            explorerBodyEl.appendChild(icon);
+        });
+        explorerBackBtn.disabled = true;
+        explorerAddressEl.textContent = 'C:\\heel\\video\\';
+        explorerTitleEl.textContent   = 'video - Welt Explorer';
+    }
+
+    function explorerRenderMusic() {
+        explorerBodyEl.innerHTML = '';
+        [{ name: 'segmentation', child: 'segmentation' }, { name: 'unreleased', child: 'unreleased' }].forEach(function (a) {
+            var icon = document.createElement('div');
+            icon.className = 'explorer-icon';
+            icon.innerHTML = '<div class="folder-icon"></div><span>' + a.name + '</span>';
+            icon.addEventListener('dblclick', (function (child) {
+                return function () { ensureTerminalVisible(); execute('cd ' + child, false, true); };
+            }(a.child)));
+            explorerBodyEl.appendChild(icon);
+        });
+        explorerBackBtn.disabled = true;
+        explorerAddressEl.textContent = 'C:\\heel\\music\\';
+        explorerTitleEl.textContent   = 'music - Welt Explorer';
+    }
+
+    function explorerRenderMusicUnreleased() {
+        explorerBodyEl.innerHTML = '';
+        [{ name: 'sgmt_demos', child: 'sgmt_demos' }, { name: 'heel2_demos', child: 'heel2_demos' }].forEach(function (a) {
+            var icon = document.createElement('div');
+            icon.className = 'explorer-icon';
+            icon.innerHTML = '<div class="folder-icon"></div><span>' + a.name + '</span>';
+            icon.addEventListener('dblclick', (function (child) {
+                return function () { ensureTerminalVisible(); execute('cd ' + child, false, true); };
+            }(a.child)));
+            explorerBodyEl.appendChild(icon);
+        });
+        explorerBackBtn.disabled = false;
+        explorerAddressEl.textContent = 'C:\\heel\\music\\unreleased\\';
+        explorerTitleEl.textContent   = 'unreleased - Welt Explorer';
+    }
+
+    function explorerRenderTrackList(key, addressPath, title) {
+        explorerBodyEl.innerHTML = '';
+        (TRACKS[key] || []).forEach(function (tr) {
+            var icon = document.createElement('div');
+            icon.className = 'explorer-icon';
+            var fname = tr.file.split('/').pop();
+            var dot  = fname.lastIndexOf('.');
+            var base = dot >= 0 ? fname.slice(0, dot) : fname;
+            var ext  = dot >= 0 ? fname.slice(dot)    : '';
+            var baseHtml = base.replace(/_/g, '_<wbr>');
+            icon.innerHTML = '<div class="expl-file-aud"></div><span>' + baseHtml + '<span style="white-space:nowrap">' + ext + '</span></span>';
+            icon.addEventListener('dblclick', (function (id) {
+                return function () { openPlayer(id); ensureTerminalVisible(); execute('play ' + id); };
+            }(tr.id)));
+            explorerBodyEl.appendChild(icon);
+        });
+        explorerBackBtn.disabled = false;
+        explorerAddressEl.textContent = addressPath;
+        explorerTitleEl.textContent   = title + ' - Welt Explorer';
+    }
+
+    function openExplorer(dir) {
+        dir = dir || 'users';
         if (explorerWindowEl.style.display !== 'block') {
             explorerWindowEl.style.left = '20px';
             explorerWindowEl.style.top  = '40px';
@@ -2415,7 +2717,7 @@
         explorerMinimized = false;
         explorerWindowEl.classList.remove('minimized');
         skipToPrompt();
-        execute('cd users', false, true);
+        execute('cd ' + dir, false, true);
         if (!explorerTaskBtn) {
             explorerTaskBtn = document.createElement('button');
             explorerTaskBtn.className = 'task-btn active';
@@ -2433,7 +2735,23 @@
     /* sync explorer body + chrome with terminal currentDir */
     updateExplorerState = function () {
         if (explorerWindowEl.style.display !== 'block') return;
-        if (currentDir === 'users') {
+        if (currentDir === 'video') {
+            explorerRenderVideo();
+        } else if (currentDir === 'photo') {
+            explorerRenderPhoto();
+        } else if (currentDir === 'wallpapers') {
+            explorerRenderWallpapers();
+        } else if (currentDir === 'music') {
+            explorerRenderMusic();
+        } else if (currentDir === 'music/segmentation') {
+            explorerRenderTrackList('segmentation', 'C:\\heel\\music\\segmentation\\', 'segmentation');
+        } else if (currentDir === 'music/unreleased') {
+            explorerRenderMusicUnreleased();
+        } else if (currentDir === 'sgmt_demos') {
+            explorerRenderTrackList('sgmt_demos', 'C:\\heel\\music\\unreleased\\sgmt_demos\\', 'sgmt_demos');
+        } else if (currentDir === 'heel2_demos') {
+            explorerRenderTrackList('heel2_demos', 'C:\\heel\\music\\unreleased\\heel2_demos\\', 'heel2_demos');
+        } else if (currentDir === 'users') {
             explorerRenderUsers();
         } else if (MEMBERS[currentDir]) {
             explorerRenderMember(currentDir);
@@ -2451,7 +2769,8 @@
             merch:     merchWindowEl,
             explorer:  explorerWindowEl,
             game:      document.getElementById('game-window'),
-            mine:      document.getElementById('mine-window')
+            mine:      document.getElementById('mine-window'),
+            photo:     document.getElementById('photo-window')
         };
         if (map[focused]) map[focused].style.zIndex = zTop;
     }
@@ -2602,8 +2921,9 @@
     var bkBallX   = 240, bkBallY = 280;
     var bkDX      = 3,   bkDY    = -4;
     var bkScore   = 0,   bkLives = 3;
-    var bkKeys    = { left: false, right: false };
-    var bkRafId   = null;
+    var bkKeys     = { left: false, right: false };
+    var bkRafId    = null;
+    var bkLastTime = 0;
 
     function bkInitBricks() {
         bkBricks = [];
@@ -2702,15 +3022,18 @@
         }
     }
 
-    function bkTick() {
+    function bkTick(timestamp) {
         if (bkState !== 'playing') return;
 
-        var PAD_SPEED = 6;
+        var dt = bkLastTime ? Math.min((timestamp - bkLastTime) / (1000 / 60), 3) : 1;
+        bkLastTime = timestamp;
+
+        var PAD_SPEED = 6 * dt;
         if (bkKeys.left)  bkPadX = Math.max(0, bkPadX - PAD_SPEED);
         if (bkKeys.right) bkPadX = Math.min(BK.W - BK.PAD_W, bkPadX + PAD_SPEED);
 
-        bkBallX += bkDX;
-        bkBallY += bkDY;
+        bkBallX += bkDX * dt;
+        bkBallY += bkDY * dt;
 
         // wall collisions
         if (bkBallX - BK.BALL_R <= 0)       { bkBallX = BK.BALL_R;           bkDX =  Math.abs(bkDX); }
@@ -2772,6 +3095,7 @@
 
     function bkStart() {
         if (bkRafId) cancelAnimationFrame(bkRafId);
+        bkLastTime = 0;
         bkState = 'playing';
         bkRafId = requestAnimationFrame(bkTick);
     }
@@ -2860,6 +3184,137 @@
         bkDragging = false;
         document.body.classList.remove('dragging');
     });
+
+/* ─── photo viewer ───────────────────────────────────── */
+    var photoWindowEl  = document.getElementById('photo-window');
+    var photoImgEl     = document.getElementById('photo-img');
+    var photoEmptyEl   = document.getElementById('photo-empty');
+    var photoCounterEl = document.getElementById('photo-counter');
+    var photoTitleEl   = document.getElementById('photo-title-text');
+    var photoPrevBtn   = document.getElementById('photo-prev');
+    var photoNextBtn   = document.getElementById('photo-next');
+    var photoOpen      = false;
+    var photoTaskBtn   = null;
+    var photoIndex     = 0;
+    var photoSet       = [];
+
+    function photoShow(index) {
+        if (photoSet.length === 0) {
+            photoImgEl.style.display  = 'none';
+            photoEmptyEl.style.display = '';
+            photoCounterEl.textContent = '\u2014 / \u2014';
+            photoTitleEl.textContent   = 'Photo Viewer';
+            photoPrevBtn.disabled = true;
+            photoNextBtn.disabled = true;
+            return;
+        }
+        photoIndex = Math.max(0, Math.min(index, photoSet.length - 1));
+        var p = photoSet[photoIndex];
+        photoImgEl.src             = p.src;
+        photoImgEl.style.display   = 'block';
+        photoEmptyEl.style.display = 'none';
+        photoCounterEl.textContent = (photoIndex + 1) + ' / ' + photoSet.length;
+        photoTitleEl.textContent   = p.file + ' - Photo Viewer';
+        photoPrevBtn.disabled = photoIndex === 0;
+        photoNextBtn.disabled = photoIndex === photoSet.length - 1;
+    }
+
+    function openPhotoViewer(globalIndex) {
+        var p = PHOTOS[globalIndex];
+        var dirKey = p && p.dir ? p.dir : null;
+        photoSet = PHOTOS.filter(function (x) { return (x.dir || null) === dirKey; });
+        var index = photoSet.indexOf(p);
+        if (!photoOpen) {
+            photoWindowEl.style.left = '60px';
+            photoWindowEl.style.top  = Math.max(20, Math.floor((window.innerHeight - 400) / 2)) + 'px';
+            photoWindowEl.style.display = 'block';
+            photoOpen = true;
+            photoTaskBtn = document.createElement('button');
+            photoTaskBtn.className   = 'task-btn active';
+            photoTaskBtn.textContent = 'kodak.exe';
+            photoTaskBtn.addEventListener('click', function () {
+                var min = photoWindowEl.classList.contains('minimized');
+                photoWindowEl.classList.toggle('minimized', !min);
+                photoTaskBtn.classList.toggle('active', min);
+            });
+            document.getElementById('taskbar-tasks').appendChild(photoTaskBtn);
+        } else {
+            if (photoWindowEl.classList.contains('minimized')) {
+                photoWindowEl.classList.remove('minimized');
+                photoTaskBtn.classList.add('active');
+            }
+        }
+        photoShow(index < 0 ? 0 : index);
+        vlcBringToFront('photo');
+    }
+
+    function openPhotoViewerWithSet(set, startIndex) {
+        photoSet = set;
+        if (!photoOpen) {
+            photoWindowEl.style.left = '60px';
+            photoWindowEl.style.top  = Math.max(20, Math.floor((window.innerHeight - 400) / 2)) + 'px';
+            photoWindowEl.style.display = 'block';
+            photoOpen = true;
+            photoTaskBtn = document.createElement('button');
+            photoTaskBtn.className   = 'task-btn active';
+            photoTaskBtn.textContent = 'kodak.exe';
+            photoTaskBtn.addEventListener('click', function () {
+                var min = photoWindowEl.classList.contains('minimized');
+                photoWindowEl.classList.toggle('minimized', !min);
+                photoTaskBtn.classList.toggle('active', min);
+            });
+            document.getElementById('taskbar-tasks').appendChild(photoTaskBtn);
+        } else {
+            if (photoWindowEl.classList.contains('minimized')) {
+                photoWindowEl.classList.remove('minimized');
+                photoTaskBtn.classList.add('active');
+            }
+        }
+        photoShow(startIndex || 0);
+        vlcBringToFront('photo');
+    }
+
+    function openPhotoViewerWithImage(src, name) {
+        openPhotoViewerWithSet([{ src: src, file: name }], 0);
+    }
+
+    photoPrevBtn.addEventListener('click', function () { photoShow(photoIndex - 1); });
+    photoNextBtn.addEventListener('click', function () { photoShow(photoIndex + 1); });
+
+    document.getElementById('photo-min-btn').addEventListener('click', function () {
+        var min = photoWindowEl.classList.contains('minimized');
+        photoWindowEl.classList.toggle('minimized', !min);
+        if (photoTaskBtn) photoTaskBtn.classList.toggle('active', min);
+    });
+
+    document.getElementById('photo-close-btn').addEventListener('click', function () {
+        photoOpen = false;
+        photoWindowEl.style.display = 'none';
+        if (photoTaskBtn) { photoTaskBtn.parentNode.removeChild(photoTaskBtn); photoTaskBtn = null; }
+    });
+
+    var photoDragging = false, photoDragOffX = 0, photoDragOffY = 0;
+    document.getElementById('photo-title-bar').addEventListener('mousedown', function (e) {
+        if (e.target.classList.contains('wbtn')) return;
+        vlcBringToFront('photo');
+        photoDragging = true;
+        photoWindowEl.style.transform = '';
+        var rect = photoWindowEl.getBoundingClientRect();
+        photoDragOffX = e.clientX - rect.left;
+        photoDragOffY = e.clientY - rect.top;
+        document.body.classList.add('dragging');
+    });
+    document.addEventListener('mousemove', function (e) {
+        if (!photoDragging) return;
+        photoWindowEl.style.left = Math.max(0, Math.min(e.clientX - photoDragOffX, window.innerWidth  - photoWindowEl.offsetWidth))  + 'px';
+        photoWindowEl.style.top  = Math.max(0, Math.min(e.clientY - photoDragOffY, window.innerHeight - photoWindowEl.offsetHeight)) + 'px';
+    });
+    document.addEventListener('mouseup', function () {
+        if (!photoDragging) return;
+        photoDragging = false;
+        document.body.classList.remove('dragging');
+    });
+    photoWindowEl.addEventListener('mousedown', function () { vlcBringToFront('photo'); });
 
 /* ─── minesweeper game ───────────────────────────────── */
     var mineWindowEl  = document.getElementById('mine-window');
