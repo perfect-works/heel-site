@@ -1622,10 +1622,15 @@ body {
     margin-right: 2px;
     cursor: pointer;
     color: #000000;
-    display: flex;
+    display: inline-flex;
     align-items: center;
+    vertical-align: middle;
     border-radius: 0;
     text-decoration: none;
+}
+#tray-mail-btn svg * {
+    stroke: #000000;
+    fill: none;
 }
 #tray-mail-btn:hover {
     background: #c0c0c0;
