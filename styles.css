@@ -304,6 +304,10 @@ body.dragging {
     font-size: 0.82em;
 }
 
+.hist-btn {
+    display: none;
+}
+
 #cmd {
     background: transparent;
     border: none;
@@ -1716,7 +1720,31 @@ body {
     }
     .input-row {
         font-size: 1em;
-        align-items: baseline;
+        align-items: center;
+    }
+    .hist-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #c0c0c0;
+        border-top: 1px solid #ffffff;
+        border-left: 1px solid #ffffff;
+        border-bottom: 1px solid #808080;
+        border-right: 1px solid #808080;
+        color: #000000;
+        font-size: 0.6em;
+        width: 22px;
+        height: 22px;
+        flex-shrink: 0;
+        margin-left: 3px;
+        cursor: pointer;
+        padding: 0;
+    }
+    .hist-btn:active {
+        border-top: 1px solid #808080;
+        border-left: 1px solid #808080;
+        border-bottom: 1px solid #ffffff;
+        border-right: 1px solid #ffffff;
     }
     .prompt-prefix {
         white-space: nowrap;

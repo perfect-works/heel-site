@@ -3611,6 +3611,30 @@
     updateClock();
     setInterval(updateClock, 30000);
 
+    /* ── mobile history buttons ── */
+    (function () {
+        var histUp   = document.getElementById('hist-up');
+        var histDown = document.getElementById('hist-down');
+        if (!histUp) return;
+        histUp.addEventListener('click', function () {
+            if (historyPos < cmdHistory.length - 1) {
+                historyPos++;
+                input.value = cmdHistory[historyPos];
+            }
+            input.focus();
+        });
+        histDown.addEventListener('click', function () {
+            if (historyPos > 0) {
+                historyPos--;
+                input.value = cmdHistory[historyPos];
+            } else {
+                historyPos = -1;
+                input.value = '';
+            }
+            input.focus();
+        });
+    }());
+
     /* ── tray RSS popup ── */
     (function () {
         var btn   = document.getElementById('tray-rss-btn');
