@@ -2376,6 +2376,7 @@
 
     function renderMerchGrid() {
         merchBrowserView = 'grid';
+        merchIeBody.style.overflow = '';
         merchAddress.value = 'http://www.heelband.com/store/';
         merchBackBtn.disabled = true;
         merchFwdBtn.disabled  = true;
@@ -2833,9 +2834,25 @@
         merchAddress.addEventListener('keydown', function (e) {
             if (e.key !== 'Enter') return;
             e.preventDefault();
-            var val = merchAddress.value.trim();
-            var hasTld = /\.[a-zA-Z]{2,}/.test(val.replace(/^https?:\/\//i, '').split('/')[0]);
-            if (!hasTld) { renderDinoGame(); }
+            var val = merchAddress.value.trim().replace(/^https?:\/\//i, '').replace(/\/.*$/, '').toLowerCase();
+            if (val === 'heelglobal.com' || val === 'www.heelglobal.com') {
+                if (window !== window.top) {
+                    renderDinoGame();
+                } else {
+                    merchIeBody.innerHTML = '';
+                    if (titleEl) titleEl.textContent = 'heelglobal.com \u2014 Internet Explorer';
+                    merchIeBody.style.overflow = 'hidden';
+                    var scale = 0.65;
+                    var iw = Math.round(merchIeBody.offsetWidth / scale);
+                    var ih = Math.round(merchIeBody.offsetHeight / scale);
+                    var frame = document.createElement('iframe');
+                    frame.src = 'index.html';
+                    frame.style.cssText = 'width:' + iw + 'px;height:' + ih + 'px;border:none;display:block;transform:scale(' + scale + ');transform-origin:top left;';
+                    merchIeBody.appendChild(frame);
+                }
+            } else {
+                renderDinoGame();
+            }
             merchAddress.blur();
         });
     }());

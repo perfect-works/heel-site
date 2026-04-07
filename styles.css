@@ -2086,6 +2086,7 @@ body {
 }
 
 .photo-controls {
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -2118,7 +2119,6 @@ body {
 
 .photo-dl-btn {
     text-decoration: none;
-    margin-left: 6px;
     cursor: pointer;
 }
 .photo-dl-btn::before {
@@ -2135,9 +2135,17 @@ body {
 }
 
 .photo-counter {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
     font-family: 'Courier New', monospace;
     font-size: 0.75em;
     color: #000;
+}
+
+.photo-right-btns {
+    display: flex;
+    gap: 4px;
 }
 
 .start-sep {
