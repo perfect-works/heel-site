@@ -177,6 +177,7 @@
                     dir:  'wallpapers'
                 };
             });
+            wallpapers.unshift({ id: 'blue', file: 'blue.png', src: null, dir: 'wallpapers' });
             PHOTOS = photos.concat(wallpapers);
         })
         .catch(function () { /* manifest unavailable, photo viewer will be empty */ });
