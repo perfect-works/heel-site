@@ -863,56 +863,51 @@ body.dragging {
     }
 }
 
-#mobile-video-overlay {
+#mobile-shortcuts {
     display: none;
-    position: fixed;
-    inset: 0;
-    z-index: 9000;
-    background: rgba(0,0,0,0.85);
+}
+
+@media (max-width: 900px) {
+    body.mobile-home #mobile-shortcuts {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 20px;
+        width: 100%;
+        margin-top: 16px;
+        padding-top: 16px;
+        border-top: 1px solid rgba(255,255,255,0.15);
+    }
+}
+
+.shortcut-icon {
+    width: 44px;
+    height: 44px;
+    background: #000;
+    border: 1px solid #33ff33;
+    color: #33ff33;
+    font-family: 'Courier New', monospace;
+    font-size: 1.2em;
+    display: flex;
     align-items: center;
     justify-content: center;
+    margin: 0 auto;
 }
-#mobile-video-overlay.active {
-    display: flex;
+
+.mobile-shortcut span {
+    color: #ffffff;
+    font-size: 0.62em;
 }
-#mobile-video-overlay-inner {
-    background: #000;
-    border: 2px solid #33ff33;
-    padding: 20px 24px;
-    max-width: 320px;
-    width: 90%;
-    font-family: 'Courier New', monospace;
-    color: #33ff33;
-}
-#mobile-video-overlay-inner h3 {
-    margin: 0 0 14px;
-    font-size: 0.8em;
-    letter-spacing: 2px;
-    opacity: 0.6;
-}
-#mobile-video-overlay-inner a {
-    display: block;
-    color: #33ff33;
-    text-decoration: none;
-    padding: 8px 0;
-    border-bottom: 1px solid #1a661a;
-    font-size: 0.85em;
-}
-#mobile-video-overlay-inner a:last-of-type {
-    border-bottom: none;
-}
-#mobile-video-overlay-close {
-    display: block;
-    margin-top: 16px;
-    text-align: center;
-    color: #33ff33;
-    opacity: 0.5;
-    font-size: 0.75em;
-    cursor: pointer;
-    background: none;
-    border: none;
-    font-family: 'Courier New', monospace;
-    width: 100%;
+
+@media (hover: none) {
+    .mobile-shortcut:active .shortcut-icon {
+        background: #33ff33;
+        color: #000;
+    }
+    .mobile-shortcut:active span {
+        color: #33ff33;
+    }
 }
 
 /* ── media player ── */

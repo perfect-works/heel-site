@@ -1780,40 +1780,40 @@
     }
 
     /* build video overlay */
-    (function () {
-        var overlay  = document.getElementById('mobile-video-overlay');
-        var inner    = document.getElementById('mobile-video-overlay-inner');
-        VIDEOS.forEach(function (v) {
-            var a = document.createElement('a');
-            a.href        = v.href;
-            a.target      = '_blank';
-            a.rel         = 'noopener';
-            a.textContent = v.file.replace(/\.[^.]+$/, '').replace(/_/g, ' ');
-            inner.appendChild(a);
-        });
-        var closeBtn = document.createElement('button');
-        closeBtn.id          = 'mobile-video-overlay-close';
-        closeBtn.textContent = '[ close ]';
-        closeBtn.addEventListener('click', function () {
-            overlay.classList.remove('active');
-        });
-        inner.appendChild(closeBtn);
-    }());
-
     /* mobile single-click handlers on desktop icons */
     desktopIconsEl.querySelectorAll('.desktop-icon').forEach(function (icon) {
         icon.addEventListener('click', function () {
             if (window.innerWidth > 900) return; /* desktop handles dblclick */
             var dir = icon.dataset.dir;
             if (!dir) { exitMobileHome(); return; } /* terminal icon */
-            if (dir === 'video') {
-                document.getElementById('mobile-video-overlay').classList.add('active');
-                return;
-            }
             exitMobileHome();
             execute('cd ' + dir, false, true);
         });
     });
+
+    /* mobile app shortcut icons */
+    (function () {
+        var shortcuts = [
+            { label: 'new releases', cmd: 'fetch --new-releases', icon: '&#9670;' },
+            { label: 'shows',        cmd: 'fetch --upcoming-shows', icon: '&#9654;' },
+            { label: 'stream',       cmd: 'fetch --streaming',      icon: '&#9835;' },
+            { label: 'socials',      cmd: 'fetch --socials',        icon: '@'       },
+        ];
+        var row = document.createElement('div');
+        row.id = 'mobile-shortcuts';
+        shortcuts.forEach(function (s) {
+            var icon = document.createElement('div');
+            icon.className = 'desktop-icon mobile-shortcut';
+            icon.innerHTML = '<div class="shortcut-icon">' + s.icon + '</div><span>' + s.label + '</span>';
+            icon.addEventListener('click', function () {
+                if (window.innerWidth > 900) return;
+                exitMobileHome();
+                execute(s.cmd);
+            });
+            row.appendChild(icon);
+        });
+        desktopIconsEl.appendChild(row);
+    }());
 
     /* ─── minimize toggle ─────────────────────────────────── */
     var windowEl = document.querySelector('.window');
