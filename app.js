@@ -105,9 +105,9 @@
         { id: 'obey_tshirt',           label: 'obey_tshirt', href: 'https://heelband.bandcamp.com/merch/obey',                          price: '$20', photo: 'images/merch/obey_shirt.png'    },
         { id: 'segmentation_cd',       label: 'cd',       href: 'https://heelband.bandcamp.com/album/segmentation',                  price: '$13', photo: 'images/merch/cd.png'            },
         { id: 'segmentation_cassette', label: 'cassette', href: 'https://heelband.bandcamp.com/album/segmentation',                  price: '$11', photo: 'images/merch/cassette.png'      },
-        { id: 'bumper_sticker',        label: 'bumper sticker', href: 'https://heelband.bandcamp.com/merch/heaven-or-heel-bumper-sticker', price: '$5',  photo: 'images/merch/bumpersticker.png' },
+        { id: 'bumper',                label: 'bumper sticker', href: 'https://heelband.bandcamp.com/merch/heaven-or-heel-bumper-sticker', price: '$5',  photo: 'images/merch/bumpersticker.png' },
         { id: 'zine',                  label: 'zine',     href: 'https://heelband.bandcamp.com/merch/heel-zine',                       price: '$14', photo: 'images/merch/zine.png', samples: ['images/merch/zine/sample1.png', 'images/merch/zine/sample2.png'] },
-        { id: 'sticker_bundle',        label: 'sticker bundle', href: 'https://heelband.bandcamp.com/merch/heel-sticker-pack',          price: '$6',  photo: 'images/merch/sticker_bundle.png' },
+        { id: 'bundle',                label: 'sticker bundle', href: 'https://heelband.bandcamp.com/merch/heel-sticker-pack',          price: '$6',  photo: 'images/merch/sticker_bundle.png' },
     ];
 
     /* label → id map for short-name cd navigation (e.g. 'cd' → 'segmentation_cd') */
@@ -196,8 +196,8 @@
         'wallpapers':         [],
         'users':              ['adharsh', 'tayla', 'nick', 'andres'],
         'music':              ['segmentation', 'unreleased'],
-        'merch':              ['obey_tshirt', 'segmentation', 'stickers', 'zine', 'sticker_bundle', 'bumper_sticker', 'bumper'],
-        'merch/stickers':     ['bumper_sticker', 'sticker_bundle', 'bumper'],
+        'merch':              ['obey_tshirt', 'segmentation', 'stickers', 'zine', 'bumper', 'bundle'],
+        'merch/stickers':     ['bumper', 'bundle'],
         'music/segmentation': [],
         'music/unreleased':   ['sgmt_demos', 'heel2_demos'],
         'sgmt_demos':         [],
@@ -210,7 +210,8 @@
         'obey_tshirt':            [],
         'segmentation_cd':        [],
         'segmentation_cassette':  [],
-        'bumper_sticker':         [],
+        'bumper':                 [],
+        'bundle':                 [],
     };
 
     /* ── parent directory map ── */
@@ -233,8 +234,8 @@
         'obey_tshirt':            'merch',
         'segmentation_cd':        'merch/segmentation',
         'segmentation_cassette':  'merch/segmentation',
-        'bumper_sticker':         'merch/stickers',
-        'sticker_bundle':         'merch/stickers',
+        'bumper':                 'merch/stickers',
+        'bundle':                 'merch/stickers',
         'zine':                   'merch',
         'merch/stickers':         'merch',
     };
@@ -439,8 +440,8 @@
             lines.push({ t: 'dirlink', label: tcsub(false)    + '[cd]',           cmd: 'cd cd'           });
             lines.push({ t: 'dirlink', label: tcsub(true)     + '[cassette]',     cmd: 'cd cassette'     });
             lines.push({ t: 'dirlink', label: tc(0, false)    + '[stickers]',     cmd: 'cd stickers'     });
-            lines.push({ t: 'dirlink', label: tcsub(false)    + '[bumper_sticker]', cmd: 'cd bumper'     });
-            lines.push({ t: 'dirlink', label: tcsub(true)     + '[sticker_bundle]', cmd: 'cd sticker_bundle' });
+            lines.push({ t: 'dirlink', label: tcsub(false)    + '[bumper]',  cmd: 'cd bumper'  });
+            lines.push({ t: 'dirlink', label: tcsub(true)     + '[bundle]',  cmd: 'cd bundle'  });
             lines.push({ t: 'dirlink', label: tc(0, false)    + '[zine]',           cmd: 'cd zine'       });
             lines.push({ t: 'dirlink', label: tc(0, true)     + '[<- back]',        cmd: 'cd ..'         });
             lines.push({ t: 'blank' });
@@ -449,8 +450,8 @@
         } else if (currentDir === 'merch/stickers') {
             lines.push({ t: 'text', v: 'C:\\heel\\merch\\' });
             lines.push({ t: 'text', v: tc(0, true) + 'stickers\\' });
-            lines.push({ t: 'dirlink', label: tc(1, false) + '[bumper_sticker]', cmd: 'cd bumper_sticker' });
-            lines.push({ t: 'dirlink', label: tc(1, false) + '[sticker_bundle]', cmd: 'cd sticker_bundle' });
+            lines.push({ t: 'dirlink', label: tc(1, false) + '[bumper]', cmd: 'cd bumper' });
+            lines.push({ t: 'dirlink', label: tc(1, false) + '[bundle]', cmd: 'cd bundle' });
             lines.push({ t: 'dirlink', label: tc(1, true)  + '[<- back]',        cmd: 'cd ..'            });
 
         } else if (currentDir === 'merch/segmentation') {
@@ -526,7 +527,7 @@
         var mlabel2 = mitem && mitem.label ? mitem.label : id;
         var pathLabel;
         if (mpar === 'merch/segmentation') pathLabel = 'C:\\heel\\merch\\segmentation\\' + mlabel2 + '\\';
-        else if (mpar === 'merch/stickers') pathLabel = 'C:\\heel\\merch\\stickers\\' + mlabel2 + '\\';
+        else if (mpar === 'merch/stickers') pathLabel = 'C:\\heel\\merch\\stickers\\' + id + '\\';
         else                                pathLabel = 'C:\\heel\\merch\\' + mlabel2 + '\\';
         var lines = [
             { t: 'blank' },
@@ -712,14 +713,13 @@
         'cd obey_tshirt':           function () { return navigateTo('obey_tshirt');         },
         'cd segmentation_cd':       function () { return navigateTo('segmentation_cd');     },
         'cd segmentation_cassette': function () { return navigateTo('segmentation_cassette'); },
-        'cd bumper_sticker':        function () { return navigateTo('bumper_sticker');      },
+        'cd bundle':                function () { return navigateTo('bundle');              },
         /* short-name aliases */
         'cd cd':       function () { return navigateTo('cd');       },
         'cd cassette': function () { return navigateTo('cassette'); },
-        'cd bumper':   function () { return navigateTo('bumper');   },
+        'cd bumper':         function () { return navigateTo('bumper');         },
         'cd stickers':       function () { return navigateTo('merch/stickers'); },
         'cd zine':           function () { return navigateTo('zine');           },
-        'cd sticker_bundle': function () { return navigateTo('sticker_bundle'); },
 
         'buy.exe': function () {
             var mitem = getMerchItem(currentDir);
