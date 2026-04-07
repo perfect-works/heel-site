@@ -3638,6 +3638,18 @@
     updateClock();
     setInterval(updateClock, 30000);
 
+    /* ── preload photo images after boot ── */
+    setTimeout(function () {
+        var srcs = [];
+        PHOTOS.forEach(function (p) { if (p.src) srcs.push(p.src); });
+        MERCH.forEach(function (m) {
+            if (m.photo) srcs.push(m.photo);
+            if (m.samples) m.samples.forEach(function (s) { srcs.push(s); });
+        });
+        srcs.push('images/album_front_cover.png', 'images/album_back_cover.png');
+        srcs.forEach(function (src) { var i = new Image(); i.src = src; });
+    }, 4000);
+
     /* ── mobile history buttons ── */
     (function () {
         var histUp   = document.getElementById('hist-up');
