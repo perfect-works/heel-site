@@ -3211,7 +3211,7 @@
         var natH = photoImgEl.naturalHeight;
         if (!natW || !natH) return;
         var maxW = 460;
-        var maxH = 380;
+        var maxH = Math.min(620, Math.floor(window.innerHeight * 0.75));
         var scale = Math.min(1, maxW / natW, maxH / natH);
         var dispW = Math.max(240, Math.round(natW * scale));
         var dispH = Math.max(160, Math.round(natH * scale));
