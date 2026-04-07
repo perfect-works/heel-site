@@ -2811,7 +2811,7 @@
                 // 4 variants
                 if (o.variant === 0) {
                     // harsh
-                    skin = '#5e452f';
+                    skin = '#70533a';
                     hair = '#111';
                     shirt = '#161616';
                 } else if (o.variant === 1) {
@@ -2827,8 +2827,8 @@
                 } else {
                     // tayla
                     skin = '#d4a879';
-                    hair = '#c46896';
-                    shirt = '#f1f1f1';
+                    hair = '#ff4ca5';
+                    shirt = '#000000';
                 }
 
                 var h = o.h;
@@ -2854,23 +2854,23 @@
 
 
                 // LONG HAIR variants (andres, nick variants)
-                if (o.variant === 1 || o.variant === 2) {
+                if (o.variant > 0 ) {
                     ctx.fillRect(3, -h * 0.75, 3, 10);
                     ctx.fillRect(12, -h * 0.75, 3, 10);
                 }
 
                 // BRAIDS (tayla variant)
-                if (o.variant === 3) {
-                    // pink braids
-                    ctx.fillStyle = '#c46896';
-                    ctx.fillRect(2, -h * 0.7, 3, 10);
-                    ctx.fillRect(13, -h * 0.7, 3, 10);
+                // if (o.variant === 3) {
+                //     // pink braids
+                //     ctx.fillStyle = '#ff4ca5';
+                //     ctx.fillRect(2, -h * 0.7, 3, 10);
+                //     ctx.fillRect(13, -h * 0.7, 3, 10);
 
-                    // blue tips
-                    ctx.fillStyle = '#212d72';
-                    ctx.fillRect(2, -h * 0.6, 3, 4);
-                    ctx.fillRect(13, -h * 0.6, 3, 4);
-                }
+                //     // blue tips
+                //     ctx.fillStyle = '#ff4ca5';
+                //     ctx.fillRect(2, -h * 0.6, 3, 4);
+                //     ctx.fillRect(13, -h * 0.6, 3, 4);
+                // }
 
                 ctx.restore();
             }
