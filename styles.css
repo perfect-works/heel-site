@@ -1943,7 +1943,6 @@ body {
     justify-content: center;
     overflow: hidden;
     box-sizing: border-box;
-    transition: width 0.15s ease, height 0.15s ease;
 }
 
 .photo-display img {
