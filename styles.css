@@ -1995,6 +1995,18 @@ body {
     margin-left: 6px;
     cursor: pointer;
 }
+.photo-dl-btn::before {
+    content: '';
+    display: inline-block;
+    width: 0;
+    height: 0;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 5px solid #000000;
+    vertical-align: middle;
+    margin-right: 4px;
+    margin-bottom: 1px;
+}
 
 .photo-counter {
     font-family: 'Courier New', monospace;

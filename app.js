@@ -2539,7 +2539,10 @@
         files.forEach(function (f) {
             var icon = document.createElement('div');
             icon.className = 'explorer-icon';
-            icon.innerHTML = '<div class="' + (f.type === 'img' ? 'expl-file-img' : 'expl-file-txt') + '"></div><span>' + f.name + '</span>';
+            var fdot = f.name.lastIndexOf('.');
+            var fbase = fdot >= 0 ? f.name.slice(0, fdot) : f.name;
+            var fext  = fdot >= 0 ? f.name.slice(fdot) : '';
+            icon.innerHTML = '<div class="' + (f.type === 'img' ? 'expl-file-img' : 'expl-file-txt') + '"></div><span>' + fbase.replace(/_/g, '_<wbr>') + '<span style="white-space:nowrap">' + fext + '</span></span>';
             icon.addEventListener('dblclick', (function (cmd) {
                 return function () {
                     ensureTerminalVisible();
@@ -2610,10 +2613,10 @@
             var dot  = p.file.lastIndexOf('.');
             var base = dot >= 0 ? p.file.slice(0, dot) : p.file;
             var ext  = dot >= 0 ? p.file.slice(dot)    : '';
-            icon.innerHTML = '<div class="expl-file-img"></div><span>' + base + '<span style="white-space:nowrap">' + ext + '</span></span>';
-            icon.addEventListener('dblclick', (function (ii) {
-                return function () { ensureTerminalVisible(); openPhotoViewer(ii); };
-            }(idx)));
+            icon.innerHTML = '<div class="expl-file-img"></div><span>' + base.replace(/_/g, '_<wbr>') + '<span style="white-space:nowrap">' + ext + '</span></span>';
+            icon.addEventListener('dblclick', (function (file) {
+                return function () { ensureTerminalVisible(); typeAndExecute('./' + file, false); };
+            }(p.file)));
             explorerBodyEl.appendChild(icon);
         });
         explorerBackBtn.disabled = true;
@@ -2629,7 +2632,7 @@
             var dot  = p.file.lastIndexOf('.');
             var base = dot >= 0 ? p.file.slice(0, dot) : p.file;
             var ext  = dot >= 0 ? p.file.slice(dot)    : '';
-            icon.innerHTML = '<div class="expl-file-img"></div><span>' + base + '<span style="white-space:nowrap">' + ext + '</span></span>';
+            icon.innerHTML = '<div class="expl-file-img"></div><span>' + base.replace(/_/g, '_<wbr>') + '<span style="white-space:nowrap">' + ext + '</span></span>';
             icon.addEventListener('dblclick', (function (src) {
                 return function () { if (window.innerWidth > 900) setWallpaper(src); };
             }(p.src)));
