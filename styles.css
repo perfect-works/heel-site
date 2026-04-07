@@ -588,6 +588,8 @@ body.dragging {
     flex-wrap: wrap;
     gap: 8px;
     min-height: 150px;
+    max-height: 420px;
+    overflow-y: auto;
     align-content: flex-start;
 }
 
