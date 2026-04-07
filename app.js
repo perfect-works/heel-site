@@ -1770,6 +1770,51 @@
         });
     }
 
+    /* ─── mobile home screen ──────────────────────────────── */
+    function exitMobileHome() {
+        document.body.classList.remove('mobile-home');
+        windowEl = windowEl || document.querySelector('.window');
+        windowEl.style.display = '';
+        document.getElementById('task-heel').classList.add('active');
+        focusInput();
+    }
+
+    /* build video overlay */
+    (function () {
+        var overlay  = document.getElementById('mobile-video-overlay');
+        var inner    = document.getElementById('mobile-video-overlay-inner');
+        VIDEOS.forEach(function (v) {
+            var a = document.createElement('a');
+            a.href        = v.href;
+            a.target      = '_blank';
+            a.rel         = 'noopener';
+            a.textContent = v.file.replace(/\.[^.]+$/, '').replace(/_/g, ' ');
+            inner.appendChild(a);
+        });
+        var closeBtn = document.createElement('button');
+        closeBtn.id          = 'mobile-video-overlay-close';
+        closeBtn.textContent = '[ close ]';
+        closeBtn.addEventListener('click', function () {
+            overlay.classList.remove('active');
+        });
+        inner.appendChild(closeBtn);
+    }());
+
+    /* mobile single-click handlers on desktop icons */
+    desktopIconsEl.querySelectorAll('.desktop-icon').forEach(function (icon) {
+        icon.addEventListener('click', function () {
+            if (window.innerWidth > 900) return; /* desktop handles dblclick */
+            var dir = icon.dataset.dir;
+            if (!dir) { exitMobileHome(); return; } /* terminal icon */
+            if (dir === 'video') {
+                document.getElementById('mobile-video-overlay').classList.add('active');
+                return;
+            }
+            exitMobileHome();
+            execute('cd ' + dir, false, true);
+        });
+    });
+
     /* ─── minimize toggle ─────────────────────────────────── */
     var windowEl = document.querySelector('.window');
     document.getElementById('min-btn').addEventListener('click', function (e) {
@@ -1874,8 +1919,14 @@
 
     document.getElementById('close-btn').addEventListener('click', function (e) {
         e.stopPropagation();
-        windowEl.style.display = 'none';
-        document.getElementById('task-heel').classList.remove('active');
+        if (window.innerWidth <= 900) {
+            windowEl.style.display = 'none';
+            document.getElementById('task-heel').classList.remove('active');
+            document.body.classList.add('mobile-home');
+        } else {
+            windowEl.style.display = 'none';
+            document.getElementById('task-heel').classList.remove('active');
+        }
     });
 
     /* ─── startup: boot → welcome → clear → prompt ────────── */
@@ -4224,6 +4275,10 @@
 
     // Task button
     document.getElementById('task-heel').addEventListener('click', function () {
+        if (document.body.classList.contains('mobile-home')) {
+            exitMobileHome();
+            return;
+        }
         if (windowEl.style.display === 'none') {
             windowEl.style.display = '';
             setMinimized(false);
