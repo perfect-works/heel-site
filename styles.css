@@ -872,13 +872,16 @@ body.dragging {
     body.mobile-home #mobile-shortcuts {
         display: flex;
         flex-direction: row;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 20px;
-        width: 100%;
-        margin-top: 16px;
-        padding-top: 16px;
-        border-top: 1px solid rgba(255,255,255,0.15);
+        flex-wrap: nowrap;
+        justify-content: space-evenly;
+        align-items: flex-end;
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 36px; /* above taskbar */
+        padding: 10px 8px;
+        background: rgba(0, 0, 0, 0.55);
+        border-top: 1px solid rgba(255,255,255,0.12);
     }
 }
 
@@ -890,13 +893,11 @@ body.dragging {
 }
 
 .shortcut-icon {
-    width: 44px;
-    height: 44px;
-    background: #000;
-    border: 1px solid #33ff33;
+    width: 40px;
+    height: 40px;
     color: #33ff33;
     font-family: 'Courier New', monospace;
-    font-size: 1.2em;
+    font-size: 1.5em;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -904,6 +905,12 @@ body.dragging {
 }
 .shortcut-icon svg {
     display: block;
+    width: 22px;
+    height: 22px;
+}
+
+.mobile-shortcut {
+    width: 72px;
 }
 
 .mobile-shortcut span {
@@ -913,8 +920,7 @@ body.dragging {
 
 @media (hover: none) {
     .mobile-shortcut:active .shortcut-icon {
-        background: #33ff33;
-        color: #000;
+        color: #ffffff;
     }
     .mobile-shortcut:active span {
         color: #33ff33;

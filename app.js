@@ -613,12 +613,18 @@
                 return r.text();
             })
             .then(function (text) {
-                var lines = [{ t: 'blank' }, { t: 'text', v: tr.label.toUpperCase(), spaced: true }];
+                var lyricLines = [];
                 text.split('\n').forEach(function (line) {
-                    lines.push(line.trim() === '' ? { t: 'blank' } : { t: 'typewriter', v: line, charDelay: 22 });
+                    lyricLines.push(line.trim() === '' ? { t: 'blank' } : { t: 'typewriter', v: line, charDelay: 22 });
                 });
-                lines.push({ t: 'blank' });
-                printLines(lines);
+                lyricLines.push({ t: 'blank' });
+                // print header, then each lyric line one at a time so they scroll in sequence
+                printLines([{ t: 'blank' }, { t: 'text', v: tr.label.toUpperCase(), spaced: true }], function () {
+                    (function printNext(i) {
+                        if (i >= lyricLines.length) return;
+                        printLines([lyricLines[i]], function () { printNext(i + 1); });
+                    }(0));
+                });
             })
             .catch(function () {
                 printLines([{ t: 'error', v: 'lyrics not found for this track.' }, { t: 'blank' }]);
@@ -1818,7 +1824,7 @@
             });
             row.appendChild(icon);
         });
-        desktopIconsEl.appendChild(row);
+        document.body.appendChild(row);
     }());
 
     /* ─── minimize toggle ─────────────────────────────────── */
