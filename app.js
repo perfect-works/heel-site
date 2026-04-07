@@ -155,7 +155,7 @@
         { id: 'aura',                    file: 'aura.jpg',                    src: 'images/photo/aura.jpg'                    },
         { id: 'bear',                    file: 'bear.jpg',                    src: 'images/photo/bear.jpg'                    },
         { id: 'early_days',              file: 'early_days.jpg',              src: 'images/photo/early_days.jpg'              },
-        { id: 'grayscale',               file: 'grayscale.jpg',               src: 'images/photo/grayscale.jpg'               },
+        { id: 'grayscale',     file: 'grayscale.jpg',     src: 'images/photo/wallpapers/grayscale.jpg',    dir: 'wallpapers' },
         { id: 'honeycomb',               file: 'honeycomb.jpg',               src: 'images/photo/honeycomb.jpg'               },
         { id: 'launch_show_poster',      file: 'launch_show_poster.jpg',      src: 'images/photo/launch_show_poster.jpg'      },
         { id: 'pain_faces',              file: 'pain_faces.png',              src: 'images/photo/pain_faces.png'              },
