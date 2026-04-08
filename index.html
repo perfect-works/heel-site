@@ -46,8 +46,7 @@
             <span class="prompt-prefix">PS&nbsp;C:\heel&gt;&nbsp;</span><input
                 type="text" id="cmd"
                 autocomplete="off" spellcheck="false">
-            <button class="hist-btn" id="hist-up" tabindex="-1" style="display:none">[^]</button>
-            <button class="hist-btn" id="hist-down" tabindex="-1" style="display:none">[v]</button>
+
         </div>
     </div>
 </div>
@@ -89,10 +88,10 @@
                 <div class="vlc-progress-fill" id="vlc-progress-fill"></div>
             </div>
             <div class="vlc-btn-row">
-                <button class="vlc-btn" id="vlc-rewind">&#9664;&#9664;</button>
-                <button class="vlc-btn vlc-btn-main" id="vlc-play-btn">&#9654;</button>
-                <button class="vlc-btn" id="vlc-stop-btn">&#9632;</button>
-                <button class="vlc-btn" id="vlc-ffwd">&#9654;&#9654;</button>
+                <button class="vlc-btn" id="vlc-rewind"><svg width="13" height="10" viewBox="0 0 13 10" fill="currentColor" style="display:block;margin:auto"><polygon points="6,0 0,5 6,10"/><polygon points="13,0 7,5 13,10"/></svg></button>
+                <button class="vlc-btn vlc-btn-main" id="vlc-play-btn"><svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor" style="display:block;margin:auto"><polygon points="1,0 9,5 1,10"/></svg></button>
+                <button class="vlc-btn" id="vlc-stop-btn"><svg width="9" height="9" viewBox="0 0 9 9" fill="currentColor" style="display:block;margin:auto"><rect width="9" height="9"/></svg></button>
+                <button class="vlc-btn" id="vlc-ffwd"><svg width="13" height="10" viewBox="0 0 13 10" fill="currentColor" style="display:block;margin:auto"><polygon points="0,0 6,5 0,10"/><polygon points="7,0 13,5 7,10"/></svg></button>
                 <span class="vlc-time"><span id="vlc-cur">0:00</span> / <span id="vlc-dur">0:00</span></span>
             </div>
         </div>
@@ -116,10 +115,10 @@
             <div class="player-progress-fill" id="player-progress-fill"></div>
         </div>
         <div class="player-controls">
-            <button class="player-btn" id="player-prev">&#9664;&#9664;</button>
-            <button class="player-btn player-btn-main" id="player-play">&#9654;</button>
-            <button class="player-btn" id="player-stop">&#9632;</button>
-            <button class="player-btn" id="player-next">&#9654;&#9654;</button>
+            <button class="player-btn" id="player-prev"><svg width="13" height="10" viewBox="0 0 13 10" fill="currentColor" style="display:block;margin:auto"><polygon points="6,0 0,5 6,10"/><polygon points="13,0 7,5 13,10"/></svg></button>
+            <button class="player-btn player-btn-main" id="player-play"><svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor" style="display:block;margin:auto"><polygon points="1,0 9,5 1,10"/></svg></button>
+            <button class="player-btn" id="player-stop"><svg width="9" height="9" viewBox="0 0 9 9" fill="currentColor" style="display:block;margin:auto"><rect width="9" height="9"/></svg></button>
+            <button class="player-btn" id="player-next"><svg width="13" height="10" viewBox="0 0 13 10" fill="currentColor" style="display:block;margin:auto"><polygon points="0,0 6,5 0,10"/><polygon points="7,0 13,5 7,10"/></svg></button>
         </div>
         <div class="player-tabs" id="player-tabs">
             <button class="player-tab active" data-album="segmentation">Segmentation</button>
@@ -197,11 +196,11 @@
             <div id="photo-empty">no photos loaded</div>
         </div>
         <div class="photo-controls">
-            <button class="photo-btn" id="photo-prev">&#9664;&#9664;</button>
+            <button class="photo-btn" id="photo-prev"><svg width="13" height="10" viewBox="0 0 13 10" fill="currentColor" style="display:block;margin:auto"><polygon points="6,0 0,5 6,10"/><polygon points="13,0 7,5 13,10"/></svg></button>
             <span class="photo-counter" id="photo-counter">&#8212; / &#8212;</span>
             <div class="photo-right-btns">
                 <a class="photo-btn photo-dl-btn" id="photo-download" target="_blank">Save</a>
-                <button class="photo-btn" id="photo-next">&#9654;&#9654;</button>
+                <button class="photo-btn" id="photo-next"><svg width="13" height="10" viewBox="0 0 13 10" fill="currentColor" style="display:block;margin:auto"><polygon points="0,0 6,5 0,10"/><polygon points="7,0 13,5 7,10"/></svg></button>
             </div>
         </div>
     </div>

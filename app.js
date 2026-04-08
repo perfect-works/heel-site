@@ -23,7 +23,7 @@
     fetch('https://heel.goatcounter.com/counter/%2F.json')
         .then(function (r) { return r.json(); })
         .then(function (data) {
-            visitorCount = data.count || null;
+            visitorCount = (data.count && /\d/.test(data.count)) ? data.count : null;
             var tray = document.getElementById('visitor-count-tray');
             if (tray && visitorCount) {
                 tray.textContent = visitorCount + ' visits  · ';
@@ -615,7 +615,7 @@
             .then(function (text) {
                 var lyricLines = [];
                 text.split('\n').forEach(function (line) {
-                    lyricLines.push(line.trim() === '' ? { t: 'blank' } : { t: 'typewriter', v: line, charDelay: 22 });
+                    lyricLines.push(line.trim() === '' ? { t: 'blank' } : { t: 'typewriter', v: line, charDelay: 14 });
                 });
                 lyricLines.push({ t: 'blank' });
                 // print header, then each lyric line one at a time so they scroll in sequence
@@ -714,7 +714,7 @@
             currentDir = parent;
             updatePrompt();
             cdClear();
-            return parent === 'root' ? [] : dirListing();
+            return dirListing();
         },
         'cd ../':  function () { return COMMANDS['cd ..'](); },
         'cd back': function () { return COMMANDS['cd ..'](); },
@@ -1847,6 +1847,7 @@
         }
     });
     document.querySelector('.title-bar').addEventListener('click', function () {
+        if (dragMoved) { dragMoved = false; return; }
         if (windowEl.classList.contains('minimized')) setMinimized(false);
     });
 
@@ -1864,6 +1865,7 @@
 
     /* ─── window dragging ─────────────────────────────────── */
     var isDragging  = false;
+    var dragMoved   = false;
     var dragOffsetX = 0;
     var dragOffsetY = 0;
 
@@ -1880,6 +1882,7 @@
         }
 
         isDragging  = true;
+        dragMoved   = false;
         dragOffsetX = e.clientX - windowEl.getBoundingClientRect().left;
         dragOffsetY = e.clientY - windowEl.getBoundingClientRect().top;
         document.body.classList.add('dragging');
@@ -1888,6 +1891,7 @@
 
     document.addEventListener('mousemove', function (e) {
         if (!isDragging) return;
+        dragMoved = true;
         var x = e.clientX - dragOffsetX;
         var y = e.clientY - dragOffsetY;
         x = Math.max(0, Math.min(x, window.innerWidth  - windowEl.offsetWidth));
@@ -2163,8 +2167,8 @@
             playerLcdTrack.textContent = '-- no track --';
         }
         playerPlayBtn.innerHTML = (currentAudio && !audioPaused)
-            ? '<svg width="6" height="7" viewBox="0 0 8 9" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;margin:0 auto 2px"><rect x="0" y="0" width="2.5" height="9" fill="#000"/><rect x="5" y="0" width="2.5" height="9" fill="#000"/></svg>'
-            : '<svg width="6" height="7" viewBox="0 0 8 9" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;margin:0 auto 2px"><polygon points="0,0 8,4.5 0,9" fill="#000"/></svg>';
+            ? '<svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor" style="display:block;margin:auto"><rect x="1" y="0" width="3" height="10"/><rect x="6" y="0" width="3" height="10"/></svg>'
+            : '<svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor" style="display:block;margin:auto"><polygon points="1,0 9,5 1,10"/></svg>';
         playerHighlightCurrent();
     }
 
@@ -2356,10 +2360,10 @@
         var playBtn = document.getElementById('vlc-play-btn');
         if (event.data === YT.PlayerState.PLAYING) {
             if (!vlcUpdateIv) vlcUpdateIv = setInterval(vlcTick, 500);
-            if (playBtn) playBtn.innerHTML = '&#9646;&#9646;';
+            if (playBtn) playBtn.innerHTML = '<svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor" style="display:block;margin:auto"><rect x="1" y="0" width="3" height="10"/><rect x="6" y="0" width="3" height="10"/></svg>';
         } else {
             if (vlcUpdateIv) { clearInterval(vlcUpdateIv); vlcUpdateIv = null; }
-            if (playBtn) playBtn.innerHTML = '&#9654;';
+            if (playBtn) playBtn.innerHTML = '<svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor" style="display:block;margin:auto"><polygon points="1,0 9,5 1,10"/></svg>';
             vlcTick();
         }
     }
@@ -3844,6 +3848,12 @@
     photoNextBtn.addEventListener('click', function () { photoShow(photoIndex + 1); });
     photoWindowEl.addEventListener('mousedown', function () { vlcBringToFront('photo'); });
 
+    document.addEventListener('keydown', function (e) {
+        if (!photoOpen || photoWindowEl.classList.contains('minimized')) return;
+        if (e.key === 'ArrowLeft')  { photoShow(photoIndex - 1); e.preventDefault(); }
+        if (e.key === 'ArrowRight') { photoShow(photoIndex + 1); e.preventDefault(); }
+    });
+
     document.getElementById('photo-min-btn').addEventListener('click', function () {
         var min = photoWindowEl.classList.contains('minimized');
         photoWindowEl.classList.toggle('minimized', !min);
@@ -4186,33 +4196,6 @@
         srcs.forEach(function (src) { var i = new Image(); i.src = src; });
     }, 4000);
 
-    /* ── mobile history buttons ── */
-    (function () {
-        var histUp   = document.getElementById('hist-up');
-        var histDown = document.getElementById('hist-down');
-        if (!histUp) return;
-        if (window.innerWidth <= 500) {
-            histUp.style.display   = 'inline';
-            histDown.style.display = 'inline';
-        }
-        histUp.addEventListener('click', function () {
-            if (historyPos < cmdHistory.length - 1) {
-                historyPos++;
-                input.value = cmdHistory[historyPos];
-            }
-            input.focus();
-        });
-        histDown.addEventListener('click', function () {
-            if (historyPos > 0) {
-                historyPos--;
-                input.value = cmdHistory[historyPos];
-            } else {
-                historyPos = -1;
-                input.value = '';
-            }
-            input.focus();
-        });
-    }());
 
     /* ── tray volume popup ── */
     (function () {
@@ -4343,7 +4326,8 @@
             startMenu.classList.remove('open');
             startBtn.classList.remove('open');
             if (cmd === 'shutdown') { triggerJumpscare(); return; }
-            if (windowEl.classList.contains('minimized')) setMinimized(false);
+            ensureTerminalVisible();
+            skipToPrompt();
             execute(cmd);
             focusInput();
         });

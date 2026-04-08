@@ -304,9 +304,6 @@ body.dragging {
     font-size: 0.82em;
 }
 
-.hist-btn {
-    display: none;
-}
 
 #cmd {
     background: transparent;
@@ -1983,22 +1980,7 @@ body {
         font-size: 1em;
         align-items: center;
     }
-    .hist-btn {
-        display: inline;
-        background: none;
-        border: none;
-        color: #33ff33;
-        font-family: 'Courier New', monospace;
-        font-size: 0.85em;
-        margin-left: 4px;
-        cursor: pointer;
-        padding: 0;
-        opacity: 0.7;
-    }
-    .hist-btn:active {
-        opacity: 1;
-    }
-    .prompt-prefix {
+.prompt-prefix {
         white-space: nowrap;
         flex-shrink: 0;
     }
