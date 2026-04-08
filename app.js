@@ -1294,6 +1294,7 @@
                     for (var ri = 0; ri < el.children.length; ri++) rowEls.push(el.children[ri]);
                     var revealed = 0;
                     var iv = setInterval(function () {
+                        if (printGeneration !== gen) { clearInterval(iv); return; }
                         revealed++;
                         for (var ri = 0; ri < rowEls.length; ri++) {
                             rowEls[ri].textContent = rows[ri].slice(0, revealed);
@@ -1322,6 +1323,7 @@
                         var text = line.v;
                         var i = 0;
                         var iv = setInterval(function () {
+                            if (printGeneration !== gen) { clearInterval(iv); return; }
                             el.textContent += text[i];
                             i++;
                             scrollBottom();
@@ -1351,6 +1353,7 @@
                         function startReveal() {
                             var pct = 100;
                             var iv = setInterval(function () {
+                                if (printGeneration !== gen) { clearInterval(iv); return; }
                                 pct -= 2;
                                 if (pct <= 0) {
                                     pct = 0;
@@ -1395,6 +1398,7 @@
                     scrollBottom();
                     var filled = 0;
                     function fillNext() {
+                        if (printGeneration !== gen) return;
                         if (filled >= totalBlocks) {
                             animating = false;
                             inputRow.style.visibility = 'visible';
@@ -1836,6 +1840,8 @@
             windowEl.style.display = 'none';
             document.getElementById('task-heel').classList.remove('active');
             document.body.classList.add('mobile-home');
+            currentDir = 'root';
+            updateDesktopIcons();
         } else {
             toggleMinimize();
         }
@@ -1863,7 +1869,6 @@
 
     document.querySelector('.title-bar').addEventListener('mousedown', function (e) {
         if (e.target.classList.contains('wbtn')) return;
-        if (windowEl.classList.contains('minimized')) return;
         if (document.body.classList.contains('maximized')) return;
 
         // Snap to fixed positioning at current visual position
@@ -1943,6 +1948,8 @@
             windowEl.style.display = 'none';
             document.getElementById('task-heel').classList.remove('active');
             document.body.classList.add('mobile-home');
+            currentDir = 'root';
+            updateDesktopIcons();
         } else {
             windowEl.style.display = 'none';
             document.getElementById('task-heel').classList.remove('active');
@@ -2311,7 +2318,6 @@
     var playerDragOffY  = 0;
     document.getElementById('player-title-bar').addEventListener('mousedown', function (e) {
         if (e.target.classList.contains('wbtn')) return;
-        if (playerMinimized) return;
         playerDragging = true;
         playerDragOffX = e.clientX - playerWindowEl.getBoundingClientRect().left;
         playerDragOffY = e.clientY - playerWindowEl.getBoundingClientRect().top;
@@ -2395,7 +2401,6 @@
     }
 
     function openVlc(videoId, title) {
-        ensureTerminalVisible();
         skipToPrompt();
         vlcWindowEl.style.display = 'block';
         vlcMinimized = false;
@@ -2474,7 +2479,6 @@
     var vlcDragging = false, vlcDragOffX = 0, vlcDragOffY = 0;
     document.getElementById('vlc-title-bar').addEventListener('mousedown', function (e) {
         if (e.target.classList.contains('wbtn')) return;
-        if (vlcMinimized) return;
         vlcDragging = true;
         vlcDragOffX = e.clientX - vlcWindowEl.getBoundingClientRect().left;
         vlcDragOffY = e.clientY - vlcWindowEl.getBoundingClientRect().top;
@@ -3021,8 +3025,9 @@
     var explorerTitleEl   = document.getElementById('explorer-title-text');
     var explorerBackBtn   = document.getElementById('explorer-back-btn');
     var explorerStatusEl  = document.getElementById('explorer-status');
-    var explorerMinimized = false;
-    var explorerTaskBtn   = null;
+    var explorerMinimized   = false;
+    var explorerTaskBtn     = null;
+    var explorerCurrentView = null;
     var explorerDragging  = false, explorerDragOffX = 0, explorerDragOffY = 0;
 
     var MEMBER_NAMES = Object.keys(MEMBERS);
@@ -3037,6 +3042,7 @@
     }
 
     function explorerRenderUsers() {
+        explorerCurrentView = 'users';
         explorerBodyEl.innerHTML = '';
         MEMBER_NAMES.forEach(function (name) {
             var icon = document.createElement('div');
@@ -3052,6 +3058,7 @@
     }
 
     function explorerRenderMember(name) {
+        explorerCurrentView = name;
         var files = getMemberFiles(name);
         explorerBodyEl.innerHTML = '';
         files.forEach(function (f) {
@@ -3091,14 +3098,15 @@
         explorerWindowEl.style.display = 'none';
         if (explorerTaskBtn) { explorerTaskBtn.remove(); explorerTaskBtn = null; }
         var musicDirs = ['music', 'music/segmentation', 'music/unreleased', 'sgmt_demos', 'heel2_demos'];
-        if (currentDir === 'video' || currentDir === 'photo' || currentDir === 'wallpapers' || musicDirs.indexOf(currentDir) !== -1) {
+        var memberDirs = Object.keys(MEMBERS);
+        var explorerDirs = ['video', 'photo', 'wallpapers', 'users'].concat(musicDirs).concat(memberDirs);
+        if (explorerDirs.indexOf(currentDir) !== -1) {
             currentDir = 'root';
             updatePrompt();
         }
     });
 
     document.getElementById('explorer-title-bar').addEventListener('mousedown', function (e) {
-        if (explorerMinimized) return;
         vlcBringToFront('explorer');
         explorerDragging = true;
         explorerDragOffX = e.clientX - explorerWindowEl.getBoundingClientRect().left;
@@ -3118,11 +3126,12 @@
     });
 
     function explorerRenderPhoto() {
+        explorerCurrentView = 'photo';
         explorerBodyEl.innerHTML = '';
         var folderIcon = document.createElement('div');
         folderIcon.className = 'explorer-icon';
         folderIcon.innerHTML = '<div class="folder-icon"></div><span>wallpapers</span>';
-        folderIcon.addEventListener('dblclick', function () { ensureTerminalVisible(); execute('cd wallpapers', false, true); });
+        folderIcon.addEventListener('dblclick', function () { execute('cd wallpapers', false, true); });
         explorerBodyEl.appendChild(folderIcon);
         PHOTOS.filter(function (p) { return !p.dir; }).forEach(function (p, i) {
             var idx = PHOTOS.indexOf(p);
@@ -3133,7 +3142,7 @@
             var ext  = dot >= 0 ? p.file.slice(dot)    : '';
             icon.innerHTML = '<div class="expl-file-img"></div><span>' + base.replace(/_/g, '_<wbr>') + '<span style="white-space:nowrap">' + ext + '</span></span>';
             icon.addEventListener('dblclick', (function (file, ii) {
-                return function () { ensureTerminalVisible(); openPhotoViewer(ii); typeAndExecute('./' + file, false); };
+                return function () { openPhotoViewer(ii); typeAndExecute('./' + file, false); };
             }(p.file, idx)));
             explorerBodyEl.appendChild(icon);
         });
@@ -3143,6 +3152,7 @@
     }
 
     function explorerRenderWallpapers() {
+        explorerCurrentView = 'wallpapers';
         explorerBodyEl.innerHTML = '';
         PHOTOS.filter(function (p) { return p.dir === 'wallpapers'; }).forEach(function (p) {
             var icon = document.createElement('div');
@@ -3162,6 +3172,7 @@
     }
 
     function explorerRenderVideo() {
+        explorerCurrentView = 'video';
         explorerBodyEl.innerHTML = '';
         VIDEOS.forEach(function (v) {
             var icon = document.createElement('div');
@@ -3169,8 +3180,6 @@
             icon.innerHTML = '<div class="expl-file-vid"></div><span>' + v.file + '</span>';
             icon.addEventListener('dblclick', (function (file) {
                 return function () {
-                    ensureTerminalVisible();
-                    vlcBringToFront('terminal');
                     execute('./' + file);
                 };
             }(v.file)));
@@ -3182,13 +3191,14 @@
     }
 
     function explorerRenderMusic() {
+        explorerCurrentView = 'music';
         explorerBodyEl.innerHTML = '';
         [{ name: 'segmentation', child: 'segmentation' }, { name: 'unreleased', child: 'unreleased' }].forEach(function (a) {
             var icon = document.createElement('div');
             icon.className = 'explorer-icon';
             icon.innerHTML = '<div class="folder-icon"></div><span>' + a.name + '</span>';
             icon.addEventListener('dblclick', (function (child) {
-                return function () { ensureTerminalVisible(); execute('cd ' + child, false, true); };
+                return function () { execute('cd ' + child, false, true); };
             }(a.child)));
             explorerBodyEl.appendChild(icon);
         });
@@ -3198,13 +3208,14 @@
     }
 
     function explorerRenderMusicUnreleased() {
+        explorerCurrentView = 'music/unreleased';
         explorerBodyEl.innerHTML = '';
         [{ name: 'sgmt_demos', child: 'sgmt_demos' }, { name: 'heel2_demos', child: 'heel2_demos' }].forEach(function (a) {
             var icon = document.createElement('div');
             icon.className = 'explorer-icon';
             icon.innerHTML = '<div class="folder-icon"></div><span>' + a.name + '</span>';
             icon.addEventListener('dblclick', (function (child) {
-                return function () { ensureTerminalVisible(); execute('cd ' + child, false, true); };
+                return function () { execute('cd ' + child, false, true); };
             }(a.child)));
             explorerBodyEl.appendChild(icon);
         });
@@ -3214,6 +3225,7 @@
     }
 
     function explorerRenderTrackList(key, addressPath, title) {
+        explorerCurrentView = key;
         explorerBodyEl.innerHTML = '';
         (TRACKS[key] || []).forEach(function (tr) {
             var icon = document.createElement('div');
@@ -3225,7 +3237,7 @@
             var baseHtml = base.replace(/_/g, '_<wbr>');
             icon.innerHTML = '<div class="expl-file-aud"></div><span>' + baseHtml + '<span style="white-space:nowrap">' + ext + '</span></span>';
             icon.addEventListener('dblclick', (function (id) {
-                return function () { openPlayer(id); ensureTerminalVisible(); execute('play ' + id); };
+                return function () { openPlayer(id); execute('play ' + id); };
             }(tr.id)));
             explorerBodyEl.appendChild(icon);
         });
