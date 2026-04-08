@@ -26,7 +26,7 @@
             visitorCount = (data.count && /\d/.test(data.count)) ? data.count : null;
             var tray = document.getElementById('visitor-count-tray');
             if (tray && visitorCount) {
-                tray.textContent = visitorCount + ' visits  | ';
+                tray.textContent = visitorCount + ' visits';
             }
         })
         .catch(function () { visitorCount = null; });
@@ -3750,7 +3750,7 @@
         var natH = photoImgEl.naturalHeight;
         if (!natW || !natH) return;
         var maxW = 460;
-        var maxH = Math.min(496, Math.floor(window.innerHeight * 0.6));
+        var maxH = Math.min(372, Math.floor(window.innerHeight * 0.45));
         var scale = Math.min(1, maxW / natW, maxH / natH);
         var dispW = Math.max(240, Math.round(natW * scale));
         var dispH = Math.max(160, Math.round(natH * scale));
