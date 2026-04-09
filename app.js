@@ -48,7 +48,8 @@
     var masterMuted        = false;
     var nowPlayingInterval = null;
     var printGeneration    = 0;
-    var tabCycle = { partial: null, matches: [], index: -1 };
+    var tabCycle      = { partial: null, matches: [], index: -1 };
+    var pendingConfirm = null;
 
     var ytApiReady        = false;
     var ytPlayer          = null;
@@ -68,6 +69,8 @@
     var playerCurrentAlbum  = 'segmentation';
     var playerUpdateIv      = null;
     var playerMinimized     = false;
+    var mobilePhotoPrev     = null;
+    var mobilePhotoNext     = null;
 
     /* ── member registry ── */
     var MEMBERS = {
@@ -635,8 +638,9 @@
             });
         }
         if (mitem && mitem.photo && window.innerWidth <= 900) {
+            var mlNext = (mitem.samples && mitem.samples.length) ? './' + mitem.samples[0].split('/').pop() : null;
             lines.push({ t: 'blank' });
-            lines.push({ t: 'img-reveal', src: mitem.photo, width: '80%' });
+            lines.push({ t: 'img-reveal', src: mitem.photo, width: '80%', filename: 'photo.jpg', nextCmd: mlNext });
         }
         if (mitem && mitem.price) {
             lines.push({ t: 'dirlink', label: tc(0, false) + 'price.txt <span style="opacity:0.55">\u2014 ' + mitem.price + '</span>', cmd: 'cat price.txt' });
@@ -1514,6 +1518,36 @@
                     el.appendChild(imgEl);
                 }
                 el._imgEl = imgEl;
+                if (line.filename || line.prevCmd || line.nextCmd) {
+                    mobilePhotoPrev = line.prevCmd || null;
+                    mobilePhotoNext = line.nextCmd || null;
+                    var navBar = document.createElement('div');
+                    navBar.style.cssText = 'display:flex;align-items:center;justify-content:space-between;margin-top:5px;font-size:11px;font-family:inherit;';
+                    var makeNavBtn = function (label, cmd) {
+                        var btn = document.createElement('span');
+                        btn.textContent = label;
+                        btn.style.cssText = 'color:#33ff33;cursor:pointer;opacity:0.8;';
+                        btn.addEventListener('click', function () { execute(cmd); });
+                        return btn;
+                    };
+                    if (line.prevCmd) {
+                        navBar.appendChild(makeNavBtn('[< prev]', line.prevCmd));
+                    } else {
+                        navBar.appendChild(document.createElement('span'));
+                    }
+                    if (line.filename) {
+                        var fnEl = document.createElement('span');
+                        fnEl.textContent = line.filename;
+                        fnEl.style.cssText = 'color:#33ff33;opacity:0.45;';
+                        navBar.appendChild(fnEl);
+                    }
+                    if (line.nextCmd) {
+                        navBar.appendChild(makeNavBtn('[next >]', line.nextCmd));
+                    } else {
+                        navBar.appendChild(document.createElement('span'));
+                    }
+                    el.appendChild(navBar);
+                }
                 return el;
 
             case 'dirlink':
@@ -1858,9 +1892,21 @@
                 if (!absolute) {
                     var children = DIR_CHILDREN[currentDir] || [];
                     if (children.indexOf(arg) === -1) {
-                        output.appendChild(render({ t: 'error', v: '\'' + esc(arg) + '\': no such directory.' }));
-                        output.appendChild(render({ t: 'blank' }));
-                        scrollBottom();
+                        var bestDir = null, bestDirDist = arg.length <= 2 ? 1 : 3;
+                        for (var ci = 0; ci < children.length; ci++) {
+                            var dd = levenshtein(arg, children[ci]);
+                            if (dd < bestDirDist) { bestDirDist = dd; bestDir = children[ci]; }
+                        }
+                        if (bestDir) {
+                            output.appendChild(render({ t: 'error', v: '\'' + esc(arg) + '\': no such directory.' }));
+                            output.appendChild(render({ t: 'text', v: 'did you mean \'cd ' + esc(bestDir) + '\'? (y/n)', dim: true }));
+                            scrollBottom();
+                            pendingConfirm = 'cd ' + bestDir;
+                        } else {
+                            output.appendChild(render({ t: 'error', v: '\'' + esc(arg) + '\': no such directory.' }));
+                            output.appendChild(render({ t: 'blank' }));
+                            scrollBottom();
+                        }
                         return;
                     }
                 }
@@ -1875,14 +1921,19 @@
             else if (getMerchItem(currentDir)) photoSrc = getMerchItem(currentDir).photo;
             if (photoSrc) {
                 var isMerch = !!getMerchItem(currentDir);
+                var mitemSet = isMerch ? getMerchItem(currentDir) : null;
                 if (isMerch && window.innerWidth > 900) {
-                    var mitemSet = getMerchItem(currentDir);
                     var pSet = [{ src: mitemSet.photo, file: 'photo.jpg' }];
                     if (mitemSet.samples) mitemSet.samples.forEach(function (s) { pSet.push({ src: s, file: s.split('/').pop() }); });
                     openPhotoViewerWithSet(pSet, 0);
                     printLines([{ t: 'blank' }, { t: 'text', v: 'opening photo.jpg...', dim: true }, { t: 'blank' }]);
+                } else if (isMerch) {
+                    var mSet = [{ src: mitemSet.photo, file: 'photo.jpg' }];
+                    if (mitemSet.samples) mitemSet.samples.forEach(function (s) { mSet.push({ src: s, file: s.split('/').pop() }); });
+                    var mNext = mSet.length > 1 ? mSet[1].file : null;
+                    printLines([{ t: 'blank' }, { t: 'img-reveal', src: photoSrc, width: '80%', pixelated: false, filename: 'photo.jpg', nextCmd: mNext ? './' + mNext : null }, { t: 'blank' }]);
                 } else {
-                    printLines([{ t: 'blank' }, { t: 'img-reveal', src: photoSrc, width: isMerch ? '80%' : '170px', pixelated: !isMerch }, { t: 'blank' }]);
+                    printLines([{ t: 'blank' }, { t: 'img-reveal', src: photoSrc, width: '170px', pixelated: true, filename: 'photo.jpg' }, { t: 'blank' }]);
                 }
                 return;
             }
@@ -1901,7 +1952,12 @@
                         openPhotoViewerWithSet(sSet, sci + 1);
                         printLines([{ t: 'blank' }, { t: 'text', v: 'opening ' + sfname + '...', dim: true }, { t: 'blank' }]);
                     } else {
-                        printLines([{ t: 'blank' }, { t: 'img-reveal', src: curMerchItem.samples[sci], width: '80%' }, { t: 'blank' }]);
+                        var sSet = [{ src: curMerchItem.photo, file: 'photo.jpg' }];
+                        curMerchItem.samples.forEach(function (s) { sSet.push({ src: s, file: s.split('/').pop() }); });
+                        var sIdx = sci + 1;
+                        var sPrev = sSet[sIdx - 1] ? (sSet[sIdx - 1].file === 'photo.jpg' ? 'cat photo.jpg' : './' + sSet[sIdx - 1].file) : null;
+                        var sNext = sSet[sIdx + 1] ? './' + sSet[sIdx + 1].file : null;
+                        printLines([{ t: 'blank' }, { t: 'img-reveal', src: curMerchItem.samples[sci], width: '80%', filename: sfname, prevCmd: sPrev, nextCmd: sNext }, { t: 'blank' }]);
                     }
                     return;
                 }
@@ -1939,7 +1995,9 @@
                         openPhotoViewer(pci);
                         printLines([{ t: 'blank' }, { t: 'text', v: 'opening ' + PHOTOS[pci].file + '...', dim: true }, { t: 'blank' }]);
                     } else {
-                        printLines([{ t: 'blank' }, { t: 'img-reveal', src: PHOTOS[pci].src, width: '100%' }, { t: 'blank' }]);
+                        var pPrev = pci > 0 ? './' + PHOTOS[pci - 1].file : null;
+                        var pNext = pci < PHOTOS.length - 1 ? './' + PHOTOS[pci + 1].file : null;
+                        printLines([{ t: 'blank' }, { t: 'img-reveal', src: PHOTOS[pci].src, width: '100%', filename: PHOTOS[pci].file, prevCmd: pPrev, nextCmd: pNext }, { t: 'blank' }]);
                     }
                     return;
                 }
@@ -1954,6 +2012,12 @@
                 printLines(COMMANDS['cd ' + lower]());
                 return;
             }
+        }
+
+        if (lower === 'next' || lower === 'prev') {
+            var navTarget = lower === 'next' ? mobilePhotoNext : mobilePhotoPrev;
+            if (navTarget) { execute(navTarget); } else { printLines([{ t: 'blank' }, { t: 'error', v: 'no ' + lower + ' image.' }, { t: 'blank' }]); }
+            return;
         }
 
         var fn = COMMANDS[lower];
@@ -1985,13 +2049,10 @@
                 if (d < bestDist) { bestDist = d; best = keys[ki]; }
             }
             if (best) {
-                var hintEl = document.createElement('div');
-                hintEl.className = 'out-text dim';
-                hintEl.style.marginTop = '2px';
-                hintEl.innerHTML = '\u2192 \'' + esc(best) + '\'';
-                output.appendChild(hintEl);
+                output.appendChild(render({ t: 'error', v: '\'' + esc(lower) + '\' not recognized.' }));
+                output.appendChild(render({ t: 'text', v: 'did you mean \'' + esc(best) + '\'? (y/n)', dim: true }));
                 scrollBottom();
-                execute(best, true);
+                pendingConfirm = best;
             } else {
                 output.appendChild(render({
                     t: 'error',
@@ -2008,6 +2069,27 @@
     input.addEventListener('keydown', function (e) {
         if (animating && e.key !== 'Tab') { e.preventDefault(); return; }
         if (e.key !== 'Tab') { tabCycle.partial = null; tabCycle.matches = []; tabCycle.index = -1; }
+
+        if (pendingConfirm) {
+            if (e.key === 'y' || e.key === 'Y') {
+                e.preventDefault();
+                var confirmed = pendingConfirm;
+                pendingConfirm = null;
+                input.value = '';
+                output.appendChild(render({ t: 'text', v: 'y' }));
+                execute(confirmed, true);
+            } else if (e.key === 'n' || e.key === 'N' || e.key === 'Escape') {
+                e.preventDefault();
+                pendingConfirm = null;
+                input.value = '';
+                output.appendChild(render({ t: 'text', v: 'n' }));
+                output.appendChild(render({ t: 'blank' }));
+                scrollBottom();
+            } else if (e.key !== 'Shift' && e.key !== 'Control' && e.key !== 'Alt' && e.key !== 'Meta') {
+                pendingConfirm = null;
+            }
+            return;
+        }
 
         switch (e.key) {
 
@@ -2090,7 +2172,16 @@
     }
 
     /* click anywhere in the terminal to focus the input */
-    terminal.addEventListener('click', function () { focusInput(); });
+    terminal.addEventListener('click', function (e) {
+        if (window.innerWidth <= 500) {
+            /* on mobile, only focus when tapping genuine empty space (target is a container, not content) */
+            if (e.target === terminal || e.target === output) {
+                input.focus();
+            }
+        } else {
+            focusInput();
+        }
+    });
 
     /* ─── desktop icons ───────────────────────────────────── */
     (function () {
