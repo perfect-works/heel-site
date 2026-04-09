@@ -60,6 +60,7 @@
     var vlcWindowEl       = null; // assigned after DOM refs below
 
     var currentTrackLabel   = null;
+    var currentTrackObj     = null;
     var playerTrackList     = [];
     var playerTrackIndex    = -1;
     var playerCurrentAlbum  = 'segmentation';
@@ -334,8 +335,7 @@
             lines.push({ t: 'dirlink', label: tc(0, false) + '[photo]',    cmd: 'cd photo'      });
             lines.push({ t: 'dirlink', label: tc(0, false) + '[video]',    cmd: 'cd video'      });
             lines.push({ t: 'dirlink', label: tc(0, false) + '[music]',    cmd: 'cd music'      });
-            lines.push({ t: 'dirlink', label: tc(0, false) + '[merch]',    cmd: 'cd merch'      });
-            lines.push({ t: 'dirlink', label: tc(0, true)  + 'about.txt', cmd: 'cat about.txt' });
+            lines.push({ t: 'dirlink', label: tc(0, true)  + '[merch]',    cmd: 'cd merch'      });
             lines.push({ t: 'blank' });
             lines.push({ t: 'text', v: "click a folder or type 'cd &lt;dir&gt;'", dim: true });
 
@@ -356,7 +356,8 @@
             lines.push({ t: 'dirlink', label: tc(1, false) + '[segmentation]', cmd: 'cd segmentation' });
             lines.push({ t: 'dirlink', label: tc(1, false) + '[unreleased]',    cmd: 'cd unreleased'   });
             lines.push({ t: 'dirlink', label: tc(1, false) + 'README.txt',     cmd: 'cat readme.txt'  });
-            lines.push({ t: 'dirlink', label: tc(1, true)  + '[<- back]',          cmd: 'cd ..'           });
+            lines.push({ t: 'dirlink', label: tc(1, false) + 'typetest.exe',   cmd: 'wpm'             });
+            lines.push({ t: 'dirlink', label: tc(1, true)  + '[<- back]',      cmd: 'cd ..'           });
             lines.push({ t: 'blank' });
             lines.push({ t: 'text', v: "click README.txt or type 'cat readme.txt' for player info", dim: true });
 
@@ -490,6 +491,93 @@
             lines.push({ t: 'text', v: "click a file, 'cat &lt;file.txt&gt;', or './&lt;file&gt;' to open", dim: true });
         }
 
+        lines.push({ t: 'blank' });
+        return lines;
+    }
+
+    function dosDirListing() {
+        var now = new Date();
+        var mm  = String(now.getMonth() + 1).padStart(2, '0');
+        var dd  = String(now.getDate()).padStart(2, '0');
+        var yyyy = now.getFullYear();
+        var hh  = now.getHours();
+        var min = String(now.getMinutes()).padStart(2, '0');
+        var ampm = hh >= 12 ? 'PM' : 'AM';
+        hh = String(hh % 12 || 12).padStart(2, ' ');
+        var ts = mm + '/' + dd + '/' + yyyy + '  ' + hh + ':' + min + ' ' + ampm;
+
+        function randSize(min, max) {
+            var n = Math.floor(Math.random() * (max - min + 1)) + min;
+            return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        }
+        function d(name, cmd) { return { type: 'dir',  name: name, cmd: cmd || 'cd ' + name }; }
+        function f(name, cmd, min, max) { return { type: 'file', name: name, cmd: cmd, size: randSize(min, max) }; }
+
+        var path, entries = [];
+
+        if (currentDir === 'root') {
+            path = 'C:\\heel';
+            entries = [d('users'), d('photo'), d('video'), d('music'), d('merch')];
+        } else if (currentDir === 'users') {
+            path = 'C:\\heel\\users';
+            entries = [d('adharsh'), d('andres'), d('nick'), d('tayla')];
+        } else if (currentDir === 'music') {
+            path = 'C:\\heel\\music';
+            entries = [d('segmentation'), d('unreleased'), f('README.txt', 'cat readme.txt', 800, 8000)];
+        } else if (currentDir === 'music/segmentation') {
+            path = 'C:\\heel\\music\\segmentation';
+            entries = TRACKS.segmentation.map(function (t) { return f(t.label + '.mp3', 'play ' + t.id, 4000000, 9000000); });
+        } else if (currentDir === 'music/unreleased') {
+            path = 'C:\\heel\\music\\unreleased';
+            entries = [d('sgmt_demos'), d('heel2_demos')];
+        } else if (currentDir === 'sgmt_demos') {
+            path = 'C:\\heel\\music\\unreleased\\sgmt_demos';
+            entries = TRACKS.sgmt_demos.map(function (t) { return f(t.label + '.mp3', 'play ' + t.id, 4000000, 9000000); });
+        } else if (currentDir === 'heel2_demos') {
+            path = 'C:\\heel\\music\\unreleased\\heel2_demos';
+            entries = TRACKS.heel2_demos.map(function (t) { return f(t.label + '.mp3', 'play ' + t.id, 4000000, 9000000); });
+        } else if (currentDir === 'video') {
+            path = 'C:\\heel\\video';
+            entries = VIDEOS.map(function (v) { return f(v.file, './' + v.file, 80000000, 500000000); });
+        } else if (currentDir === 'photo') {
+            path = 'C:\\heel\\photo';
+            entries = [d('wallpapers')].concat(PHOTOS.filter(function (p) { return !p.dir; }).map(function (p) { return f(p.file, './' + p.file, 500000, 4000000); }));
+        } else if (currentDir === 'wallpapers') {
+            path = 'C:\\heel\\photo\\wallpapers';
+            entries = PHOTOS.filter(function (p) { return p.dir === 'wallpapers'; }).map(function (p) { return f(p.file, './' + p.file, 1000000, 6000000); });
+        } else if (currentDir === 'merch') {
+            path = 'C:\\heel\\merch';
+            entries = [d('obey_tshirt'), d('segmentation'), d('stickers'), d('zine')];
+        } else if (MEMBERS[currentDir]) {
+            var mem = MEMBERS[currentDir];
+            path = 'C:\\heel\\users\\' + currentDir;
+            entries = [f('profile.txt', 'cat profile.txt', 500, 5000)];
+            if (mem.gear) entries.push(f('gear.txt', 'cat gear.txt', 500, 5000));
+            if (mem.data) entries.push(f('data.txt', 'cat data.txt', 500, 5000));
+            entries.push(f('photo.jpg', './photo.jpg', 800000, 4000000));
+        } else {
+            path = promptPath();
+            entries = [];
+        }
+
+        var dirCount  = entries.filter(function (e) { return e.type === 'dir';  }).length;
+        var fileCount = entries.filter(function (e) { return e.type === 'file'; }).length;
+
+        var lines = [{ t: 'blank' }];
+        lines.push({ t: 'text', v: ' Volume in drive C is HEEL',        dim: true });
+        lines.push({ t: 'text', v: ' Volume Serial Number is 4A10-2026', dim: true });
+        lines.push({ t: 'blank' });
+        lines.push({ t: 'text', v: ' Directory of ' + path });
+        lines.push({ t: 'blank' });
+        entries.forEach(function (e) {
+            var col = e.type === 'dir'
+                ? ts + '    &lt;DIR&gt;          ' + e.name
+                : ts + '    ' + e.size.padStart(14) + ' ' + e.name;
+            lines.push({ t: 'dirlink', label: col, cmd: e.cmd });
+        });
+        lines.push({ t: 'blank' });
+        lines.push({ t: 'text', v: '               ' + fileCount + ' File(s)', dim: true });
+        lines.push({ t: 'text', v: '               ' + (dirCount + 2) + ' Dir(s)   420,666 bytes free', dim: true });
         lines.push({ t: 'blank' });
         return lines;
     }
@@ -631,6 +719,131 @@
             });
     }
 
+    /* ─── typing speed test ──────────────────────────────── */
+    function startTypingTest(passage, songName) {
+        var typed      = '';
+        var startTime  = null;
+        var g          = '#33ff33';
+
+        var container = document.createElement('div');
+        container.style.cssText = 'margin:0.2em 0 0.5em;font-family:inherit;font-size:0.88em;';
+
+        var titleEl = document.createElement('div');
+        titleEl.style.cssText = 'opacity:0.45;margin-bottom:0.8em;font-size:0.9em;';
+        titleEl.textContent = '[ ' + songName + ' ]';
+        container.appendChild(titleEl);
+
+        var passageEl = document.createElement('pre');
+        passageEl.style.cssText = 'margin:0;font-family:inherit;font-size:inherit;white-space:pre-wrap;line-height:1.8;';
+        container.appendChild(passageEl);
+
+        var statsEl = document.createElement('div');
+        statsEl.style.cssText = 'margin-top:0.8em;opacity:0.5;font-size:0.85em;';
+        statsEl.textContent = 'start typing  ·  esc to cancel';
+        container.appendChild(statsEl);
+
+        output.appendChild(container);
+        output.scrollTop = output.scrollHeight;
+        inputRow.style.display = 'none';
+
+        function esc(s) {
+            return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        }
+
+        function updateDisplay() {
+            var html = '';
+            for (var i = 0; i < passage.length; i++) {
+                var ch   = passage[i];
+                var isNl = ch === '\n';
+                var disp = isNl ? '\u21b5' : esc(ch);
+
+                if (i === typed.length) {
+                    html += '<span style="background:' + g + ';color:#000">' + disp + '</span>';
+                    if (isNl) html += '\n';
+                } else if (i < typed.length) {
+                    var ok = typed[i] === ch;
+                    html += '<span style="color:' + (ok ? g : '#ff4444') + '">' + disp + '</span>';
+                    if (isNl) html += '\n';
+                } else {
+                    html += '<span style="opacity:0.3">' + disp + '</span>';
+                    if (isNl) html += '\n';
+                }
+            }
+            passageEl.innerHTML = html;
+
+            if (startTime && typed.length > 0) {
+                var elapsed = (Date.now() - startTime) / 60000;
+                var wpm     = Math.round((typed.length / 5) / elapsed);
+                var correct = 0;
+                for (var j = 0; j < typed.length; j++) {
+                    if (typed[j] === passage[j]) correct++;
+                }
+                var acc = Math.round((correct / typed.length) * 100);
+                statsEl.textContent = wpm + ' wpm  ·  ' + acc + '% acc  ·  esc to exit';
+            }
+
+            output.scrollTop = output.scrollHeight;
+        }
+
+        function finish() {
+            document.removeEventListener('keydown', onKey);
+            inputRow.style.display = '';
+
+            var elapsed = (Date.now() - startTime) / 60000;
+            var wpm     = Math.round((passage.replace(/\n/g, ' ').length / 5) / elapsed);
+            var correct = 0;
+            for (var i = 0; i < passage.length; i++) {
+                if (i < typed.length && typed[i] === passage[i]) correct++;
+            }
+            var acc = Math.round((correct / passage.length) * 100);
+
+            container.remove();
+            printLines([
+                { t: 'blank' },
+                { t: 'text', v: '<span style="opacity:0.5">[ ' + songName + ' ]</span>' },
+                { t: 'text', v: wpm + ' wpm' },
+                { t: 'text', v: acc + '% accuracy' },
+                { t: 'blank' },
+            ]);
+            input.focus();
+        }
+
+        function cancel() {
+            document.removeEventListener('keydown', onKey);
+            container.remove();
+            inputRow.style.display = '';
+            printLines([{ t: 'blank' }, { t: 'text', v: 'cancelled.', dim: true }, { t: 'blank' }]);
+            input.focus();
+        }
+
+        function onKey(e) {
+            if (e.key === 'Escape') { e.preventDefault(); cancel(); return; }
+            if (e.ctrlKey || e.altKey || e.metaKey) return;
+            if (e.key === 'Tab') { e.preventDefault(); return; }
+            if (e.key.length > 1 && e.key !== 'Backspace' && e.key !== 'Enter') return;
+
+            e.preventDefault();
+
+            if (e.key === 'Backspace') {
+                if (typed.length > 0) typed = typed.slice(0, -1);
+            } else {
+                if (!startTime) startTime = Date.now();
+                var expectedChar = passage[typed.length];
+                var inputChar = (e.key === 'Enter' || (e.key === ' ' && expectedChar === '\n')) ? '\n' : e.key;
+                if (typed.length < passage.length) typed += inputChar;
+            }
+
+            updateDisplay();
+            if (typed.length >= passage.length) {
+                document.removeEventListener('keydown', onKey);
+                setTimeout(finish, 300);
+            }
+        }
+
+        document.addEventListener('keydown', onKey);
+        updateDisplay();
+    }
+
     var COMMANDS = {
 
         'help': function () {
@@ -638,6 +851,7 @@
                 { t: 'blank' },
                 { t: 'text', v: 'USAGE:&nbsp;&nbsp;&#60;command&#62; [--flag]', dim: true },
                 { t: 'blank' },
+                { t: 'hrow', cmd: 'neofetch',               desc: 'system info',           exec: 'neofetch'               },
                 { t: 'hrow', cmd: 'ls',                     desc: 'list current directory', exec: 'ls'                     },
                 { t: 'hrow', cmd: 'cd &lt;dir&gt;',         desc: 'open a folder',         exec: 'cd'                     },
                 { t: 'hrow', cmd: 'play &lt;track&gt;',     desc: '',                      exec: 'cd music'               },
@@ -646,7 +860,6 @@
                 { t: 'hrow-sub',  flag: '--socials',        desc: '',                      exec: 'fetch --socials',        last: false },
                 { t: 'hrow-sub',  flag: '--streaming',      desc: '',                      exec: 'fetch --streaming',      last: false },
                 { t: 'hrow-sub',  flag: '--upcoming-shows', desc: '',                      exec: 'fetch --upcoming-shows', last: true  },
-                { t: 'hrow', cmd: 'neofetch',               desc: '',                      exec: 'neofetch'               },
                 { t: 'hrow', cmd: 'clear',                  desc: '',                      exec: 'clear'                  },
                 { t: 'blank' },
                 { t: 'text', v: '<span style="opacity:0.6">click or type commands</span>' },
@@ -702,8 +915,9 @@
             return lines;
         },
 
-        'ls': function () { return dirListing(); },
-        'dir': function () { return dirListing(); },
+        'ls':   function () { return dirListing(); },
+        'ls -l': function () { return dosDirListing(); },
+        'dir':  function () { return dosDirListing(); },
 
         'cd': function () { return dirListing(); },
 
@@ -792,10 +1006,16 @@
         'about':     function () { return COMMANDS['cat about.txt'](); },
 
         'neofetch': function () {
+            var isMobile = window.innerWidth <= 900;
             var art = [
-                '||     || ||===== ||===== ||     ',
-                '||=====|| ||===   ||===   ||     ',
-                '||     || ||===== ||===== ||====='
+                ' /$$   /$$                     /$$      ',
+                '| $$  | $$                    | $$      ',
+                '| $$  | $$  /$$$$$$   /$$$$$$ | $$      ',
+                '| $$$$$$$$ /$$__  $$ /$$__  $$| $$      ',
+                '| $$__  $$| $$$$$$$$| $$$$$$$$| $$      ',
+                '| $$  | $$| $$_____/| $$_____/| $$      ',
+                '| $$  | $$|  $$$$$$$|  $$$$$$$| $$$$$$$$',
+                '|__/  |__/ \\_______/ \\_______/|________/'
             ].join('\n');
 
             var g = '#33ff33';
@@ -814,30 +1034,34 @@
             }).join('');
 
             var info = [
-                '<span style="color:' + g + ';font-weight:bold">heel</span><span style="' + dim + '">@</span><span style="color:' + g + ';font-weight:bold">hl-dos</span>',
+                '<span style="color:' + g + ';font-weight:bold">heel</span><span style="' + dim + '">@</span><span style="color:' + g + ';font-weight:bold">global</span>',
                 sep,
-                row('OS     ', 'HL-DOS v1.0.2023'),
-                row('Host   ', 'Welt BIOS v1.0'),
-                row('Kernel ', 'Segmentation 1.0.2023'),
-                row('Shell  ', 'PS C:\\heel&gt;'),
-                row('Uptime ', 'est. 2023'),
-                row('Members', 'adharsh · tayla · nick · andres'),
-                row('Genre  ', 'rock'),
-                row('Label  ', 'independent'),
-                row('Albums ', 'Segmentation (2023)'),
-                row('Booking', 'heelbooking@gmail.com'),
-                '',
+                row('OS      ', 'Solaris OS [Version 4.10.2026]'),
+                row('Host    ', 'Welt BIOS v1.0'),
+                row('Kernel  ', 'html · css · js'),
+                row('Terminal', 'HL-DOS.exe'),
+                row('Uptime  ', 'est. 2026'),
+                row('Users   ', 'adharsh · tayla · nick · andres'),
+                row('Locale  ', 'College Station, TX'),
+                row('Distro  ', 'independent'),
+                row('Network ', '<a href="https://www.instagram.com/heel.mp3/" target="_blank" style="color:' + g + ';text-decoration:none">@heel.mp3</a>'),
+                visitorCount ? row('Sessions', visitorCount) : null,
                 palette,
-            ].join('<br>');
+            ].filter(function(v){ return v !== null; }).join('<br>');
+
+            var layout = isMobile
+                ? '<div style="display:flex;flex-direction:column;gap:0.8em;align-items:flex-start">'
+                  + '<pre style="color:' + g + ';margin:0;line-height:1.4;flex-shrink:0;font-family:inherit;font-size:0.6em">' + art + '</pre>'
+                  + '<div style="line-height:1.6">' + info + '</div>'
+                  + '</div>'
+                : '<div style="display:flex;gap:2em;align-items:center">'
+                  + '<pre style="color:' + g + ';margin:0;line-height:1.6;flex-shrink:0;font-family:inherit">' + art + '</pre>'
+                  + '<div style="line-height:1.6">' + info + '</div>'
+                  + '</div>';
 
             return [
                 { t: 'blank' },
-                { t: 'text', v:
-                    '<div style="display:flex;gap:2em;align-items:flex-start">'
-                  + '<pre style="color:' + g + ';margin:0;line-height:1.6;flex-shrink:0;font-family:inherit">' + art + '</pre>'
-                  + '<div style="line-height:1.6">' + info + '</div>'
-                  + '</div>'
-                },
+                { t: 'text', v: layout },
                 { t: 'blank' },
             ];
         },
@@ -900,6 +1124,9 @@
         'delete system32':     function () { triggerJumpscare(); return []; },
         'format c:':           function () { triggerJumpscare(); return []; },
         'format c:/':          function () { triggerJumpscare(); return []; },
+        'shutdown':            function () { triggerJumpscare(); return []; },
+        'shutdown /s':         function () { triggerJumpscare(); return []; },
+        'shutdown -h now':     function () { triggerJumpscare(); return []; },
         'shutdown /s':         function () { triggerJumpscare(); return []; },
         'shutdown /s /t 0':    function () { triggerJumpscare(); return []; },
         'rd /s /q c:':         function () { triggerJumpscare(); return []; },
@@ -976,6 +1203,54 @@
         'fetch upcoming shows':   function () { return COMMANDS['fetch --upcoming-shows'](); },
         'fetch upcoming-shows':   function () { return COMMANDS['fetch --upcoming-shows'](); },
         'fetch -upcoming-shows':  function () { return COMMANDS['fetch --upcoming-shows'](); },
+
+        'wpm': function () {
+            var track = null;
+            if (currentTrackObj && currentTrackObj.lyricsFile) {
+                track = currentTrackObj;
+            } else if (currentTrackLabel) {
+                var lbl = currentTrackLabel.toLowerCase();
+                track = TRACKS.segmentation.find(function (t) { return t.label.toLowerCase() === lbl && t.lyricsFile; }) || null;
+            }
+            if (!track) {
+                var tracks = TRACKS.segmentation.filter(function (t) { return t.lyricsFile; });
+                track = tracks[Math.floor(Math.random() * tracks.length)];
+            }
+            var path   = 'sounds/music/segmentation/lyrics/' + track.lyricsFile;
+            printLines([{ t: 'blank' }]);
+            fetch(path)
+                .then(function (r) { return r.text(); })
+                .then(function (text) {
+                    var verses = text.trim().split(/\n\s*\n/).map(function (v) { return v.trim().replace(/\r/g, ''); }).filter(function (v) { return v.split('\n').length >= 2; });
+                    var idx     = Math.floor(Math.random() * verses.length);
+                    var passage = verses[idx];
+                    if (passage.split('\n').length < 4 && idx + 1 < verses.length) {
+                        passage = passage + '\n' + verses[idx + 1];
+                    }
+                    startTypingTest(passage, track.id);
+                })
+                .catch(function () {
+                    printLines([{ t: 'error', v: 'could not load lyrics.' }, { t: 'blank' }]);
+                });
+            return [];
+        },
+        'typetest':  function () { return COMMANDS['wpm'](); },
+        'typeracer': function () { return COMMANDS['wpm'](); },
+        'type':      function () { return COMMANDS['wpm'](); },
+        'benchmark': function () { return COMMANDS['wpm'](); },
+
+        'whoami': function () {
+            printLines([{ t: 'blank' }]);
+            fetch('https://api.ipify.org?format=json')
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    printLines([{ t: 'typewriter', v: data.ip }, { t: 'blank' }]);
+                })
+                .catch(function () {
+                    printLines([{ t: 'error', v: 'unable to resolve user.' }, { t: 'blank' }]);
+                });
+            return [];
+        },
 
         'clear': function () {
             output.innerHTML = '';
@@ -1924,6 +2199,7 @@
     document.querySelector('.title-bar').addEventListener('mousedown', function (e) {
         if (e.target.classList.contains('wbtn')) return;
         if (document.body.classList.contains('maximized')) return;
+        if (window.innerWidth <= 900) return;
 
         // Snap to fixed positioning at current visual position
         if (!windowEl.style.left) {
@@ -2374,6 +2650,7 @@
     var playerDragOffY  = 0;
     document.getElementById('player-title-bar').addEventListener('mousedown', function (e) {
         if (e.target.classList.contains('wbtn')) return;
+        if (window.innerWidth <= 900) return;
         playerDragging = true;
         playerDragOffX = e.clientX - playerWindowEl.getBoundingClientRect().left;
         playerDragOffY = e.clientY - playerWindowEl.getBoundingClientRect().top;
@@ -2535,6 +2812,7 @@
     var vlcDragging = false, vlcDragOffX = 0, vlcDragOffY = 0;
     document.getElementById('vlc-title-bar').addEventListener('mousedown', function (e) {
         if (e.target.classList.contains('wbtn')) return;
+        if (window.innerWidth <= 900) return;
         vlcDragging = true;
         vlcDragOffX = e.clientX - vlcWindowEl.getBoundingClientRect().left;
         vlcDragOffY = e.clientY - vlcWindowEl.getBoundingClientRect().top;
@@ -3056,6 +3334,7 @@
     var merchDragging = false, merchDragOffX = 0, merchDragOffY = 0;
     document.getElementById('merch-title-bar').addEventListener('mousedown', function (e) {
         if (e.target.classList.contains('wbtn')) return;
+        if (window.innerWidth <= 900) return;
         vlcBringToFront('merch');
         merchDragging = true;
         merchDragOffX = e.clientX - merchWindowEl.getBoundingClientRect().left;
@@ -3163,6 +3442,7 @@
     });
 
     document.getElementById('explorer-title-bar').addEventListener('mousedown', function (e) {
+        if (window.innerWidth <= 900) return;
         vlcBringToFront('explorer');
         explorerDragging = true;
         explorerDragOffX = e.clientX - explorerWindowEl.getBoundingClientRect().left;
@@ -3420,15 +3700,23 @@
         currentAudio.muted  = masterMuted;
         audioPaused  = false;
         currentTrackLabel = found.label;
+        currentTrackObj   = found;
         currentAudio.play().catch(function () {});
         updateNowPlaying(found.label);
         currentAudio.addEventListener('ended', function () {
             currentAudio = null;
             audioPaused  = false;
             currentTrackLabel = null;
+            currentTrackObj   = null;
             updateNowPlaying(null);
         });
-        return [{ t: 'blank' }, { t: 'text', v: 'now playing: ' + found.label }, { t: 'blank' }];
+        var lines = [{ t: 'blank' }, { t: 'text', v: 'now playing: ' + found.label }];
+        if (found.lyricsFile) {
+            lines.push({ t: 'blank' });
+            lines.push({ t: 'text', v: '<span style="opacity:0.4">try: lyrics  or  wpm</span>' });
+        }
+        lines.push({ t: 'blank' });
+        return lines;
     }
 
     function typeAndExecute(cmd, absolute) {
@@ -3762,6 +4050,7 @@
     var bkDragging = false, bkDragOffX = 0, bkDragOffY = 0;
     document.getElementById('game-title-bar').addEventListener('mousedown', function (e) {
         if (e.target.classList.contains('wbtn')) return;
+        if (window.innerWidth <= 900) return;
         vlcBringToFront('game');
         bkDragging = true;
         gameWindowEl.style.transform = '';
@@ -3921,6 +4210,7 @@
     var photoDragging = false, photoDragOffX = 0, photoDragOffY = 0;
     document.getElementById('photo-title-bar').addEventListener('mousedown', function (e) {
         if (e.target.classList.contains('wbtn')) return;
+        if (window.innerWidth <= 900) return;
         vlcBringToFront('photo');
         photoDragging = true;
         photoWindowEl.style.transform = '';
@@ -4183,6 +4473,7 @@
     var mineDragging = false, mineDragOffX = 0, mineDragOffY = 0;
     document.getElementById('mine-title-bar').addEventListener('mousedown', function (e) {
         if (e.target.classList.contains('wbtn')) return;
+        if (window.innerWidth <= 900) return;
         vlcBringToFront('mine');
         mineDragging = true;
         mineWindowEl.style.transform = '';
@@ -4378,7 +4669,7 @@
             startMenu.classList.remove('open');
             startBtn.classList.remove('open');
             if (cmd === 'shutdown') { triggerJumpscare(); return; }
-            ensureTerminalVisible();
+            if (cmd !== 'breakout' && cmd !== 'minesweeper') ensureTerminalVisible();
             skipToPrompt();
             execute(cmd);
             focusInput();
