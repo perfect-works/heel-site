@@ -1259,6 +1259,7 @@
 
         'breakout':     function () { openBreakout();     return []; },
         'minesweeper':  function () { openMinesweeper(); return []; },
+        'snake':        function () { openSnake(); return []; },
 
         'segmentation tracklist': function () {
             return [
@@ -3645,7 +3646,8 @@
             explorer:  explorerWindowEl,
             game:      document.getElementById('game-window'),
             mine:      document.getElementById('mine-window'),
-            photo:     document.getElementById('photo-window')
+            photo:     document.getElementById('photo-window'),
+            snake:     document.getElementById('snake-window')
         };
         if (map[focused]) map[focused].style.zIndex = zTop;
     }
@@ -4494,6 +4496,173 @@
     });
     mineWindowEl.addEventListener('mousedown', function () { vlcBringToFront('mine'); });
 
+/* ─── snake ───────────────────────────────────────────── */
+    var snakeWindowEl = document.getElementById('snake-window');
+    var snakeOpen     = false;
+    var snakeTaskBtn  = null;
+    var snakeIv       = null;
+
+    var CELL = 15;
+    var COLS = 20;
+    var ROWS = 20;
+
+    var snakeBody, snakeDir, snakeNext, snakeFood, snakeScore, snakeAlive, snakeStarted;
+
+    function snakeInit() {
+        snakeBody    = [{ x: 10, y: 10 }, { x: 9, y: 10 }, { x: 8, y: 10 }];
+        snakeDir     = { x: 0, y: 0 };
+        snakeNext    = { x: 0, y: 0 };
+        snakeFood    = snakeRandFood();
+        snakeScore   = 0;
+        snakeAlive   = true;
+        snakeStarted = false;
+        document.getElementById('snake-score').textContent = '0';
+        document.getElementById('snake-status').textContent = 'press any arrow to start';
+        snakeDraw();
+    }
+
+    function snakeRandFood() {
+        var pos;
+        do {
+            pos = { x: Math.floor(Math.random() * COLS), y: Math.floor(Math.random() * ROWS) };
+        } while (snakeBody.some(function (s) { return s.x === pos.x && s.y === pos.y; }));
+        return pos;
+    }
+
+    function snakeTick() {
+        if (!snakeAlive || !snakeStarted) return;
+        snakeDir = snakeNext;
+        var head = { x: snakeBody[0].x + snakeDir.x, y: snakeBody[0].y + snakeDir.y };
+
+        if (head.x < 0 || head.x >= COLS || head.y < 0 || head.y >= ROWS ||
+            snakeBody.some(function (s) { return s.x === head.x && s.y === head.y; })) {
+            snakeAlive = false;
+            document.getElementById('snake-status').textContent = 'game over — press r to restart';
+            snakeDraw();
+            return;
+        }
+
+        snakeBody.unshift(head);
+        if (head.x === snakeFood.x && head.y === snakeFood.y) {
+            snakeScore++;
+            document.getElementById('snake-score').textContent = snakeScore;
+            snakeFood = snakeRandFood();
+        } else {
+            snakeBody.pop();
+        }
+        snakeDraw();
+    }
+
+    function snakeDraw() {
+        var canvas = document.getElementById('snake-canvas');
+        var ctx    = canvas.getContext('2d');
+        ctx.fillStyle = '#000';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // food
+        ctx.fillStyle = '#ff4444';
+        ctx.fillRect(snakeFood.x * CELL + 1, snakeFood.y * CELL + 1, CELL - 2, CELL - 2);
+
+        // snake
+        snakeBody.forEach(function (s, i) {
+            ctx.fillStyle = i === 0 ? '#33ff33' : '#1a9933';
+            ctx.fillRect(s.x * CELL + 1, s.y * CELL + 1, CELL - 2, CELL - 2);
+        });
+
+        // game over overlay
+        if (!snakeAlive) {
+            ctx.fillStyle = 'rgba(0,0,0,0.55)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#33ff33';
+            ctx.font = '14px monospace';
+            ctx.textAlign = 'center';
+            ctx.fillText('GAME OVER', canvas.width / 2, canvas.height / 2 - 8);
+            ctx.fillText('score: ' + snakeScore, canvas.width / 2, canvas.height / 2 + 12);
+        }
+    }
+
+    function snakeHandleKey(e) {
+        if (!snakeOpen) return;
+        var map = { ArrowUp: {x:0,y:-1}, ArrowDown: {x:0,y:1}, ArrowLeft: {x:-1,y:0}, ArrowRight: {x:1,y:0} };
+        if (e.key === 'r' || e.key === 'R') { snakeInit(); return; }
+        if (!map[e.key]) return;
+        e.preventDefault();
+        var d = map[e.key];
+        // prevent reversing
+        if (d.x === -snakeDir.x && d.y === -snakeDir.y && snakeStarted) return;
+        snakeNext = d;
+        if (!snakeStarted) {
+            snakeStarted = true;
+            snakeDir = d;
+            document.getElementById('snake-status').textContent = 'score';
+        }
+    }
+
+    function openSnake() {
+        if (!snakeOpen) {
+            snakeWindowEl.style.left = '120px';
+            snakeWindowEl.style.top  = Math.max(20, Math.floor((window.innerHeight - 360) / 2)) + 'px';
+            snakeWindowEl.style.display = 'block';
+            snakeOpen = true;
+            snakeTaskBtn = document.createElement('button');
+            snakeTaskBtn.className   = 'task-btn active';
+            snakeTaskBtn.textContent = 'Snake';
+            snakeTaskBtn.addEventListener('click', function () {
+                var min = snakeWindowEl.classList.contains('minimized');
+                snakeWindowEl.classList.toggle('minimized', !min);
+                snakeTaskBtn.classList.toggle('active', min);
+            });
+            document.getElementById('taskbar-tasks').appendChild(snakeTaskBtn);
+            snakeInit();
+            snakeIv = setInterval(snakeTick, 130);
+        } else {
+            if (snakeWindowEl.classList.contains('minimized')) {
+                snakeWindowEl.classList.remove('minimized');
+                snakeTaskBtn.classList.add('active');
+            }
+        }
+        vlcBringToFront('snake');
+    }
+
+    document.getElementById('snake-min-btn').addEventListener('click', function () {
+        var min = snakeWindowEl.classList.contains('minimized');
+        snakeWindowEl.classList.toggle('minimized', !min);
+        if (snakeTaskBtn) snakeTaskBtn.classList.toggle('active', min);
+    });
+
+    document.getElementById('snake-close-btn').addEventListener('click', function () {
+        clearInterval(snakeIv); snakeIv = null;
+        snakeOpen = false;
+        snakeWindowEl.style.display = 'none';
+        if (snakeTaskBtn) { snakeTaskBtn.parentNode.removeChild(snakeTaskBtn); snakeTaskBtn = null; }
+    });
+
+    document.addEventListener('keydown', snakeHandleKey);
+
+    var snakeDragging = false, snakeDragOffX = 0, snakeDragOffY = 0;
+    document.getElementById('snake-title-bar').addEventListener('mousedown', function (e) {
+        if (e.target.classList.contains('wbtn')) return;
+        if (window.innerWidth <= 900) return;
+        vlcBringToFront('snake');
+        snakeDragging = true;
+        snakeWindowEl.style.transform = '';
+        var rect = snakeWindowEl.getBoundingClientRect();
+        snakeDragOffX = e.clientX - rect.left;
+        snakeDragOffY = e.clientY - rect.top;
+        document.body.classList.add('dragging');
+    });
+    document.addEventListener('mousemove', function (e) {
+        if (!snakeDragging) return;
+        snakeWindowEl.style.left = Math.max(0, Math.min(e.clientX - snakeDragOffX, window.innerWidth  - snakeWindowEl.offsetWidth))  + 'px';
+        snakeWindowEl.style.top  = Math.max(0, Math.min(e.clientY - snakeDragOffY, window.innerHeight - snakeWindowEl.offsetHeight)) + 'px';
+    });
+    document.addEventListener('mouseup', function () {
+        if (!snakeDragging) return;
+        snakeDragging = false;
+        document.body.classList.remove('dragging');
+    });
+    snakeWindowEl.addEventListener('mousedown', function () { vlcBringToFront('snake'); });
+
 /* ─── taskbar ─────────────────────────────────────────── */
     function ensureTerminalVisible() {
         if (windowEl.style.display === 'none') {
@@ -4669,7 +4838,7 @@
             startMenu.classList.remove('open');
             startBtn.classList.remove('open');
             if (cmd === 'shutdown') { triggerJumpscare(); return; }
-            if (cmd !== 'breakout' && cmd !== 'minesweeper') ensureTerminalVisible();
+            if (cmd !== 'breakout' && cmd !== 'minesweeper' && cmd !== 'snake') ensureTerminalVisible();
             skipToPrompt();
             execute(cmd);
             focusInput();

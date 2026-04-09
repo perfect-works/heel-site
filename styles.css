@@ -2052,6 +2052,28 @@ body {
 }
 
 /* ── minesweeper window ── */
+.snake-window {
+    position: fixed;
+    display: none;
+    user-select: none;
+    width: auto;
+}
+.snake-window.minimized .snake-hud,
+.snake-window.minimized #snake-canvas { display: none; }
+.snake-hud {
+    background: #c0c0c0;
+    padding: 4px 8px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    font-family: 'W95FA', monospace;
+    border-bottom: 1px solid #808080;
+}
+#snake-canvas {
+    display: block;
+    background: #000;
+}
+
 .mine-window {
     position: fixed;
     display: none;

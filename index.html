@@ -62,6 +62,7 @@
         <button class="start-item" data-cmd="fetch --socials"><span class="si-icon"><svg width="14" height="14" viewBox="0 0 14 14"><circle cx="7" cy="7" r="5.5" stroke="currentColor" fill="none" stroke-width="1.3"/><ellipse cx="7" cy="7" rx="2.5" ry="5.5" stroke="currentColor" fill="none" stroke-width="1.3"/><line x1="1.5" y1="5" x2="12.5" y2="5" stroke="currentColor" stroke-width="1.1"/><line x1="1.5" y1="9" x2="12.5" y2="9" stroke="currentColor" stroke-width="1.1"/></svg></span>Socials</button>
         <hr class="start-sep">
         <button class="start-item" data-cmd="breakout"><span class="si-icon"><svg width="14" height="14" viewBox="0 0 14 14"><rect x="1" y="1" width="4" height="3" rx="0.5" fill="currentColor" opacity="0.9"/><rect x="6" y="1" width="4" height="3" rx="0.5" fill="currentColor" opacity="0.7"/><rect x="1" y="5" width="4" height="3" rx="0.5" fill="currentColor" opacity="0.5"/><rect x="6" y="5" width="4" height="3" rx="0.5" fill="currentColor" opacity="0.3"/><rect x="3" y="11" width="5" height="2" rx="1" fill="currentColor"/></svg></span>Breakout</button>
+        <button class="start-item" data-cmd="snake"><span class="si-icon"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 2 L6 2 L6 6 L10 6 L10 10 L6 10 L6 8 L4 8 L4 6 L2 6 Z" stroke="currentColor" fill="none" stroke-width="1.3" stroke-linejoin="round"/><circle cx="11.5" cy="4" r="1.2" fill="currentColor"/></svg></span>Snake</button>
         <button class="start-item" data-cmd="minesweeper"><span class="si-icon"><svg width="14" height="14" viewBox="0 0 14 14"><circle cx="7" cy="8.5" r="4" fill="currentColor"/><line x1="7" y1="4.5" x2="9.5" y2="2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="10" cy="1.5" r="1.2" fill="currentColor" opacity="0.7"/><line x1="3" y1="8.5" x2="1" y2="8.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="11" y1="8.5" x2="13" y2="8.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="7" y1="12.5" x2="7" y2="14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="3.5" y1="11.5" x2="2.5" y2="12.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="10.5" y1="11.5" x2="11.5" y2="12.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>Minesweeper</button>
         <button class="start-item" data-cmd="wpm"><span class="si-icon"><svg width="14" height="14" viewBox="0 0 14 14"><rect x="1" y="3.5" width="12" height="7" rx="1.2" stroke="currentColor" fill="none" stroke-width="1.3"/><rect x="2.5" y="5.5" width="2" height="1.5" rx="0.4" fill="currentColor"/><rect x="6" y="5.5" width="2" height="1.5" rx="0.4" fill="currentColor"/><rect x="9.5" y="5.5" width="2" height="1.5" rx="0.4" fill="currentColor"/><rect x="4" y="8" width="6" height="1.5" rx="0.4" fill="currentColor"/></svg></span>Typing Test</button>
         <div class="start-spacer"></div>
@@ -223,6 +224,21 @@
         </div>
         <div class="mine-grid" id="mine-grid"></div>
     </div>
+</div>
+
+<div id="snake-window" class="window snake-window" style="display:none">
+    <div class="title-bar" id="snake-title-bar">
+        <span class="title-bar-text">Snake</span>
+        <div class="title-bar-controls">
+            <span class="wbtn" id="snake-min-btn">_</span>
+            <span class="wbtn" id="snake-close-btn">&#215;</span>
+        </div>
+    </div>
+    <div class="snake-hud">
+        <span>SCORE:&nbsp;<span id="snake-score">0</span></span>
+        <span id="snake-status">press any arrow to start</span>
+    </div>
+    <canvas id="snake-canvas" width="300" height="300"></canvas>
 </div>
 
 <div id="jumpscare" class="window">
