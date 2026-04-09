@@ -1109,12 +1109,14 @@
                 fetch('sounds/music/unreleased/segmentation/readme.txt')
                     .then(function (r) { return r.text(); })
                     .then(function (text) {
-                        var lines = [{ t: 'blank' }];
-                        text.trim().split('\n').forEach(function (line) {
-                            lines.push({ t: 'typewriter', v: line || ' ' });
+                        var lineDescs = text.trim().split('\n').map(function (line) {
+                            return { t: 'typewriter', v: line || ' ' };
                         });
-                        lines.push({ t: 'blank' });
-                        printLines(lines);
+                        lineDescs.push({ t: 'blank' });
+                        (function printNext(i) {
+                            if (i >= lineDescs.length) return;
+                            printLines([lineDescs[i]], function () { printNext(i + 1); });
+                        }(0));
                     })
                     .catch(function () {
                         printLines([{ t: 'error', v: 'could not load readme.' }, { t: 'blank' }]);
