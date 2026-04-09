@@ -864,6 +864,7 @@
                 { t: 'hrow-sub',  flag: '--streaming',      desc: '',                      exec: 'fetch --streaming',      last: false },
                 { t: 'hrow-sub',  flag: '--upcoming-shows', desc: '',                      exec: 'fetch --upcoming-shows', last: true  },
                 { t: 'hrow', cmd: 'clear',                  desc: '',                      exec: 'clear'                  },
+                { t: 'hrow', cmd: 'reset',                  desc: 'clear cache + refresh', exec: 'reset'                  },
                 { t: 'blank' },
                 { t: 'text', v: '<span style="opacity:0.6">click or type commands</span>' },
                 { t: 'blank' },
@@ -1277,6 +1278,12 @@
 
         'clear': function () {
             output.innerHTML = '';
+            return [];
+        },
+
+        'reset': function () {
+            localStorage.clear();
+            location.reload();
             return [];
         },
 
@@ -4877,6 +4884,251 @@
     document.addEventListener('click', function () {
         startMenu.classList.remove('open');
         startBtn.classList.remove('open');
+    });
+
+    /* ─── desktop icon grid + rubber-band + drag ─────────── */
+    var rubberbandEl = document.getElementById('rubberband');
+
+    /* grid constants */
+    var CELL_W  = 80;
+    var CELL_H  = 82;
+    var GRID_PAD = 8;
+
+    /* occupancy map: "col,row" -> el */
+    var gridOccupied = {};
+    var iconPosMap   = new Map();   /* el -> {col, row} */
+    var selectedIcons = new Set();
+
+    function gridKey(c, r) { return c + ',' + r; }
+    function gridCols()    { return Math.floor((window.innerWidth  - GRID_PAD * 2) / CELL_W); }
+    function gridRows()    { return Math.floor((window.innerHeight - 28 - GRID_PAD * 2) / CELL_H); }
+
+    function cellToPx(c, r) {
+        return { x: GRID_PAD + c * CELL_W, y: GRID_PAD + r * CELL_H };
+    }
+    function pxToCell(x, y) {
+        return {
+            col: Math.round((x - GRID_PAD) / CELL_W),
+            row: Math.round((y - GRID_PAD) / CELL_H)
+        };
+    }
+    function clampCell(c, r) {
+        return {
+            col: Math.max(0, Math.min(c, gridCols() - 1)),
+            row: Math.max(0, Math.min(r, gridRows() - 1))
+        };
+    }
+    function cellFree(c, r) { return !gridOccupied[gridKey(c, r)]; }
+
+    /* BFS outward spiral to find nearest free cell */
+    function nearestFree(c, r) {
+        if (cellFree(c, r)) return { col: c, row: r };
+        var cols = gridCols(), rows = gridRows();
+        for (var d = 1; d < cols + rows; d++) {
+            for (var dc = -d; dc <= d; dc++) {
+                for (var dr = -d; dr <= d; dr++) {
+                    if (Math.abs(dc) !== d && Math.abs(dr) !== d) continue;
+                    var nc = c + dc, nr = r + dr;
+                    if (nc < 0 || nr < 0 || nc >= cols || nr >= rows) continue;
+                    if (cellFree(nc, nr)) return { col: nc, row: nr };
+                }
+            }
+        }
+        return { col: c, row: r };
+    }
+
+    function placeAt(el, c, r) {
+        var old = iconPosMap.get(el);
+        if (old) delete gridOccupied[gridKey(old.col, old.row)];
+        iconPosMap.set(el, { col: c, row: r });
+        gridOccupied[gridKey(c, r)] = el;
+        var px = cellToPx(c, r);
+        el.style.left = px.x + 'px';
+        el.style.top  = px.y + 'px';
+    }
+
+    function selectIcon(el) {
+        selectedIcons.add(el);
+        el.classList.add('selected');
+    }
+    function deselectAll() {
+        selectedIcons.forEach(function (el) { el.classList.remove('selected'); });
+        selectedIcons.clear();
+    }
+
+    function iconKey(el) { return el.id || ('dir-' + el.dataset.dir); }
+
+    function saveLayout() {
+        var data = {};
+        desktopIconsEl.querySelectorAll('.desktop-icon').forEach(function (el) {
+            var pos = iconPosMap.get(el);
+            if (pos) data[iconKey(el)] = { col: pos.col, row: pos.row };
+        });
+        localStorage.setItem('hl_icon_layout', JSON.stringify(data));
+    }
+
+    /* place all icons on desktop — restore saved layout if present */
+    if (window.innerWidth > 900) {
+        var savedLayout = {};
+        try { savedLayout = JSON.parse(localStorage.getItem('hl_icon_layout') || '{}'); } catch (e) {}
+        var icons = Array.from(desktopIconsEl.querySelectorAll('.desktop-icon'));
+        /* first pass: place icons with a saved position */
+        icons.forEach(function (el) {
+            var saved = savedLayout[iconKey(el)];
+            if (saved) placeAt(el, saved.col, saved.row);
+        });
+        /* second pass: place remaining icons in column 0 */
+        var fallbackRow = 0;
+        icons.forEach(function (el) {
+            if (iconPosMap.has(el)) return;
+            while (!cellFree(0, fallbackRow)) fallbackRow++;
+            placeAt(el, 0, fallbackRow++);
+        });
+    }
+
+    /* ── icon dragging ── */
+    var iconDragging  = false;
+    var iconAnchor    = null;
+    var iconDragOffX  = 0, iconDragOffY  = 0;
+    var iconDragBaseX = 0, iconDragBaseY = 0;
+    var iconHasMoved  = false;
+    var iconStartPos  = new Map();  /* el -> {col, row} at drag start */
+
+    desktopIconsEl.addEventListener('mousedown', function (e) {
+        if (e.button !== 0 || window.innerWidth <= 900) return;
+        var icon = e.target.closest('.desktop-icon');
+        if (!icon) return;
+        e.stopPropagation();
+
+        if (!selectedIcons.has(icon)) {
+            if (!e.shiftKey) deselectAll();
+            selectIcon(icon);
+        }
+
+        iconDragging  = true;
+        iconHasMoved  = false;
+        iconAnchor    = icon;
+        iconDragBaseX = e.clientX;
+        iconDragBaseY = e.clientY;
+        var rect = icon.getBoundingClientRect();
+        iconDragOffX = e.clientX - rect.left;
+        iconDragOffY = e.clientY - rect.top;
+
+        iconStartPos.clear();
+        selectedIcons.forEach(function (el) {
+            var pos = iconPosMap.get(el);
+            if (pos) iconStartPos.set(el, { col: pos.col, row: pos.row });
+            el.classList.add('icon-dragging');
+        });
+        document.body.classList.add('rband');
+    });
+
+    document.addEventListener('mousemove', function (e) {
+        if (!iconDragging) return;
+        if (!iconHasMoved) {
+            if (Math.abs(e.clientX - iconDragBaseX) + Math.abs(e.clientY - iconDragBaseY) < 6) return;
+            iconHasMoved = true;
+        }
+
+        var ax = e.clientX - iconDragOffX;
+        var ay = e.clientY - iconDragOffY;
+        iconAnchor.style.left = ax + 'px';
+        iconAnchor.style.top  = ay + 'px';
+
+        var aStart = iconStartPos.get(iconAnchor);
+        if (!aStart) return;
+        var aStartPx = cellToPx(aStart.col, aStart.row);
+        var dx = ax - aStartPx.x;
+        var dy = ay - aStartPx.y;
+
+        selectedIcons.forEach(function (el) {
+            if (el === iconAnchor) return;
+            var sp = iconStartPos.get(el);
+            if (!sp) return;
+            var spx = cellToPx(sp.col, sp.row);
+            el.style.left = (spx.x + dx) + 'px';
+            el.style.top  = (spx.y + dy) + 'px';
+        });
+    });
+
+    document.addEventListener('mouseup', function () {
+        if (!iconDragging) return;
+        iconDragging = false;
+        document.body.classList.remove('rband');
+        selectedIcons.forEach(function (el) { el.classList.remove('icon-dragging'); });
+
+        if (!iconHasMoved) return; /* click only — stay in place */
+
+        /* compute grid delta from anchor */
+        var ax = parseFloat(iconAnchor.style.left);
+        var ay = parseFloat(iconAnchor.style.top);
+        var aStart = iconStartPos.get(iconAnchor);
+        if (!aStart) return;
+        var targetCell = clampCell(pxToCell(ax, ay).col, pxToCell(ax, ay).row);
+        var dCol = targetCell.col - aStart.col;
+        var dRow = targetCell.row - aStart.row;
+
+        /* remove all dragged icons from occupancy so they don't block each other */
+        selectedIcons.forEach(function (el) {
+            var pos = iconPosMap.get(el);
+            if (pos) delete gridOccupied[gridKey(pos.col, pos.row)];
+            iconPosMap.delete(el);
+        });
+
+        /* place each at nearest free cell to its target */
+        selectedIcons.forEach(function (el) {
+            var sp = iconStartPos.get(el);
+            if (!sp) return;
+            var tc = clampCell(sp.col + dCol, sp.row + dRow);
+            var free = nearestFree(tc.col, tc.row);
+            placeAt(el, free.col, free.row);
+        });
+        saveLayout();
+    });
+
+    /* ── rubber-band ── */
+    var rbActive  = false;
+    var rbOriginX = 0;
+    var rbOriginY = 0;
+    var BLOCKED   = ['#taskbar', '#start-menu', '#jumpscare', '.window', '.desktop-icon'];
+
+    document.body.addEventListener('mousedown', function (e) {
+        if (e.button !== 0) return;
+        if (BLOCKED.some(function (sel) { return e.target.closest(sel); })) return;
+        deselectAll();
+        rbActive  = true;
+        rbOriginX = e.clientX;
+        rbOriginY = e.clientY;
+        rubberbandEl.style.cssText = 'display:block;left:' + rbOriginX + 'px;top:' + rbOriginY + 'px;width:0;height:0';
+        document.body.classList.add('rband');
+    });
+
+    document.addEventListener('mousemove', function (e) {
+        if (!rbActive) return;
+        var x = Math.min(e.clientX, rbOriginX);
+        var y = Math.min(e.clientY, rbOriginY);
+        var w = Math.abs(e.clientX - rbOriginX);
+        var h = Math.abs(e.clientY - rbOriginY);
+        rubberbandEl.style.left   = x + 'px';
+        rubberbandEl.style.top    = y + 'px';
+        rubberbandEl.style.width  = w + 'px';
+        rubberbandEl.style.height = h + 'px';
+        /* live highlight icons that intersect the band */
+        var rb = rubberbandEl.getBoundingClientRect();
+        deselectAll();
+        desktopIconsEl.querySelectorAll('.desktop-icon').forEach(function (icon) {
+            var r = icon.getBoundingClientRect();
+            if (r.left < rb.right && r.right > rb.left && r.top < rb.bottom && r.bottom > rb.top) {
+                selectIcon(icon);
+            }
+        });
+    });
+
+    document.addEventListener('mouseup', function () {
+        if (!rbActive) return;
+        rbActive = false;
+        rubberbandEl.style.display = 'none';
+        document.body.classList.remove('rband');
     });
 
     startMenu.addEventListener('click', function (e) { e.stopPropagation(); });
