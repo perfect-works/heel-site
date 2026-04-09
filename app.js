@@ -4890,9 +4890,10 @@
     var rubberbandEl = document.getElementById('rubberband');
 
     /* grid constants */
-    var CELL_W  = 80;
-    var CELL_H  = 82;
-    var GRID_PAD = 8;
+    var CELL_W   = 72;
+    var CELL_H   = 65;   /* matches original: ~57px icon height + 8px gap */
+    var GRID_PAD_X = 16; /* matches original left: 16px */
+    var GRID_PAD_Y = 40; /* matches original top: 40px  */
 
     /* occupancy map: "col,row" -> el */
     var gridOccupied = {};
@@ -4900,16 +4901,16 @@
     var selectedIcons = new Set();
 
     function gridKey(c, r) { return c + ',' + r; }
-    function gridCols()    { return Math.floor((window.innerWidth  - GRID_PAD * 2) / CELL_W); }
-    function gridRows()    { return Math.floor((window.innerHeight - 28 - GRID_PAD * 2) / CELL_H); }
+    function gridCols()    { return Math.floor((window.innerWidth  - GRID_PAD_X * 2) / CELL_W); }
+    function gridRows()    { return Math.floor((window.innerHeight - 28 - GRID_PAD_Y - GRID_PAD_X) / CELL_H); }
 
     function cellToPx(c, r) {
-        return { x: GRID_PAD + c * CELL_W, y: GRID_PAD + r * CELL_H };
+        return { x: GRID_PAD_X + c * CELL_W, y: GRID_PAD_Y + r * CELL_H };
     }
     function pxToCell(x, y) {
         return {
-            col: Math.round((x - GRID_PAD) / CELL_W),
-            row: Math.round((y - GRID_PAD) / CELL_H)
+            col: Math.round((x - GRID_PAD_X) / CELL_W),
+            row: Math.round((y - GRID_PAD_Y) / CELL_H)
         };
     }
     function clampCell(c, r) {
