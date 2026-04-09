@@ -61,6 +61,7 @@
 
     var currentTrackLabel   = null;
     var currentTrackObj     = null;
+    var manifestLoaded      = false;
     var playerTrackList     = [];
     var playerTrackIndex    = -1;
     var playerCurrentAlbum  = 'segmentation';
@@ -155,6 +156,7 @@
             }
             TRACKS.sgmt_demos  = toTracks(data.sgmt_demos  || [], 'segmentation');
             TRACKS.heel2_demos = toTracks(data.heel2_demos || [], 'heel2');
+            manifestLoaded = true;
         })
         .catch(function () { /* manifest unavailable, demo lists stay empty */ });
 
@@ -2424,6 +2426,14 @@
     }
 
     function playerBuildPlaylist() {
+        if (playerCurrentAlbum !== 'segmentation' && !manifestLoaded) {
+            var iv = setInterval(function () {
+                if (!manifestLoaded) return;
+                clearInterval(iv);
+                playerBuildPlaylist();
+            }, 100);
+            return;
+        }
         playerPlaylist.innerHTML = '';
         if (playerCurrentAlbum === 'segmentation') {
             playerTrackList = TRACKS.segmentation.slice();
