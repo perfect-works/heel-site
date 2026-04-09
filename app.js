@@ -669,7 +669,6 @@
         { t: 'detect', v: '&nbsp;&nbsp;C:\\ BITE.HDD', detectDelay: 1200, maxDots: 7 },
         { t: 'blank' },
         { t: 'text', v: 'LOADING DRIVERS:' },
-        { t: 'driver', label: 'DISTORTION.SYS', driverDelay: 700, maxDots: 5 },
         { t: 'driver', label: 'REVERB.DRV',     driverDelay: 550, maxDots: 4 },
         { t: 'driver', label: 'FEEDBACK.VXD',   driverDelay: 600, maxDots: 4 },
         { t: 'blank' },
