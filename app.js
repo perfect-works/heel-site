@@ -64,6 +64,7 @@
     var manifestLoaded      = false;
     var playerTrackList     = [];
     var playerTrackIndex    = -1;
+    var playerCursorIndex   = -1;
     var playerCurrentAlbum  = 'segmentation';
     var playerUpdateIv      = null;
     var playerMinimized     = false;
@@ -2468,6 +2469,7 @@
             }, 100);
             return;
         }
+        playerCursorIndex = playerTrackIndex >= 0 ? playerTrackIndex : 0;
         playerPlaylist.innerHTML = '';
         if (playerCurrentAlbum === 'segmentation') {
             playerTrackList = TRACKS.segmentation.slice();
@@ -2499,7 +2501,9 @@
         var items = playerPlaylist.querySelectorAll('.player-track-item');
         items.forEach(function (el, i) {
             var isPlaying = i === playerTrackIndex && !!currentAudio;
+            var isCursor  = i === playerCursorIndex && !isPlaying;
             el.classList.toggle('playing', isPlaying);
+            el.classList.toggle('cursor',  isCursor);
         });
     }
 
@@ -2513,6 +2517,7 @@
         audioPaused  = false;
         currentTrackLabel = tr.label;
         playerTrackIndex  = i;
+        playerCursorIndex = i;
         currentAudio.play().catch(function () {});
         updateNowPlaying(tr.label);
         currentAudio.addEventListener('ended', function () {
@@ -2553,10 +2558,12 @@
         playerWindowEl.style.top     = initialTop  + 'px';
         playerWindowEl.style.display = 'block';
         vlcBringToFront('player');
+        playerWindowEl.focus();
         playerMinimized = false;
         if (trackId) {
             var isDemos = TRACKS.sgmt_demos.concat(TRACKS.heel2_demos).some(function (t) { return t.id === trackId; });
             var album = isDemos ? 'demos' : 'segmentation';
+            if (album !== playerCurrentAlbum) { playerTrackIndex = -1; }
             playerCurrentAlbum = album;
             document.getElementById('player-tabs').querySelectorAll('.player-tab').forEach(function (t) {
                 t.classList.toggle('active', t.dataset.album === album);
@@ -2687,6 +2694,42 @@
             t.classList.toggle('active', t === tab);
         });
         playerBuildPlaylist();
+    });
+
+    /* player keyboard navigation */
+    var playerAlbumOrder = ['segmentation', 'demos'];
+    playerWindowEl.addEventListener('keydown', function (e) {
+        if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+            e.preventDefault();
+            var cur  = playerAlbumOrder.indexOf(playerCurrentAlbum);
+            var next = e.key === 'ArrowRight' ? cur + 1 : cur - 1;
+            if (next < 0 || next >= playerAlbumOrder.length) return;
+            var album = playerAlbumOrder[next];
+            playerCurrentAlbum = album;
+            playerTrackIndex   = -1;
+            document.getElementById('player-tabs').querySelectorAll('.player-tab').forEach(function (t) {
+                t.classList.toggle('active', t.dataset.album === album);
+            });
+            playerBuildPlaylist();
+        } else if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+            e.preventDefault();
+            if (!playerTrackList.length) return;
+            var idx = playerCursorIndex >= 0 ? playerCursorIndex : (playerTrackIndex >= 0 ? playerTrackIndex : 0);
+            idx = e.key === 'ArrowDown'
+                ? Math.min(idx + 1, playerTrackList.length - 1)
+                : Math.max(idx - 1, 0);
+            playerCursorIndex = idx;
+            playerHighlightCurrent();
+            var items = playerPlaylist.querySelectorAll('.player-track-item');
+            if (items[idx]) items[idx].scrollIntoView({ block: 'nearest' });
+        } else if (e.key === ' ' || e.key === 'Enter') {
+            e.preventDefault();
+            if (playerCursorIndex >= 0 && playerTrackList[playerCursorIndex]) {
+                playerPlayIndex(playerCursorIndex);
+            } else {
+                document.getElementById('player-play').click();
+            }
+        }
     });
 
     /* player window dragging */
@@ -3692,7 +3735,9 @@
 
     /* ─── window focus / z-index ──────────────────────────── */
     var zTop = 25;
+    var focusedWindow = 'terminal';
     function vlcBringToFront(focused) {
+        focusedWindow = focused;
         zTop++;
         var map = {
             terminal:  windowEl,
@@ -3708,7 +3753,7 @@
         if (map[focused]) map[focused].style.zIndex = zTop;
     }
     windowEl.addEventListener('mousedown',       function () { vlcBringToFront('terminal'); });
-    playerWindowEl.addEventListener('mousedown', function () { vlcBringToFront('player'); });
+    playerWindowEl.addEventListener('mousedown', function () { vlcBringToFront('player'); playerWindowEl.focus(); });
     vlcWindowEl.addEventListener('mousedown',    function () { vlcBringToFront('vlc'); });
     merchWindowEl.addEventListener('mousedown',  function () { vlcBringToFront('merch'); });
     explorerWindowEl.addEventListener('mousedown', function () { vlcBringToFront('explorer'); });
@@ -3761,6 +3806,12 @@
         currentTrackObj   = found;
         currentAudio.play().catch(function () {});
         updateNowPlaying(found.label);
+        var foundIdx = playerTrackList.findIndex(function (t) { return t.file === found.file; });
+        if (foundIdx !== -1) {
+            playerTrackIndex  = foundIdx;
+            playerCursorIndex = foundIdx;
+            playerHighlightCurrent();
+        }
         currentAudio.addEventListener('ended', function () {
             currentAudio = null;
             audioPaused  = false;

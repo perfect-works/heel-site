@@ -974,6 +974,7 @@ body.rband, body.rband * {
     display: none;
     z-index: 25;
     user-select: none;
+    outline: none;
 }
 
 .player-body {
@@ -1114,10 +1115,19 @@ body.rband, body.rband * {
 }
 
 .player-track-item:hover {
-    background: #000080;
+    background: #6666aa;
     color: #ffffff;
 }
 
+.player-track-item.cursor {
+    background: #6666aa;
+    color: #ffffff;
+}
+
+.player-playlist:hover .player-track-item.cursor:not(:hover) {
+    background: transparent;
+    color: #000080;
+}
 
 .player-track-item.playing {
     background: #000080;
