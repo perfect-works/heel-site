@@ -3593,6 +3593,18 @@
     function explorerRenderTrackList(key, addressPath, title) {
         explorerCurrentView = key;
         explorerBodyEl.innerHTML = '';
+        if (key === 'sgmt_demos') {
+            var readmeIcon = document.createElement('div');
+            readmeIcon.className = 'explorer-icon';
+            readmeIcon.innerHTML = '<div class="expl-file-txt"></div><span>readme<span style="white-space:nowrap">.txt</span></span>';
+            readmeIcon.addEventListener('dblclick', function () {
+                ensureTerminalVisible();
+                vlcBringToFront('terminal');
+                focusInput();
+                execute('cat readme.txt');
+            });
+            explorerBodyEl.appendChild(readmeIcon);
+        }
         (TRACKS[key] || []).forEach(function (tr) {
             var icon = document.createElement('div');
             icon.className = 'explorer-icon';
