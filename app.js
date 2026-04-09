@@ -386,6 +386,7 @@
             var sdTracks = TRACKS.sgmt_demos;
             lines.push({ t: 'text', v: 'C:\\heel\\music\\unreleased\\' });
             lines.push({ t: 'text', v: tc(0, true) + 'sgmt_demos\\' });
+            lines.push({ t: 'dirlink', label: tc(1, false) + 'readme.txt', cmd: 'cat readme.txt' });
             for (var i = 0; i < sdTracks.length; i++) {
                 lines.push({ t: 'dirlink',
                     label: tc(1, false) + sdTracks[i].label + '.mp3',
@@ -534,7 +535,7 @@
             entries = [d('sgmt_demos'), d('heel2_demos')];
         } else if (currentDir === 'sgmt_demos') {
             path = 'C:\\heel\\music\\unreleased\\sgmt_demos';
-            entries = TRACKS.sgmt_demos.map(function (t) { return f(t.label + '.mp3', 'play ' + t.id, 4000000, 9000000); });
+            entries = [f('readme.txt', 'cat readme.txt', 500, 4000)].concat(TRACKS.sgmt_demos.map(function (t) { return f(t.label + '.mp3', 'play ' + t.id, 4000000, 9000000); }));
         } else if (currentDir === 'heel2_demos') {
             path = 'C:\\heel\\music\\unreleased\\heel2_demos';
             entries = TRACKS.heel2_demos.map(function (t) { return f(t.label + '.mp3', 'play ' + t.id, 4000000, 9000000); });
@@ -1103,6 +1104,23 @@
         'data':      function () { return COMMANDS['cat data.txt'](); },
 
         'cat readme.txt': function () {
+            if (currentDir === 'sgmt_demos') {
+                printLines([{ t: 'blank' }]);
+                fetch('sounds/music/unreleased/segmentation/readme.txt')
+                    .then(function (r) { return r.text(); })
+                    .then(function (text) {
+                        var lines = [{ t: 'blank' }];
+                        text.trim().split('\n').forEach(function (line) {
+                            lines.push({ t: 'typewriter', v: line || ' ' });
+                        });
+                        lines.push({ t: 'blank' });
+                        printLines(lines);
+                    })
+                    .catch(function () {
+                        printLines([{ t: 'error', v: 'could not load readme.' }, { t: 'blank' }]);
+                    });
+                return [];
+            }
             return [
                 { t: 'blank' },
                 { t: 'text', v: 'MUSIC PLAYER', spaced: true },
@@ -1236,7 +1254,8 @@
                 });
             return [];
         },
-        'typetest':  function () { return COMMANDS['wpm'](); },
+        'typetest':    function () { return COMMANDS['wpm'](); },
+        'typetest.exe': function () { return COMMANDS['wpm'](); },
         'typeracer': function () { return COMMANDS['wpm'](); },
         'type':      function () { return COMMANDS['wpm'](); },
         'benchmark': function () { return COMMANDS['wpm'](); },
