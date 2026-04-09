@@ -646,6 +646,7 @@
                 { t: 'hrow-sub',  flag: '--socials',        desc: '',                      exec: 'fetch --socials',        last: false },
                 { t: 'hrow-sub',  flag: '--streaming',      desc: '',                      exec: 'fetch --streaming',      last: false },
                 { t: 'hrow-sub',  flag: '--upcoming-shows', desc: '',                      exec: 'fetch --upcoming-shows', last: true  },
+                { t: 'hrow', cmd: 'neofetch',               desc: '',                      exec: 'neofetch'               },
                 { t: 'hrow', cmd: 'clear',                  desc: '',                      exec: 'clear'                  },
                 { t: 'blank' },
                 { t: 'text', v: '<span style="opacity:0.6">click or type commands</span>' },
@@ -789,6 +790,57 @@
         'cat about': function () { return COMMANDS['cat about.txt'](); },
         'about.txt': function () { return COMMANDS['cat about.txt'](); },
         'about':     function () { return COMMANDS['cat about.txt'](); },
+
+        'neofetch': function () {
+            var art = [
+                '||     || ||===== ||===== ||     ',
+                '||=====|| ||===   ||===   ||     ',
+                '||     || ||===== ||===== ||====='
+            ].join('\n');
+
+            var g = '#33ff33';
+            var dim = 'opacity:0.55';
+
+            function row(key, val) {
+                return '<span style="color:' + g + ';font-weight:bold">' + key + '</span>'
+                     + '<span style="' + dim + '">:</span> ' + val;
+            }
+
+            var sep = '<span style="' + dim + '">──────────────────────</span>';
+
+            var colors = ['#111','#1a1a1a','#003300','#005500','#008800','#00bb00','#33ff33','#99ff99'];
+            var palette = colors.map(function (c) {
+                return '<span style="color:' + c + '">███</span>';
+            }).join('');
+
+            var info = [
+                '<span style="color:' + g + ';font-weight:bold">heel</span><span style="' + dim + '">@</span><span style="color:' + g + ';font-weight:bold">hl-dos</span>',
+                sep,
+                row('OS     ', 'HL-DOS v1.0.2023'),
+                row('Host   ', 'Welt BIOS v1.0'),
+                row('Kernel ', 'Segmentation 1.0.2023'),
+                row('Shell  ', 'PS C:\\heel&gt;'),
+                row('Uptime ', 'est. 2023'),
+                row('Members', 'adharsh · tayla · nick · andres'),
+                row('Genre  ', 'rock'),
+                row('Label  ', 'independent'),
+                row('Albums ', 'Segmentation (2023)'),
+                row('Booking', 'heelbooking@gmail.com'),
+                '',
+                palette,
+            ].join('<br>');
+
+            return [
+                { t: 'blank' },
+                { t: 'text', v:
+                    '<div style="display:flex;gap:2em;align-items:flex-start">'
+                  + '<pre style="color:' + g + ';margin:0;line-height:1.6;flex-shrink:0;font-family:inherit">' + art + '</pre>'
+                  + '<div style="line-height:1.6">' + info + '</div>'
+                  + '</div>'
+                },
+                { t: 'blank' },
+            ];
+        },
 
         'cat profile.txt': function () {
             var member = MEMBERS[currentDir];
