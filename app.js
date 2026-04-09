@@ -1801,6 +1801,12 @@
         var trimmed = raw.trim();
         var lower   = trimmed.toLowerCase();
 
+        if (animating) {
+            printGeneration++;
+            animating = false;
+            inputRow.style.visibility = 'visible';
+        }
+
         if (!silent) {
             output.appendChild(render({ t: 'prompt', v: trimmed }));
             scrollBottom();
