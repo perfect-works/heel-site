@@ -112,7 +112,7 @@
         { id: 'segmentation_cd',       label: 'cd',       href: 'https://heelband.bandcamp.com/album/segmentation',                  price: '$13', photo: 'images/merch/cd.png'            },
         { id: 'segmentation_cassette', label: 'cassette', href: 'https://heelband.bandcamp.com/album/segmentation',                  price: '$11', photo: 'images/merch/cassette.png'      },
         { id: 'bumper',                label: 'bumper sticker', href: 'https://heelband.bandcamp.com/merch/heaven-or-heel-bumper-sticker', price: '$5',  photo: 'images/merch/bumpersticker.png' },
-        { id: 'zine',                  label: 'zine',     href: 'https://heelband.bandcamp.com/merch/heel-zine',                       price: '$14', photo: 'images/merch/zine.png', samples: ['images/merch/zine/sample1.png', 'images/merch/zine/sample2.png'] },
+        { id: 'zine',                  label: 'zine',     href: 'https://heelband.bandcamp.com/merch/heel-zine',                       price: '$14', photo: 'images/merch/zine.png', samples: ['images/merch/zine/sample1.jpg', 'images/merch/zine/sample2.jpg'] },
         { id: 'bundle',                label: 'sticker bundle', href: 'https://heelband.bandcamp.com/merch/heel-sticker-pack',          price: '$6',  photo: 'images/merch/sticker_bundle.png' },
     ];
 
