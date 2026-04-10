@@ -390,12 +390,12 @@
             var sdTracks = TRACKS.sgmt_demos;
             lines.push({ t: 'text', v: 'C:\\heel\\music\\unreleased\\' });
             lines.push({ t: 'text', v: tc(0, true) + 'sgmt_demos\\' });
-            lines.push({ t: 'dirlink', label: tc(1, false) + 'readme.txt', cmd: 'cat readme.txt' });
             for (var i = 0; i < sdTracks.length; i++) {
                 lines.push({ t: 'dirlink',
                     label: tc(1, false) + sdTracks[i].label + '.mp3',
                     cmd:   'play ' + sdTracks[i].id });
             }
+            lines.push({ t: 'dirlink', label: tc(1, false) + 'readme.txt', cmd: 'cat readme.txt' });
             lines.push({ t: 'dirlink', label: tc(1, true) + '[<- back]', cmd: 'cd ..' });
 
         } else if (currentDir === 'heel2_demos') {
@@ -539,7 +539,7 @@
             entries = [d('sgmt_demos'), d('heel2_demos')];
         } else if (currentDir === 'sgmt_demos') {
             path = 'C:\\heel\\music\\unreleased\\sgmt_demos';
-            entries = [f('readme.txt', 'cat readme.txt', 500, 4000)].concat(TRACKS.sgmt_demos.map(function (t) { return f(t.label + '.mp3', 'play ' + t.id, 4000000, 9000000); }));
+            entries = TRACKS.sgmt_demos.map(function (t) { return f(t.label + '.mp3', 'play ' + t.id, 4000000, 9000000); }).concat([f('readme.txt', 'cat readme.txt', 500, 4000)]);
         } else if (currentDir === 'heel2_demos') {
             path = 'C:\\heel\\music\\unreleased\\heel2_demos';
             entries = TRACKS.heel2_demos.map(function (t) { return f(t.label + '.mp3', 'play ' + t.id, 4000000, 9000000); });
@@ -3744,18 +3744,6 @@
     function explorerRenderTrackList(key, addressPath, title) {
         explorerCurrentView = key;
         explorerBodyEl.innerHTML = '';
-        if (key === 'sgmt_demos') {
-            var readmeIcon = document.createElement('div');
-            readmeIcon.className = 'explorer-icon';
-            readmeIcon.innerHTML = '<div class="expl-file-txt"></div><span>readme<span style="white-space:nowrap">.txt</span></span>';
-            readmeIcon.addEventListener('dblclick', function () {
-                ensureTerminalVisible();
-                vlcBringToFront('terminal');
-                focusInput();
-                execute('cat readme.txt');
-            });
-            explorerBodyEl.appendChild(readmeIcon);
-        }
         (TRACKS[key] || []).forEach(function (tr) {
             var icon = document.createElement('div');
             icon.className = 'explorer-icon';
@@ -3770,6 +3758,18 @@
             }(tr.id)));
             explorerBodyEl.appendChild(icon);
         });
+        if (key === 'sgmt_demos') {
+            var readmeIcon = document.createElement('div');
+            readmeIcon.className = 'explorer-icon';
+            readmeIcon.innerHTML = '<div class="expl-file-txt"></div><span>readme<span style="white-space:nowrap">.txt</span></span>';
+            readmeIcon.addEventListener('dblclick', function () {
+                ensureTerminalVisible();
+                vlcBringToFront('terminal');
+                focusInput();
+                execute('cat readme.txt');
+            });
+            explorerBodyEl.appendChild(readmeIcon);
+        }
         explorerBackBtn.disabled = false;
         explorerAddressEl.textContent = addressPath;
         explorerTitleEl.textContent   = title + ' - File Explorer';
