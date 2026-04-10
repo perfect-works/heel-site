@@ -51,6 +51,20 @@ body.dragging {
     user-select: none;
 }
 
+#rubberband {
+    display: none;
+    position: fixed;
+    border: 1px dotted #000080;
+    background: rgba(0, 0, 128, 0.15);
+    pointer-events: none;
+    z-index: 5;
+}
+
+body.rband, body.rband * {
+    user-select: none !important;
+    cursor: default !important;
+}
+
 .title-bar-text {
     color: #ffffff;
     font-size: 0.8em;
@@ -304,9 +318,6 @@ body.dragging {
     font-size: 0.82em;
 }
 
-.hist-btn {
-    display: none;
-}
 
 #cmd {
     background: transparent;
@@ -340,6 +351,34 @@ body.dragging {
     text-align: center;
     user-select: none;
     padding: 3px;
+}
+
+/* desktop grid layout — overrides base styles above */
+@media (min-width: 901px) {
+    #desktop-icons {
+        left: 0;
+        top: 0;
+        right: 0;
+        bottom: 28px;
+        display: block;
+        pointer-events: none;
+        overflow: hidden;
+    }
+
+    .desktop-icon {
+        position: absolute;
+        pointer-events: all;
+    }
+}
+
+.desktop-icon.selected {
+    background: rgba(0, 0, 128, 0.28);
+    outline: 1px dotted #ffffff;
+}
+
+.desktop-icon.icon-dragging {
+    opacity: 0.5;
+    z-index: 200;
 }
 
 .folder-icon {
@@ -607,7 +646,7 @@ body.dragging {
     flex-wrap: wrap;
     gap: 8px;
     min-height: 150px;
-    max-height: 420px;
+    max-height: 252px;
     overflow-y: auto;
     align-content: flex-start;
 }
@@ -838,6 +877,7 @@ body.dragging {
 }
 
 @media (max-width: 900px) {
+    #max-btn { display: none; }
     #desktop-icons { display: none; }
 
     body.mobile-home #desktop-icons {
@@ -863,56 +903,68 @@ body.dragging {
     }
 }
 
-#mobile-video-overlay {
+#mobile-shortcuts {
     display: none;
-    position: fixed;
-    inset: 0;
-    z-index: 9000;
-    background: rgba(0,0,0,0.85);
+}
+
+@media (max-width: 900px) {
+    body.mobile-home #mobile-shortcuts {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        justify-content: space-evenly;
+        align-items: flex-end;
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 36px; /* above taskbar */
+        padding: 10px 8px;
+        border-top: 1px solid rgba(255, 255, 255, 0.18);
+    }
+}
+
+.mobile-merch-folder { display: none; }
+
+@media (max-width: 900px) {
+    body.mobile-home .desktop-icon .mobile-merch-folder { display: block; }
+    body.mobile-home .desktop-icon .globe-icon          { display: none;  }
+}
+
+.shortcut-icon {
+    width: 40px;
+    height: 40px;
+    background: #000;
+    color: #33ff33;
+    font-family: 'Courier New', monospace;
+    font-size: 1.5em;
+    line-height: 40px;
+    display: flex;
     align-items: center;
     justify-content: center;
+    margin: 0 auto;
 }
-#mobile-video-overlay.active {
-    display: flex;
-}
-#mobile-video-overlay-inner {
-    background: #000;
-    border: 2px solid #33ff33;
-    padding: 20px 24px;
-    max-width: 320px;
-    width: 90%;
-    font-family: 'Courier New', monospace;
-    color: #33ff33;
-}
-#mobile-video-overlay-inner h3 {
-    margin: 0 0 14px;
-    font-size: 0.8em;
-    letter-spacing: 2px;
-    opacity: 0.6;
-}
-#mobile-video-overlay-inner a {
+.shortcut-icon svg {
     display: block;
-    color: #33ff33;
-    text-decoration: none;
-    padding: 8px 0;
-    border-bottom: 1px solid #1a661a;
-    font-size: 0.85em;
+    width: 22px;
+    height: 22px;
 }
-#mobile-video-overlay-inner a:last-of-type {
-    border-bottom: none;
+
+.mobile-shortcut {
+    width: 72px;
 }
-#mobile-video-overlay-close {
-    display: block;
-    margin-top: 16px;
-    text-align: center;
-    color: #33ff33;
-    opacity: 0.5;
-    font-size: 0.75em;
-    cursor: pointer;
-    background: none;
-    border: none;
-    font-family: 'Courier New', monospace;
-    width: 100%;
+
+.mobile-shortcut span {
+    color: #ffffff;
+    font-size: 0.62em;
+}
+
+@media (hover: none) {
+    .mobile-shortcut:active .shortcut-icon {
+        color: #ffffff;
+    }
+    .mobile-shortcut:active span {
+        color: #33ff33;
+    }
 }
 
 /* ── media player ── */
@@ -922,6 +974,7 @@ body.dragging {
     display: none;
     z-index: 25;
     user-select: none;
+    outline: none;
 }
 
 .player-body {
@@ -1062,10 +1115,19 @@ body.dragging {
 }
 
 .player-track-item:hover {
-    background: #000080;
+    background: #6666aa;
     color: #ffffff;
 }
 
+.player-track-item.cursor {
+    background: #6666aa;
+    color: #ffffff;
+}
+
+.player-playlist:hover .player-track-item.cursor:not(:hover) {
+    background: transparent;
+    color: #000080;
+}
 
 .player-track-item.playing {
     background: #000080;
@@ -1578,6 +1640,15 @@ body {
     color: #000000;
 }
 
+.tray-sep {
+    width: 0;
+    height: 20px;
+    border-left: 1px solid #808080;
+    border-right: 1px solid #ffffff;
+    margin: 0 4px;
+    flex-shrink: 0;
+}
+
 #taskbar-clock {
     font-family: 'Courier New', monospace;
     font-size: 0.72em;
@@ -1970,22 +2041,7 @@ body {
         font-size: 1em;
         align-items: center;
     }
-    .hist-btn {
-        display: inline;
-        background: none;
-        border: none;
-        color: #33ff33;
-        font-family: 'Courier New', monospace;
-        font-size: 0.85em;
-        margin-left: 4px;
-        cursor: pointer;
-        padding: 0;
-        opacity: 0.7;
-    }
-    .hist-btn:active {
-        opacity: 1;
-    }
-    .prompt-prefix {
+.prompt-prefix {
         white-space: nowrap;
         flex-shrink: 0;
     }
@@ -2048,6 +2104,28 @@ body {
 }
 
 /* ── minesweeper window ── */
+.snake-window {
+    position: fixed;
+    display: none;
+    user-select: none;
+    width: auto;
+}
+.snake-window.minimized .snake-hud,
+.snake-window.minimized #snake-canvas { display: none; }
+.snake-hud {
+    background: #c0c0c0;
+    padding: 4px 8px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    font-family: 'W95FA', monospace;
+    border-bottom: 1px solid #808080;
+}
+#snake-canvas {
+    display: block;
+    background: #000;
+}
+
 .mine-window {
     position: fixed;
     display: none;
