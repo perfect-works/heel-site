@@ -195,6 +195,8 @@
         { id: 'honeycomb_vis',         file: 'honeycomb_vis.avi',         href: 'https://www.youtube.com/watch?v=JAfxkuAhK0c' },
         { id: 'through_me_vis',        file: 'through_me_vis.avi',        href: 'https://youtu.be/v5sKosUJGIw'                 },
         { id: 'youre_so_far_away_vis', file: 'youre_so_far_away_vis.avi', href: 'https://www.youtube.com/watch?v=Jyj_q3xwDWA' },
+        { id: 'skatepark_show',        file: 'skatepark_show.avi',        href: 'https://youtu.be/ZV-WiwxWC88'                 },
+        { id: 'cat_snatch',            file: 'cat_snatch.avi',            href: 'https://youtu.be/n1wusJsdMPE'                 },
     ];
 
     /* ── valid children per directory ── */
@@ -483,7 +485,7 @@
             }
             lines.push({ t: 'dirlink', label: tc(0, true) + '[<- back]', cmd: 'cd ..' });
             lines.push({ t: 'blank' });
-            lines.push({ t: 'text', v: "click a file to open, or 'buy.exe' to purchase", dim: true });
+            lines.push({ t: 'text', v: "click or type 'buy.exe' to purchase", dim: true });
 
         } else if (MEMBERS[currentDir]) {
             /* member directory */
@@ -651,7 +653,7 @@
         lines.push({ t: 'dirlink', label: tc(0, true) + '[<- back]', cmd: 'cd ..' });
         lines.push({ t: 'blank' });
         if (mitem && mitem.href) {
-            lines.push({ t: 'text', v: "click 'buy.exe' or type 'buy' to purchase", dim: true });
+            lines.push({ t: 'text', v: "click or type 'buy.exe' to purchase", dim: true });
         }
         lines.push({ t: 'blank' });
         return lines;
@@ -979,6 +981,7 @@
             window.open(mitem.href, '_blank');
             return [{ t: 'blank' }, { t: 'text', v: 'launching checkout...', dim: true }, { t: 'blank' }];
         },
+        'buy': function () { return COMMANDS['buy.exe'](); },
 
         'price.txt': function () {
             var mitem = getMerchItem(currentDir);
