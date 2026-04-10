@@ -479,7 +479,7 @@
                 lines.push({ t: 'dirlink', label: tc(0, false) + 'price.txt <span style="opacity:0.55">\u2014 ' + mitem.price + '</span>', cmd: 'cat price.txt' });
             }
             if (mitem.href) {
-                lines.push({ t: 'dirlink', label: tc(0, false) + 'buy.exe', cmd: 'buy.exe' });
+                lines.push({ t: 'dirlink', label: tc(0, false) + 'buy.exe', cmd: 'buy.exe', href: mitem.href });
             }
             lines.push({ t: 'dirlink', label: tc(0, true) + '[<- back]', cmd: 'cd ..' });
             lines.push({ t: 'blank' });
@@ -646,7 +646,7 @@
             lines.push({ t: 'dirlink', label: tc(0, false) + 'price.txt <span style="opacity:0.55">\u2014 ' + mitem.price + '</span>', cmd: 'cat price.txt' });
         }
         if (mitem && mitem.href) {
-            lines.push({ t: 'dirlink', label: tc(0, false) + 'buy.exe', cmd: 'buy.exe' });
+            lines.push({ t: 'dirlink', label: tc(0, false) + 'buy.exe', cmd: 'buy.exe', href: mitem.href });
         }
         lines.push({ t: 'dirlink', label: tc(0, true) + '[<- back]', cmd: 'cd ..' });
         lines.push({ t: 'blank' });
@@ -1553,9 +1553,12 @@
                 el = document.createElement('div');
                 el.className = 'dir-line';
                 el.innerHTML = line.label;
-                el.addEventListener('click', (function (cmd) {
-                    return function () { typeAndExecute(cmd, true); };
-                }(line.cmd)));
+                el.addEventListener('click', (function (cmd, href) {
+                    return function () {
+                        if (href) window.open(href, '_blank');
+                        typeAndExecute(cmd, true);
+                    };
+                }(line.cmd, line.href || null)));
                 return el;
 
             case 'dirrow':
