@@ -2900,7 +2900,13 @@
             width:  '100%',
             videoId: videoId,
             playerVars: { rel: 0, controls: 0, autoplay: 1 },
-            events: { onStateChange: vlcOnStateChange }
+            events: {
+                onStateChange: vlcOnStateChange,
+                onReady: function (e) {
+                    e.target.setVolume(Math.round(masterVolume * 100));
+                    if (masterMuted) { e.target.mute(); }
+                }
+            }
         });
     }
 
@@ -4946,10 +4952,16 @@
             if (popup.style.display === 'block') { closePopup(); return; }
             openPopup();
         });
+        function applyVolumeToVlc() {
+            if (!ytPlayer || typeof ytPlayer.setVolume !== 'function') return;
+            ytPlayer.setVolume(Math.round(masterVolume * 100));
+            if (masterMuted) { ytPlayer.mute(); } else { ytPlayer.unMute(); }
+        }
         btn.addEventListener('dblclick', function (e) {
             e.stopPropagation();
             masterMuted = !masterMuted;
             if (currentAudio) currentAudio.muted = masterMuted;
+            applyVolumeToVlc();
             updateIcon();
         });
         slider.addEventListener('input', function () {
@@ -4960,6 +4972,7 @@
                 currentAudio.volume = masterVolume;
                 currentAudio.muted  = masterMuted;
             }
+            applyVolumeToVlc();
             updateIcon();
         });
         document.addEventListener('click', function (e) {
