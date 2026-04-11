@@ -90,10 +90,12 @@
             data: 'movies: gummo, the royal tenenbaums\ncolors: pink, orange, red, purple\nplaces: nearest body of water',
             photoName: 'tayla_diza.png'
         },
-        'nick': { 
+        'nick': {
             instrument: 'bass',
-            profile: '22 years old. round rock born and raised. fan of long walks in urban and non-urban areas, posting instagram story collages, and the lesser known rage game pogostuck.',
-            photo: 'images/users/nick/nicholas_dienstbier.png',  
+            profile: '22 years old too. round rock born and raised. likes walking, jumping, and otherings. washed pogostuck speedrunner. irishman.',
+            gear: 'guitar: fender precision bass\namp: gallien krueger 2x10 combo + 1x15 cab\nfavorite pedal: mxr blowtorch fuzz',
+            data: 'music: the american analog set, bladee, the pains of being pure at heart\nmovies: the thing, office space, paterson\nplaces: quiktrip, pavement, omaha\nsmells: rain, cinnamon, fir',
+            photo: 'images/users/nick/nicholas_dienstbier.png',
             photoName: 'nicholas_dienstbier.png'
         },
         'andres':  { 
