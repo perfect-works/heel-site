@@ -4213,6 +4213,7 @@
     // keyboard controls
     document.addEventListener('keydown', function (e) {
         if (!gameOpen || gameWindowEl.classList.contains('minimized')) return;
+        if (focusedWindow !== 'game') return;
         if (e.key === 'ArrowLeft')  { bkKeys.left  = true; if (bkState === 'playing') e.preventDefault(); }
         if (e.key === 'ArrowRight') { bkKeys.right = true; if (bkState === 'playing') e.preventDefault(); }
         if (e.key === ' ' || e.key === 'Spacebar') {
@@ -4224,6 +4225,7 @@
         }
     });
     document.addEventListener('keyup', function (e) {
+        if (focusedWindow !== 'game') return;
         if (e.key === 'ArrowLeft')  bkKeys.left  = false;
         if (e.key === 'ArrowRight') bkKeys.right = false;
     });
@@ -4404,6 +4406,7 @@
 
     document.addEventListener('keydown', function (e) {
         if (!photoOpen || photoWindowEl.classList.contains('minimized')) return;
+        if (focusedWindow !== 'photo') return;
         if (e.key === 'ArrowLeft')  { photoShow(photoIndex - 1); e.preventDefault(); }
         if (e.key === 'ArrowRight') { photoShow(photoIndex + 1); e.preventDefault(); }
     });
@@ -4793,7 +4796,7 @@
     }
 
     function snakeHandleKey(e) {
-        if (!snakeOpen) return;
+        if (!snakeOpen || focusedWindow !== 'snake') return;
         var map = { ArrowUp: {x:0,y:-1}, ArrowDown: {x:0,y:1}, ArrowLeft: {x:-1,y:0}, ArrowRight: {x:1,y:0} };
         if (e.key === 'r' || e.key === 'R') { snakeInit(); return; }
         if (!map[e.key]) return;
