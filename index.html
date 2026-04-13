@@ -12,21 +12,39 @@
 
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HL-DOS</title>
-    <meta name="description" content="heel is a four-piece from college station, texas.">
+    <title>Heel Global</title>
+    <meta name="description" content="Heel is a four-piece band from College Station, Texas. Listen to Segmentation, stream on Spotify, and catch upcoming shows.">
 
     <!-- Open Graph -->
-    <meta property="og:title" content="HEEL">
-    <meta property="og:description" content="heel is a four-piece from college station, texas.">
+    <meta property="og:title" content="Heel Global">
+    <meta property="og:description" content="Heel is a four-piece band from College Station, Texas. Listen to Segmentation, stream on Spotify, and catch upcoming shows.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://heelglobal.com">
     <meta property="og:image" content="https://heelglobal.com/images/og.png">
 
     <!-- Twitter / X -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="HEEL">
-    <meta name="twitter:description" content="heel is a four-piece from college station, texas.">
+    <meta name="twitter:title" content="Heel Global">
+    <meta name="twitter:description" content="Heel is a four-piece band from College Station, Texas. Listen to Segmentation, stream on Spotify, and catch upcoming shows.">
     <meta name="twitter:image" content="https://heelglobal.com/images/og.png">
+
+    <!-- Structured data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "MusicGroup",
+      "name": "Heel",
+      "url": "https://heelglobal.com",
+      "description": "Heel is a four-piece band from College Station, Texas.",
+      "genre": ["Rock"],
+      "image": "https://heelglobal.com/images/og.png",
+      "sameAs": [
+        "https://www.instagram.com/heelglobal",
+        "https://open.spotify.com/artist/7kp9NBFk4Nq7BLOJMKo3xC",
+        "https://music.apple.com/us/artist/heel/1557946920"
+      ]
+    }
+    </script>
 
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="stylesheet" href="styles.css">
@@ -43,7 +61,7 @@
         </div>
     </div>
     <div class="content" id="terminal">
-        <div id="output"></div>
+        <div id="output" data-nosnippet></div>
         <div id="nowplaying-row">
             <div class="nowplaying-label">NOW PLAYING</div>
             <span class="nowplaying-text"></span>
