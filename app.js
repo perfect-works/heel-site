@@ -102,7 +102,7 @@
             instrument: 'drums',
             profile: '22 years old. spent his formative years in the california high desert before arriving in texas at the age of 14. just plays the drums. in the spaces between heel shows he spends his time playing overwatch and inbetween playing overwatch he spends his time studying ocean engineering.', 
             gear: 'kit: tama imperialstar\nhi-hat: zildijan new beats\nride: paiste power ride\nsticks: promark hickory 5b', 
-            data: 'music: the beach boys, roly poly rag bear, bloodthirsty butchers\nmovies: love exposure\nbooks: childhood\'s end, dune\ngames: ocarina of time, xenogears\nfood: in n out burger\nplaces: seaside, bed', 
+            data: 'music: the beach boys, myhairball, bloodthirsty butchers\nmovies: love exposure\nbooks: childhood\'s end, dune\ngames: ocarina of time, xenogears\nfood: in n out burger\nplaces: seaside, bed', 
             photo: 'images/users/andres/andres_gonzalez.png',    
             photoName: 'andres_gonzalez.png'    
         },
@@ -199,6 +199,7 @@
         { id: 'youre_so_far_away_vis', file: 'youre_so_far_away_vis.avi', href: 'https://www.youtube.com/watch?v=Jyj_q3xwDWA' },
         { id: 'skatepark_show',        file: 'skatepark_show.avi',        href: 'https://youtu.be/ZV-WiwxWC88'                 },
         { id: 'cat_snatch',            file: 'cat_snatch.avi',            href: 'https://youtu.be/n1wusJsdMPE'                 },
+        { id: 'heelglobal',            file: 'heelglobal.avi',            href: 'https://www.youtube.com/watch?v=eCFigwXQVQg'  },
     ];
 
     /* ── valid children per directory ── */
@@ -1091,27 +1092,30 @@
             lines.push({ t: 'blank' });
             return lines;
         },
-        'cat profile':  function () { return COMMANDS['cat profile.txt'](); },
-        'profile.txt':  function () { return COMMANDS['cat profile.txt'](); },
-        'profile':      function () { return COMMANDS['cat profile.txt'](); },
+        'cat profile':      function () { return COMMANDS['cat profile.txt'](); },
+        'profile.txt':      function () { return COMMANDS['cat profile.txt'](); },
+        './profile.txt':    function () { return COMMANDS['cat profile.txt'](); },
+        'profile':          function () { return COMMANDS['cat profile.txt'](); },
 
         'cat gear.txt': function () {
             var member = MEMBERS[currentDir];
             if (!member || !member.gear) return [{ t: 'blank' }, { t: 'error', v: 'no such file.' }, { t: 'blank' }];
             return [{ t: 'blank' }, { t: 'typewriter', v: member.gear }, { t: 'blank' }];
         },
-        'cat gear':  function () { return COMMANDS['cat gear.txt'](); },
-        'gear.txt':  function () { return COMMANDS['cat gear.txt'](); },
-        'gear':      function () { return COMMANDS['cat gear.txt'](); },
+        'cat gear':      function () { return COMMANDS['cat gear.txt'](); },
+        'gear.txt':      function () { return COMMANDS['cat gear.txt'](); },
+        './gear.txt':    function () { return COMMANDS['cat gear.txt'](); },
+        'gear':          function () { return COMMANDS['cat gear.txt'](); },
 
         'cat data.txt': function () {
             var member = MEMBERS[currentDir];
             if (!member || !member.data) return [{ t: 'blank' }, { t: 'error', v: 'no such file.' }, { t: 'blank' }];
             return [{ t: 'blank' }, { t: 'typewriter', v: member.data }, { t: 'blank' }];
         },
-        'cat data':  function () { return COMMANDS['cat data.txt'](); },
-        'data.txt':  function () { return COMMANDS['cat data.txt'](); },
-        'data':      function () { return COMMANDS['cat data.txt'](); },
+        'cat data':      function () { return COMMANDS['cat data.txt'](); },
+        'data.txt':      function () { return COMMANDS['cat data.txt'](); },
+        './data.txt':    function () { return COMMANDS['cat data.txt'](); },
+        'data':          function () { return COMMANDS['cat data.txt'](); },
 
         'cat readme.txt': function () {
             if (currentDir === 'sgmt_demos') {
@@ -2548,7 +2552,19 @@
     var playerFill      = document.getElementById('player-progress-fill');
     var playerPlaylist  = document.getElementById('player-playlist');
     var playerPlayBtn   = document.getElementById('player-play');
-    var playerTaskBtn   = null;
+    var playerTaskBtn   = document.getElementById('task-weltamp');
+    playerTaskBtn.addEventListener('click', function () {
+        if (playerWindowEl.style.display === 'none') {
+            openPlayer();
+        } else if (playerMinimized) {
+            playerWindowEl.classList.remove('minimized');
+            playerMinimized = false;
+            playerTaskBtn.classList.add('active');
+            vlcBringToFront('player');
+        } else {
+            vlcBringToFront('player');
+        }
+    });
 
     function playerMakeItem(tr, idx) {
         var el = document.createElement('div');
@@ -2678,23 +2694,7 @@
         if (playerUpdateIv) clearInterval(playerUpdateIv);
         playerUpdateIv = setInterval(playerTick, 500);
         playerTick();
-        if (!playerTaskBtn) {
-            playerTaskBtn = document.createElement('button');
-            playerTaskBtn.className = 'task-btn active';
-            playerTaskBtn.textContent = 'weltamp.exe';
-            playerTaskBtn.addEventListener('click', function () {
-                if (playerMinimized) {
-                    playerWindowEl.classList.remove('minimized');
-                    playerMinimized = false;
-                    playerTaskBtn.classList.add('active');
-                } else {
-                    playerWindowEl.classList.add('minimized');
-                    playerMinimized = true;
-                    playerTaskBtn.classList.remove('active');
-                }
-            });
-            document.getElementById('taskbar-tasks').appendChild(playerTaskBtn);
-        }
+        playerTaskBtn.classList.add('active');
     }
 
     function closePlayer() {
@@ -2707,7 +2707,7 @@
         }
         playerWindowEl.style.display = 'none';
         if (playerUpdateIv) { clearInterval(playerUpdateIv); playerUpdateIv = null; }
-        if (playerTaskBtn) { playerTaskBtn.remove(); playerTaskBtn = null; }
+        playerTaskBtn.classList.remove('active');
     }
 
     /* now-playing bar controls (mobile) */
@@ -2940,9 +2940,12 @@
             vlcTaskBtn.className   = 'task-btn active';
             vlcTaskBtn.textContent = 'HLC.exe';
             vlcTaskBtn.addEventListener('click', function () {
-                vlcMinimized = !vlcMinimized;
-                vlcWindowEl.classList.toggle('minimized', vlcMinimized);
-                vlcTaskBtn.classList.toggle('active', !vlcMinimized);
+                if (vlcMinimized) {
+                    vlcMinimized = false;
+                    vlcWindowEl.classList.remove('minimized');
+                    vlcTaskBtn.classList.add('active');
+                }
+                vlcBringToFront('vlc');
             });
             document.getElementById('taskbar-tasks').appendChild(vlcTaskBtn);
         } else {
@@ -3112,9 +3115,12 @@
             merchTaskBtn.className = 'task-btn active';
             merchTaskBtn.textContent = 'iexplore.exe';
             merchTaskBtn.addEventListener('click', function () {
-                merchMinimized = !merchMinimized;
-                merchWindowEl.classList.toggle('minimized', merchMinimized);
-                merchTaskBtn.classList.toggle('active', !merchMinimized);
+                if (merchMinimized) {
+                    merchMinimized = false;
+                    merchWindowEl.classList.remove('minimized');
+                    merchTaskBtn.classList.add('active');
+                }
+                vlcBringToFront('merch');
             });
             document.getElementById('taskbar-tasks').appendChild(merchTaskBtn);
         }
@@ -3802,9 +3808,12 @@
             explorerTaskBtn.className = 'task-btn active';
             explorerTaskBtn.textContent = 'explorer.exe';
             explorerTaskBtn.addEventListener('click', function () {
-                explorerMinimized = !explorerMinimized;
-                explorerWindowEl.classList.toggle('minimized', explorerMinimized);
-                explorerTaskBtn.classList.toggle('active', !explorerMinimized);
+                if (explorerMinimized) {
+                    explorerMinimized = false;
+                    explorerWindowEl.classList.remove('minimized');
+                    explorerTaskBtn.classList.add('active');
+                }
+                vlcBringToFront('explorer');
             });
             document.getElementById('taskbar-tasks').appendChild(explorerTaskBtn);
         }
@@ -3980,9 +3989,11 @@
             gameTaskBtn = document.createElement('button');
             gameTaskBtn.className = 'task-btn active';
             gameTaskBtn.addEventListener('click', function () {
-                var min = gameWindowEl.classList.contains('minimized');
-                gameWindowEl.classList.toggle('minimized', !min);
-                gameTaskBtn.classList.toggle('active', min);
+                if (gameWindowEl.classList.contains('minimized')) {
+                    gameWindowEl.classList.remove('minimized');
+                    gameTaskBtn.classList.add('active');
+                }
+                vlcBringToFront('game');
             });
             document.getElementById('taskbar-tasks').appendChild(gameTaskBtn);
         } else {
@@ -4355,9 +4366,11 @@
             photoTaskBtn.className   = 'task-btn active';
             photoTaskBtn.textContent = 'kodak.exe';
             photoTaskBtn.addEventListener('click', function () {
-                var min = photoWindowEl.classList.contains('minimized');
-                photoWindowEl.classList.toggle('minimized', !min);
-                photoTaskBtn.classList.toggle('active', min);
+                if (photoWindowEl.classList.contains('minimized')) {
+                    photoWindowEl.classList.remove('minimized');
+                    photoTaskBtn.classList.add('active');
+                }
+                vlcBringToFront('photo');
             });
             document.getElementById('taskbar-tasks').appendChild(photoTaskBtn);
         } else {
@@ -4381,9 +4394,11 @@
             photoTaskBtn.className   = 'task-btn active';
             photoTaskBtn.textContent = 'kodak.exe';
             photoTaskBtn.addEventListener('click', function () {
-                var min = photoWindowEl.classList.contains('minimized');
-                photoWindowEl.classList.toggle('minimized', !min);
-                photoTaskBtn.classList.toggle('active', min);
+                if (photoWindowEl.classList.contains('minimized')) {
+                    photoWindowEl.classList.remove('minimized');
+                    photoTaskBtn.classList.add('active');
+                }
+                vlcBringToFront('photo');
             });
             document.getElementById('taskbar-tasks').appendChild(photoTaskBtn);
         } else {
@@ -4658,9 +4673,11 @@
             mineTaskBtn.className   = 'task-btn active';
             mineTaskBtn.textContent = 'Minesweeper';
             mineTaskBtn.addEventListener('click', function () {
-                var min = mineWindowEl.classList.contains('minimized');
-                mineWindowEl.classList.toggle('minimized', !min);
-                mineTaskBtn.classList.toggle('active', min);
+                if (mineWindowEl.classList.contains('minimized')) {
+                    mineWindowEl.classList.remove('minimized');
+                    mineTaskBtn.classList.add('active');
+                }
+                vlcBringToFront('mine');
             });
             document.getElementById('taskbar-tasks').appendChild(mineTaskBtn);
             msInit();
@@ -4822,9 +4839,11 @@
             snakeTaskBtn.className   = 'task-btn active';
             snakeTaskBtn.textContent = 'Snake';
             snakeTaskBtn.addEventListener('click', function () {
-                var min = snakeWindowEl.classList.contains('minimized');
-                snakeWindowEl.classList.toggle('minimized', !min);
-                snakeTaskBtn.classList.toggle('active', min);
+                if (snakeWindowEl.classList.contains('minimized')) {
+                    snakeWindowEl.classList.remove('minimized');
+                    snakeTaskBtn.classList.add('active');
+                }
+                vlcBringToFront('snake');
             });
             document.getElementById('taskbar-tasks').appendChild(snakeTaskBtn);
             snakeInit();
@@ -5030,10 +5049,9 @@
         }
         if (windowEl.style.display === 'none') {
             windowEl.style.display = '';
-            setMinimized(false);
-        } else {
-            toggleMinimize();
         }
+        setMinimized(false);
+        vlcBringToFront('terminal');
     });
 
     // Start menu

@@ -77,7 +77,7 @@ The core command dispatcher. Key behaviours:
 | `about` / `cat about.txt` | Band description (typewriter) |
 | `fetch --new-releases` | Album art + release info |
 | `fetch --upcoming-shows` | Show dates |
-| `fetch --social` | Instagram + booking email |
+| `fetch --socials` | Instagram + booking email |
 | `stream --heel` | Spotify / Apple Music / Bandcamp |
 | `watch --all` | YouTube links |
 | `cd <dir>` | Navigate filesystem (supports `cd users/andres`) |
@@ -98,10 +98,10 @@ The core command dispatcher. Key behaviours:
 | `cat cat` | Prints a random cat face emoticon |
 
 Member file commands (context-sensitive to current member dir):
-- `cat profile.txt` / `profile` — types out bio
-- `cat gear.txt` / `gear` — types out gear list (if member has gear)
-- `cat data.txt` / `data` — types out likes/data (if member has data)
-- `./<file>` / `cat photo.jpg` / `open photo` — reveals member photo with scanline animation
+- `cat profile.txt` / `profile` / `./profile.txt` — types out bio
+- `cat gear.txt` / `gear` / `./gear.txt` — types out gear list (if member has gear)
+- `cat data.txt` / `data` / `./data.txt` — types out likes/data (if member has data)
+- `./photo.jpg` / `cat photo.jpg` / `open photo` — reveals member photo with scanline animation
 
 Tab completion and arrow-key command history are supported. Typos auto-correct to the closest match (shown with a dim `→` hint).
 
@@ -136,7 +136,7 @@ The terminal window sits on a Win9x desktop. Additional layers:
 
 **Taskbar** (`#taskbar`) — pinned to the bottom. Contains:
 - Start button (`#start-btn`) — toggles the start menu
-- Task area (`#taskbar-tasks`) — one static button `HL-DOS.exe` (always active); app windows append their own buttons dynamically when opened and remove them on close
+- Task area (`#taskbar-tasks`) — two static buttons always present: `HL-DOS.exe` and `weltamp.exe`; other app windows append their own buttons dynamically when opened and remove them on close. Clicking a taskbar button restores the window if minimized and brings it to front — it does not toggle minimize.
 - Tray (`#taskbar-tray`) — visitor count (from GoatCounter) + live clock
 
 **Start menu** (`#start-menu`) — appears above taskbar on Start click. Has a vertical "HEEL" sidebar and buttons that fire terminal commands directly (`data-cmd` attribute). Clicking outside dismisses it.
@@ -161,9 +161,9 @@ Four floating Win9x-style windows sit on the desktop alongside the terminal. All
 
 ### weltamp.exe — music player
 - Element: `#player-window` / `.player-window`
-- Opened by: `openPlayer()` — double-clicking the music desktop icon
+- Starts hidden (`display:none`). Opened by: `openPlayer()` — double-clicking the music desktop icon, or clicking the persistent `weltamp.exe` taskbar button when the player is closed
 - Contains: LCD track display, progress bar, prev/play/stop/next controls, album tabs (Segmentation / Demos), playlist
-- Taskbar label: `weltamp.exe`
+- Taskbar button (`#task-weltamp`) is static in the HTML (always visible). Active when player is open, inactive when closed.
 
 ### HLC.exe — video player
 - Element: `#vlc-window` / `.vlc-window`
@@ -201,12 +201,11 @@ BIOS text → driver loading → progress bar → HEEL ASCII animation → `-- W
 ## Terminal close behavior
 
 - **Desktop**: `×` button hides the terminal window (not jumpscare); `HL-DOS.exe` taskbar button remains and reopens it.
-- **Mobile**: `×` button triggers the jumpscare.
+- **Mobile**: `×` button hides the terminal and returns to the mobile home screen (desktop icons).
 
 ## Jumpscare
 
 `#jumpscare` is a standalone `position: fixed` Win9x-style window (680×480px, centered, `z-index: 9999`), independent of the terminal. Triggered by:
-- Mobile terminal `×` button
 - Start menu → Shut Down...
 
 Plays `sounds/jumpscare.mp3`, auto-dismisses after 1.5s, or click/`×` to dismiss early.
