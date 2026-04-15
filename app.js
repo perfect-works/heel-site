@@ -1243,6 +1243,14 @@
         'fetch -upcoming-shows':  function () { return COMMANDS['fetch --upcoming-shows'](); },
 
         'wpm': function () {
+            if (window.innerWidth <= 900) {
+                printLines([
+                    { t: 'blank' },
+                    { t: 'text', v: 'sorry, the typing test isn\'t available on mobile.' },
+                    { t: 'blank' },
+                ]);
+                return [];
+            }
             var track = null;
             if (currentTrackObj && currentTrackObj.lyricsFile) {
                 track = currentTrackObj;
