@@ -458,6 +458,7 @@
             lines.push({ t: 'dirlink', label: tcsub(false)    + '[bumper]',  cmd: 'cd bumper'  });
             lines.push({ t: 'dirlink', label: tcsub(true)     + '[bundle]',  cmd: 'cd bundle'  });
             lines.push({ t: 'dirlink', label: tc(0, false)    + '[zine]',           cmd: 'cd zine'       });
+            lines.push({ t: 'dirlink', label: tc(0, false)    + '[all]',            href: 'https://heelband.bandcamp.com/merch', cmd: '' });
             lines.push({ t: 'dirlink', label: tc(0, true)     + '[<- back]',        cmd: 'cd ..'         });
             lines.push({ t: 'blank' });
             lines.push({ t: 'text', v: "click an item or type 'cd &lt;item&gt;' to view", dim: true });
@@ -905,8 +906,9 @@
         'fetch --socials': function () {
             return [
                 { t: 'blank' },
-                { t: 'link', label: 'instagram', href: 'https://www.instagram.com/heel.mp3/',    value: '@heel.mp3'            },
-                { t: 'link', label: 'booking',   href: 'mailto:heelbooking@gmail.com',           value: 'heelbooking@gmail.com' },
+                { t: 'link', label: 'instagram', href: 'https://www.instagram.com/heel.mp3/',             value: '@heel.mp3'            },
+                { t: 'link', label: 'bandcamp',  href: 'https://heelband.bandcamp.com/album/segmentation', value: 'heelband'             },
+                { t: 'link', label: 'booking',   href: 'mailto:heelbooking@gmail.com',                    value: 'heelbooking@gmail.com' },
                 { t: 'blank' },
             ];
         },
